@@ -141,7 +141,7 @@
           </div>
         </div>
 
-        <!-- 右側：時計エリア（短押しで現地⇔日本切替 / 長押しでDEMOバー開閉） -->
+        <!-- 右側：時計エリア -->
         <div id="clockArea" 
              oncontextmenu="return false;"
              class="shrink-0 whitespace-nowrap text-right font-mono bg-white/10 hover:bg-white/15 active:scale-95 px-3 py-1 rounded-xl cursor-pointer transition">
@@ -188,7 +188,7 @@
       </div>
     </div>
 
-    <!-- 📲 スマホ用「アプリとしてダウンロード（ホーム画面に追加）」案内バナー -->
+    <!-- 📲 スマホ用アプリインストール案内バナー -->
     <div id="pwaInstallBanner" class="mx-4 mt-3 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-2xl p-3 shadow-md flex items-center justify-between gap-2 hidden no-select">
       <div class="flex items-center gap-2.5 min-w-0">
         <div class="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center text-lg shrink-0">
@@ -288,7 +288,7 @@
 
       </section>
 
-      <!-- ================= 📅 2. スケジュールタブ（6日間対応） ================= -->
+      <!-- ================= 📅 2. スケジュールタブ ================= -->
       <section id="view-schedule" class="hidden space-y-3.5">
         <div class="flex justify-between items-center no-select">
           <h2 class="text-lg font-extrabold text-slate-800"><i class="fa-regular fa-calendar-days text-blue-600 mr-1.5"></i>スケジュール</h2>
@@ -366,7 +366,6 @@
 
     <!-- ================= モーダル群 ================= -->
 
-    <!-- 1. 予定詳細モーダル -->
     <div id="scheduleDetailModal" onclick="closeScheduleDetailModal()" class="fixed inset-0 bg-black/60 z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
       <div onclick="event.stopPropagation()" class="bg-white w-full max-w-md rounded-t-2xl sm:rounded-2xl p-5 space-y-4 shadow-2xl">
         <div class="flex justify-between items-start border-b border-slate-100 pb-3">
@@ -402,7 +401,6 @@
       </div>
     </div>
 
-    <!-- 2. スケジュール追加・編集モーダル -->
     <div id="scheduleEditModal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
       <div class="bg-white w-full max-w-md rounded-t-2xl sm:rounded-2xl p-5 max-h-[92vh] overflow-y-auto space-y-3.5 text-left">
         <div class="flex justify-between items-center border-b pb-2 no-select">
@@ -502,7 +500,6 @@
       </div>
     </div>
 
-    <!-- 3. 汎用アイテム編集モーダル -->
     <div id="genericEditModal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
       <div class="bg-white w-full max-w-md rounded-t-2xl sm:rounded-2xl p-5 space-y-3.5 text-left">
         <div class="flex justify-between items-center border-b pb-2 no-select">
@@ -517,7 +514,6 @@
       </div>
     </div>
 
-    <!-- 4. クイックタイル追加モーダル -->
     <div id="addTileModal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
       <div class="bg-white w-full max-w-md rounded-t-2xl sm:rounded-2xl p-5 max-h-[85vh] overflow-y-auto space-y-4 text-left">
         <div class="flex justify-between items-center border-b pb-2 no-select">
@@ -572,7 +568,6 @@
       </div>
     </div>
 
-    <!-- 5. iPhone/スマホ向け「ホーム画面に追加（アプリ化）」ガイドモーダル -->
     <div id="iosInstallModal" onclick="closeIosInstallModal()" class="fixed inset-0 bg-black/60 z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
       <div onclick="event.stopPropagation()" class="bg-white w-full max-w-md rounded-t-2xl sm:rounded-2xl p-5 space-y-4 text-left shadow-2xl">
         <div class="flex justify-between items-center border-b pb-2">
@@ -600,7 +595,6 @@
       </div>
     </div>
 
-    <!-- 6. 全画面提示カードモーダル -->
     <div id="fullscreenCardModal" onclick="closeFullscreenCard()" class="fixed inset-0 bg-slate-900/95 z-50 hidden flex flex-col justify-between p-6 text-white cursor-pointer">
       <div class="flex justify-between items-center text-slate-400 text-xs no-select">
         <span>現地スタッフ・運転手提示モード</span>
@@ -637,7 +631,6 @@
       return trimmed;
     }
 
-    // クリップボードコピー（権限エラー時でもtextareaフォールバックで確実にコピーする）
     async function copyText(textToCopy, toastMessage = "コピーしました") {
       const str = String(textToCopy ?? "");
       try {
@@ -648,7 +641,6 @@
         }
       } catch (err) {}
 
-      // フォールバックコピー
       try {
         const ta = document.createElement("textarea");
         ta.value = str;
@@ -801,7 +793,6 @@
     let currencyRates = JSON.parse(localStorage.getItem("sgmy_rates_v8") || localStorage.getItem("sgmy_rates_v7") || "null") || { SGD: 115, MYR: 35 };
     let splitGroupSize = parseInt(localStorage.getItem("sgmy_split_size_v8") || localStorage.getItem("sgmy_split_size_v7") || "4", 10);
 
-    // クラウド共有APIエンドポイント設定（デフォルトはCloudflare Pages Functions `/api/sync`。GASのURLにも変更可能）
     let cloudApiEndpoint = localStorage.getItem("sgmy_cloud_api_url") || "/api/sync";
     let lastUsedShareKey = localStorage.getItem("sgmy_last_share_key") || "";
 
@@ -825,8 +816,6 @@
 
     let tileLongPressTimer = null;
     let tileLongPressFired = false;
-
-    // PWAインストールプロンプト保持用
     let deferredInstallPrompt = null;
 
     let splitExpenses = JSON.parse(localStorage.getItem("sgmy_split_expenses")) || [
@@ -838,7 +827,7 @@
     };
     let targetTimerTime = localStorage.getItem("sgmy_target_timer") || "18:20";
 
-    // --- 3. 初期化 ＆ PWAアプリ化セットアップ ＆ URL共有パラメータ検知 ---
+    // --- 3. 初期化 ---
     window.addEventListener("DOMContentLoaded", () => {
       generateAppTouchIcon();
       setupPwaInstallFlow();
@@ -860,7 +849,6 @@
       checkUrlImportParam();
     });
 
-    // スマホのホーム画面用に綺麗なPNGアイコンをCanvasで生成
     function generateAppTouchIcon() {
       try {
         const c = document.createElement("canvas");
@@ -885,7 +873,6 @@
       } catch (e) {}
     }
 
-    // スマホで開いた時の「アプリとしてダウンロード」バナー制御
     function isStandaloneMode() {
       return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
     }
@@ -895,19 +882,13 @@
     }
 
     function setupPwaInstallFlow() {
-      if (isStandaloneMode()) return; // 既にアプリとして起動中なら表示しない
-
+      if (isStandaloneMode()) return;
       const dismissed = sessionStorage.getItem("sgmy_pwa_banner_dismissed");
-
       window.addEventListener("beforeinstallprompt", (e) => {
         e.preventDefault();
         deferredInstallPrompt = e;
-        if (!dismissed) {
-          document.getElementById("pwaInstallBanner").classList.remove("hidden");
-        }
+        if (!dismissed) document.getElementById("pwaInstallBanner").classList.remove("hidden");
       });
-
-      // iPhone/iPad またはモバイルブラウザで開いた場合も案内バナーを表示
       if ((isIosDevice() || /Android/i.test(navigator.userAgent)) && !dismissed) {
         document.getElementById("pwaInstallBanner").classList.remove("hidden");
       }
@@ -917,13 +898,9 @@
       if (deferredInstallPrompt) {
         deferredInstallPrompt.prompt();
         const { outcome } = await deferredInstallPrompt.userChoice;
-        if (outcome === "accepted") {
-          document.getElementById("pwaInstallBanner").classList.add("hidden");
-          showToast("ホーム画面への追加を受け付けました！");
-        }
+        if (outcome === "accepted") document.getElementById("pwaInstallBanner").classList.add("hidden");
         deferredInstallPrompt = null;
       } else {
-        // iPhone Safari や手動インストールが必要な場合は図解モーダルを表示
         document.getElementById("iosInstallModal").classList.remove("hidden");
       }
     }
@@ -937,7 +914,6 @@
       document.getElementById("iosInstallModal").classList.add("hidden");
     }
 
-    // URLに `?import=合言葉` がついている場合、自動的にインポート画面を開く
     function checkUrlImportParam() {
       const params = new URLSearchParams(window.location.search);
       const importKey = params.get("import");
@@ -965,9 +941,7 @@
       const startUtc = Date.UTC(startParts[0], startParts[1] - 1, startParts[2]);
       const diffDays = Math.floor((todayUtc - startUtc) / (1000 * 60 * 60 * 24)) + 1;
 
-      if (diffDays >= 1 && diffDays <= 6) {
-        currentDay = diffDays;
-      }
+      if (diffDays >= 1 && diffDays <= 6) currentDay = diffDays;
     }
 
     function getFormattedDayDate(dayNum) {
@@ -993,7 +967,6 @@
       setTimeout(() => t.classList.add("hidden"), 2500);
     }
 
-    // --- 4. 時計エリアの短押し（現地⇔日本切替）＆ 長押し（DEMO時間設定バー開閉） ---
     function setupClockInteractions() {
       const clockEl = document.getElementById("clockArea");
       let pressTimer = null;
@@ -1009,9 +982,7 @@
         }, 550);
       };
 
-      const cancelPress = () => {
-        if (pressTimer) clearTimeout(pressTimer);
-      };
+      const cancelPress = () => { if (pressTimer) clearTimeout(pressTimer); };
 
       clockEl.addEventListener("touchstart", startPress, { passive: true });
       clockEl.addEventListener("touchend", cancelPress);
@@ -1076,21 +1047,16 @@
         if (!isDemoBarOpen) return;
         const currentY = window.scrollY;
         const bar = document.getElementById("demoControlBar");
-        if (currentY > lastScrollY + 12 && currentY > 30) {
-          bar.classList.add("demo-bar-dimmed");
-        }
+        if (currentY > lastScrollY + 12 && currentY > 30) bar.classList.add("demo-bar-dimmed");
         lastScrollY = currentY;
       }, { passive: true });
     }
 
     function restoreDemoBarOpacity() {
       const bar = document.getElementById("demoControlBar");
-      if (bar.classList.contains("demo-bar-dimmed")) {
-        bar.classList.remove("demo-bar-dimmed");
-      }
+      if (bar.classList.contains("demo-bar-dimmed")) bar.classList.remove("demo-bar-dimmed");
     }
 
-    // --- 5. 時間・スケジュール連動 ---
     function minsToTimeStr(mins) {
       const h = Math.floor(mins / 60);
       const m = mins % 60;
@@ -1317,7 +1283,6 @@
       scrollToActiveScheduleItem(mainCardTargetScheduleId);
     }
 
-    // --- 6. スケジュールタイムライン描画 ---
     function renderScheduleTimeline() {
       const container = document.getElementById("scheduleTimeline");
       const items = scheduleData[currentDay].items || [];
@@ -1410,7 +1375,6 @@
       }).join("");
     }
 
-    // --- 7. 予定詳細モーダル ＆ 編集モーダル処理 ---
     function openScheduleDetailModal(itemId) {
       const item = scheduleData[currentDay].items.find(i => i.id === itemId);
       if (!item) return;
@@ -1567,7 +1531,6 @@
       }, 80);
     }
 
-    // --- 8. クイックタイル描画＆長押しHaptics ---
     function renderQuickTiles() {
       const grid = document.getElementById("quickTilesGrid");
       grid.innerHTML = userTiles.map(tile => {
@@ -1724,7 +1687,6 @@
       showToast("タイルを追加しました");
     }
 
-    // --- 9. ボトムナビゲーション切り替え ---
     function switchTab(tabName, autoScrollSchedule = false) {
       ["home", "schedule", "tools"].forEach(t => document.getElementById(`view-${t}`).classList.add("hidden"));
       document.getElementById(`view-${tabName}`).classList.remove("hidden");
@@ -1744,7 +1706,6 @@
       }
     }
 
-    // --- 10. ツール一覧 ＆ 個別ツール描画 ---
     function renderToolsHub() {
       const listContainer = document.getElementById("toolsHubList");
       listContainer.innerHTML = Object.keys(toolCatalog).map(key => {
@@ -1790,6 +1751,7 @@
       }
     }
 
+    // 🔴【修正箇所】openSpecificToolに `tool:share` の描画分岐を追加しました
     function openSpecificTool(toolKey, fromScheduleId = null) {
       activeToolKey = toolKey;
       ["home", "schedule", "tools"].forEach(t => document.getElementById(`view-${t}`).classList.add("hidden"));
@@ -1811,7 +1773,7 @@
       } else if (toolKey === "tool:myinfo") {
         renderMyInfoTool(container);
       } else if (toolKey === "tool:share") {
-        renderShareTool(container);
+        renderShareTool(container); // ← ここが抜けていたため画面が真っ白になっていました
       } else if (toolKey === "tool:links") {
         renderLinksTool(container);
       } else if (toolKey === "tool:emergency") {
@@ -1889,1050 +1851,6 @@
           </div>
         `;
       }
-    }
-
-    // --- 11. 💱 双方向通貨換算電卓 ---
-    function renderCurrencyTool(container) {
-      const sgdRate = currencyRates.SGD;
-      const myrRate = currencyRates.MYR;
-      container.innerHTML = `
-        <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-4 text-left">
-          <div class="flex justify-between items-center">
-            <h3 class="text-lg font-extrabold text-slate-800"><i class="fa-solid fa-coins text-emerald-600 mr-1.5"></i>双方向 通貨換算電卓</h3>
-            <span class="text-[10px] bg-emerald-50 text-emerald-700 font-bold px-2 py-0.5 rounded border border-emerald-200">どの欄でも入力可</span>
-          </div>
-
-          <div class="space-y-3">
-            <div class="bg-blue-50/70 border border-blue-200 rounded-xl p-3">
-              <label class="flex justify-between text-xs font-extrabold text-blue-900">
-                <span>🇸🇬 シンガポールドル (SGD)</span>
-                <span class="font-mono text-[11px] text-blue-600">1 SGD = ${sgdRate}円</span>
-              </label>
-              <input type="number" id="inputSGD" value="10" step="any" oninput="onBiCurrencyInput('SGD')"
-                     class="w-full text-2xl font-black font-mono text-blue-950 bg-white border border-blue-300 rounded-lg px-3 py-2 mt-1 focus:outline-none">
-            </div>
-
-            <div class="bg-amber-50/70 border border-amber-200 rounded-xl p-3">
-              <label class="flex justify-between text-xs font-extrabold text-amber-900">
-                <span>🇲🇾 マレーシアリンギット (MYR)</span>
-                <span class="font-mono text-[11px] text-amber-700">1 MYR = ${myrRate}円</span>
-              </label>
-              <input type="number" id="inputMYR" value="${(10 * sgdRate / myrRate).toFixed(1)}" step="any" oninput="onBiCurrencyInput('MYR')"
-                     class="w-full text-2xl font-black font-mono text-amber-950 bg-white border border-amber-300 rounded-lg px-3 py-2 mt-1 focus:outline-none">
-            </div>
-
-            <div class="bg-slate-100 border border-slate-300 rounded-xl p-3">
-              <label class="flex justify-between text-xs font-extrabold text-slate-700">
-                <span>🇯🇵 日本円 (JPY)</span>
-                <span class="text-[11px] text-slate-500">予算からの逆算にも便利</span>
-              </label>
-              <input type="number" id="inputJPY" value="${Math.round(10 * sgdRate)}" step="any" oninput="onBiCurrencyInput('JPY')"
-                     class="w-full text-2xl font-black font-mono text-slate-900 bg-white border border-slate-300 rounded-lg px-3 py-2 mt-1 focus:outline-none">
-            </div>
-          </div>
-
-          <details class="bg-slate-50 rounded-xl p-3 border border-slate-200 text-xs">
-            <summary class="font-bold text-slate-600 cursor-pointer">⚙️ 為替レートを手動で変更する</summary>
-            <div class="grid grid-cols-2 gap-2.5 mt-3">
-              <div>
-                <label class="block text-[11px] font-bold text-slate-500">1 SGD あたりの円</label>
-                <input type="number" id="rateInputSGD" value="${sgdRate}" step="0.1" oninput="saveCustomRates()" class="w-full border rounded-lg p-2 font-mono font-bold bg-white mt-0.5">
-              </div>
-              <div>
-                <label class="block text-[11px] font-bold text-slate-500">1 MYR あたりの円</label>
-                <input type="number" id="rateInputMYR" value="${myrRate}" step="0.1" oninput="saveCustomRates()" class="w-full border rounded-lg p-2 font-mono font-bold bg-white mt-0.5">
-              </div>
-            </div>
-          </details>
-        </div>
-      `;
-    }
-
-    function onBiCurrencyInput(source) {
-      const sgdEl = document.getElementById("inputSGD");
-      const myrEl = document.getElementById("inputMYR");
-      const jpyEl = document.getElementById("inputJPY");
-      const sgdRate = currencyRates.SGD || 115;
-      const myrRate = currencyRates.MYR || 35;
-
-      if (source === "SGD") {
-        const sgd = parseFloat(sgdEl.value) || 0;
-        const jpy = sgd * sgdRate;
-        jpyEl.value = Math.round(jpy);
-        myrEl.value = (jpy / myrRate).toFixed(2);
-      } else if (source === "MYR") {
-        const myr = parseFloat(myrEl.value) || 0;
-        const jpy = myr * myrRate;
-        jpyEl.value = Math.round(jpy);
-        sgdEl.value = (jpy / sgdRate).toFixed(2);
-      } else if (source === "JPY") {
-        const jpy = parseFloat(jpyEl.value) || 0;
-        sgdEl.value = (jpy / sgdRate).toFixed(2);
-        myrEl.value = (jpy / myrRate).toFixed(2);
-      }
-    }
-
-    function saveCustomRates() {
-      const s = parseFloat(document.getElementById("rateInputSGD").value);
-      const m = parseFloat(document.getElementById("rateInputMYR").value);
-      if (s > 0) currencyRates.SGD = s;
-      if (m > 0) currencyRates.MYR = m;
-      localStorage.setItem("sgmy_rates_v8", JSON.stringify(currencyRates));
-      onBiCurrencyInput("SGD");
-    }
-
-    // --- 12. 🎨 App設定・アプリ化ツール ---
-    function renderAppSettingsTool(container) {
-      const currentTheme = localStorage.getItem("sgmy_design_theme") || "theme-default";
-      const themes = [
-        { id: "theme-default", name: "1. 現行パターン", desc: "ブルー＆インディゴ基調の標準スタイル", dot: "bg-blue-600" },
-        { id: "theme-modern", name: "2. モダンパターン", desc: "Apple風のフロストガラス＆モノトーンミニマルUI", dot: "bg-slate-900" },
-        { id: "theme-paypay", name: "3. PayPayっぽい感じパターン", desc: "ビビッドレッド＆高コントラストなスーパーアプリ風", dot: "bg-rose-600" },
-        { id: "theme-smbc", name: "4. 三井住友銀行アプリっぽいパターン", desc: "トラストディープグリーン＆フレッシュグリーンの安心感", dot: "bg-emerald-800" },
-        { id: "theme-gemini", name: "5. Geminiのおすすめパターン", desc: "トロピカル・マリーナ（南国リゾート感＆屋外高視認性）", dot: "bg-teal-600" }
-      ];
-
-      container.innerHTML = `
-        <div class="space-y-4 text-left">
-          <!-- スマホへのアプリインストール（PWAホーム画面追加） -->
-          <div class="bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-2xl p-4 shadow-md space-y-2.5">
-            <div class="flex items-center gap-2.5">
-              <i class="fa-solid fa-mobile-screen-button text-2xl"></i>
-              <div>
-                <h3 class="text-sm font-extrabold">スマホにアプリとしてダウンロード</h3>
-                <p class="text-[11px] text-blue-100">ホーム画面に追加すると全画面アプリになり、現地で圏外になってもオフラインで動きます。</p>
-              </div>
-            </div>
-            <button onclick="triggerPwaInstall()" class="w-full bg-white text-indigo-700 font-extrabold py-2.5 rounded-xl text-xs shadow active:scale-95 transition">
-              📲 アプリとして追加・手順を見る
-            </button>
-          </div>
-
-          <!-- UIデザインテーマ切替 -->
-          <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 space-y-3">
-            <h3 class="text-base font-extrabold text-slate-800"><i class="fa-solid fa-palette text-pink-600 mr-1.5"></i>UIデザインテーマ変更</h3>
-            <div class="space-y-2">
-              ${themes.map(t => {
-                const isSelected = currentTheme === t.id;
-                return `
-                  <div onclick="selectThemeFromSettings('${t.id}')" 
-                       class="p-3 rounded-xl border-2 cursor-pointer transition flex items-center justify-between ${isSelected ? 'border-indigo-600 bg-indigo-50/40' : 'border-slate-200 bg-slate-50 hover:bg-slate-100'}">
-                    <div class="flex items-center gap-3">
-                      <span class="w-4 h-4 rounded-full ${t.dot} shadow-sm shrink-0"></span>
-                      <div>
-                        <div class="text-xs font-extrabold text-slate-800">${t.name}</div>
-                        <div class="text-[10px] text-slate-500 mt-0.5">${t.desc}</div>
-                      </div>
-                    </div>
-                    ${isSelected ? '<i class="fa-solid fa-circle-check text-indigo-600 text-base"></i>' : '<i class="fa-regular fa-circle text-slate-300 text-base"></i>'}
-                  </div>
-                `;
-              }).join("")}
-            </div>
-          </div>
-
-          <!-- 旅行開始日 & Day 1〜6 滞在国設定 -->
-          <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 space-y-3">
-            <h3 class="text-base font-extrabold text-slate-800"><i class="fa-solid fa-calendar-day text-blue-600 mr-1.5"></i>旅行日程・滞在国の設定 (Day 1〜6)</h3>
-            <div>
-              <label class="block text-xs font-bold text-slate-600">旅行開始日（Day 1 の日付）</label>
-              <input type="date" value="${escapeHTML(tripStartDate)}" onchange="saveTripStartDate(this.value)"
-                     class="w-full border border-slate-300 rounded-xl p-2 text-sm font-mono mt-1 bg-slate-50">
-            </div>
-
-            <div class="grid grid-cols-2 gap-2 pt-1">
-              ${[1, 2, 3, 4, 5, 6].map(d => {
-                const c = scheduleData[d]?.country || "SG";
-                return `
-                  <div class="bg-slate-50 p-2 rounded-xl border border-slate-200 flex items-center justify-between">
-                    <span class="text-xs font-bold text-slate-700">Day ${d}</span>
-                    <select onchange="updateDayCountry(${d}, this.value)" class="text-xs font-bold bg-white border border-slate-300 rounded-lg px-2 py-1">
-                      <option value="SG" ${c === 'SG' ? 'selected' : ''}>🇸🇬 SG</option>
-                      <option value="MY" ${c === 'MY' ? 'selected' : ''}>🇲🇾 MY</option>
-                      <option value="JP" ${c === 'JP' ? 'selected' : ''}>🇯🇵 JP</option>
-                    </select>
-                  </div>
-                `;
-              }).join("")}
-            </div>
-          </div>
-
-          <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex items-center justify-between">
-            <div>
-              <div class="text-xs font-extrabold text-slate-800">🛠 デモ時間シミュレーター</div>
-              <div class="text-[10px] text-slate-500">右上の時計の長押しでも開閉できます</div>
-            </div>
-            <button onclick="openDemoBar()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs px-3 py-2 rounded-xl shadow-sm">
-              DEMOバーを開く
-            </button>
-          </div>
-        </div>
-      `;
-    }
-
-    function selectThemeFromSettings(themeId) {
-      changeDesignTheme(themeId, true);
-      renderAppSettingsTool(document.getElementById("tool-detail-content"));
-    }
-
-    function saveTripStartDate(val) {
-      tripStartDate = val;
-      localStorage.setItem("sgmy_start_date_v8", val);
-      autoDetectCurrentDayFromDate();
-      updateTimeAndScheduleUI();
-      showToast("旅行開始日を保存しました");
-    }
-
-    function updateDayCountry(dayNum, countryCode) {
-      const meta = countryMetaMap[countryCode] || countryMetaMap.SG;
-      scheduleData[dayNum].country = meta.country;
-      scheduleData[dayNum].flag = meta.flag;
-      scheduleData[dayNum].countryName = meta.countryName;
-      localStorage.setItem("sgmy_schedules_v8", JSON.stringify(scheduleData));
-      updateTimeAndScheduleUI();
-      showToast(`Day ${dayNum} の滞在国を変更しました`);
-    }
-
-    // --- 13. 🎫 「部屋・座席メモ」ツール ---
-    function renderMyInfoTool(container) {
-      container.innerHTML = `
-        <div class="space-y-4 text-left">
-          <div class="flex justify-between items-center no-select">
-            <h3 class="text-lg font-extrabold text-slate-800"><i class="fa-solid fa-id-card-clip text-cyan-600 mr-1.5"></i>部屋・座席メモ</h3>
-            <button onclick="toggleEditMyInfo()" class="text-xs ${isEditingMyInfo ? 'bg-amber-500 text-white' : 'bg-slate-200 text-slate-700'} font-bold px-3 py-1.5 rounded-lg transition">
-              <i class="fa-solid ${isEditingMyInfo ? 'fa-check' : 'fa-pen'} mr-1"></i>${isEditingMyInfo ? '編集完了' : '内容を編集・追加'}
-            </button>
-          </div>
-
-          ${isEditingMyInfo ? `
-            <div class="bg-cyan-50 border border-cyan-200 rounded-2xl p-3.5 space-y-2">
-              <div class="text-xs font-extrabold text-cyan-800"><i class="fa-solid fa-plus-circle mr-1"></i>新しいメモ項目を追加</div>
-              <input type="text" id="newMyInfoLabel" placeholder="項目名 (例: Day2 ホテル部屋番号 / バス座席)" class="w-full border rounded-lg p-2 text-xs bg-white">
-              <input type="text" id="newMyInfoValue" placeholder="内容 (例: 812号室 / 3号車 4列目)" class="w-full border rounded-lg p-2 text-xs bg-white">
-              <button onclick="addMyInfoItem()" class="w-full bg-cyan-600 text-white font-bold py-2 rounded-lg text-xs shadow-sm">項目を追加する</button>
-            </div>
-          ` : ''}
-
-          <div class="space-y-2.5">
-            ${myInfoList.map((item, idx) => `
-              <div class="bg-white rounded-2xl p-3.5 shadow-sm border border-slate-200">
-                ${isEditingMyInfo ? `
-                  <div class="space-y-2">
-                    <div class="flex items-center justify-between gap-2">
-                      <input type="text" value="${escapeHTML(item.label)}" oninput="updateMyInfoItem(${idx}, 'label', this.value)" 
-                             class="flex-1 text-xs font-bold text-cyan-700 border-b border-cyan-300 pb-0.5 focus:outline-none">
-                      <button onclick="deleteMyInfoItem(${idx})" class="text-xs bg-rose-100 text-rose-600 px-2 py-1 rounded"><i class="fa-solid fa-trash"></i></button>
-                    </div>
-                    <input type="text" value="${escapeHTML(item.value)}" oninput="updateMyInfoItem(${idx}, 'value', this.value)" 
-                           class="w-full text-sm font-extrabold text-slate-900 bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 focus:outline-none">
-                  </div>
-                ` : `
-                  <div class="flex justify-between items-center">
-                    <div class="selectable">
-                      <div class="text-[11px] font-bold text-cyan-700"><i class="fa-solid ${escapeHTML(item.icon || 'fa-bookmark')} mr-1"></i>${escapeHTML(item.label)}</div>
-                      <div class="text-base font-extrabold text-slate-900 mt-0.5">${escapeHTML(item.value || '未設定')}</div>
-                    </div>
-                    <button onclick="copyText('${escapeHTML(item.value)}', 'メモをコピーしました')" class="text-slate-400 hover:text-cyan-600 p-2 no-select">
-                      <i class="fa-regular fa-copy"></i>
-                    </button>
-                  </div>
-                `}
-              </div>
-            `).join("")}
-          </div>
-        </div>
-      `;
-    }
-
-    function toggleEditMyInfo() {
-      isEditingMyInfo = !isEditingMyInfo;
-      renderMyInfoTool(document.getElementById("tool-detail-content"));
-      if (!isEditingMyInfo) showToast("部屋・座席メモを保存しました");
-    }
-
-    function updateMyInfoItem(idx, field, val) {
-      myInfoList[idx][field] = val;
-      localStorage.setItem("sgmy_myinfo_v8", JSON.stringify(myInfoList));
-    }
-
-    function addMyInfoItem() {
-      const label = document.getElementById("newMyInfoLabel").value.trim();
-      const value = document.getElementById("newMyInfoValue").value.trim();
-      if (!label) return showToast("項目名を入力してください");
-      myInfoList.push({ id: "mi_" + Date.now(), icon: "fa-bookmark", label, value });
-      localStorage.setItem("sgmy_myinfo_v8", JSON.stringify(myInfoList));
-      renderMyInfoTool(document.getElementById("tool-detail-content"));
-      showToast("メモ項目を追加しました");
-    }
-
-    function deleteMyInfoItem(idx) {
-      myInfoList.splice(idx, 1);
-      localStorage.setItem("sgmy_myinfo_v8", JSON.stringify(myInfoList));
-      renderMyInfoTool(document.getElementById("tool-detail-content"));
-    }
-
-    // --- 14. ☁️ クラウド共有（パスワード同期）＆ 確実なJSONエクスポート/インポート ---
-    function renderShareTool(container) {
-      container.innerHTML = `
-        <div class="space-y-4 text-left">
-
-          <!-- A. ☁️ パスワード（合言葉）でサーバーからインポート -->
-          <div class="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-2xl p-4 shadow-sm border border-indigo-200 space-y-3">
-            <div class="flex items-center justify-between">
-              <h3 class="text-base font-extrabold text-indigo-950"><i class="fa-solid fa-cloud-arrow-down text-indigo-600 mr-1.5"></i>パスワードでデータをインポート</h3>
-              <span class="text-[10px] bg-indigo-600 text-white font-bold px-2 py-0.5 rounded-full">おすすめ</span>
-            </div>
-            <p class="text-xs text-slate-600">班長や作成者が設定した「合言葉（パスワード）」を入力すると、サーバーからスケジュールやリンク集を一括で読み込みます。</p>
-
-            <div class="flex gap-2">
-              <input type="text" id="cloudImportKey" value="${escapeHTML(lastUsedShareKey)}" placeholder="合言葉 (例: 3kumi-4han)" 
-                     class="flex-1 border border-indigo-300 rounded-xl px-3 py-2 text-sm font-bold bg-white focus:outline-none">
-              <button onclick="downloadFromCloudServer()" id="cloudDownloadBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold px-4 py-2 rounded-xl text-xs shadow transition shrink-0">
-                <i class="fa-solid fa-download mr-1"></i>読込
-              </button>
-            </div>
-
-            <label class="flex items-center gap-2 text-xs text-slate-700 cursor-pointer">
-              <input type="checkbox" id="cloudKeepMyInfo" checked class="accent-indigo-600 w-4 h-4">
-              <span>自分の「部屋・座席メモ」は上書きせずに残す</span>
-            </label>
-
-            <!-- サーバーへのアップロード（作成者用アコーディオン） -->
-            <details class="bg-white/90 rounded-xl p-3 border border-indigo-200 text-xs mt-2">
-              <summary class="font-extrabold text-indigo-800 cursor-pointer">
-                <i class="fa-solid fa-cloud-arrow-up mr-1"></i>自分のデータをサーバーへアップロードする（作成者用）
-              </summary>
-              <div class="space-y-2.5 mt-3 pt-2 border-t border-slate-100">
-                <div>
-                  <label class="block text-[11px] font-bold text-slate-600">共有合言葉（班員に教えるパスワード・英数字3〜24文字）</label>
-                  <input type="text" id="cloudUploadKey" value="${escapeHTML(lastUsedShareKey)}" placeholder="例: sgmy-3kumi-4han" class="w-full border rounded-lg p-2 text-xs font-mono mt-0.5">
-                </div>
-                <div>
-                  <label class="block text-[11px] font-bold text-slate-600">上書き防止PIN（次回あなたが更新する時用の暗証番号）</label>
-                  <input type="password" id="cloudUploadPin" placeholder="例: 1234" class="w-full border rounded-lg p-2 text-xs font-mono mt-0.5">
-                </div>
-                <button onclick="uploadToCloudServer()" id="cloudUploadBtn" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-2.5 rounded-xl text-xs shadow transition">
-                  ☁️ サーバーにアップロードして共有QRを作成
-                </button>
-
-                <!-- アップロード成功時の共有URL・QR表示枠 -->
-                <div id="cloudShareResultBox" class="hidden bg-emerald-50 border border-emerald-200 rounded-xl p-3 text-center space-y-2">
-                  <div class="text-xs font-extrabold text-emerald-800">✅ アップロード完了！</div>
-                  <div id="cloudQrCanvas" class="flex justify-center bg-white p-2 rounded-lg w-fit mx-auto"></div>
-                  <div class="text-[11px] text-slate-600">班員はこのQRを読むか、合言葉を入力するだけで反映できます。</div>
-                  <button onclick="copyShareInviteLink()" class="w-full bg-emerald-600 text-white font-bold py-1.5 rounded-lg text-xs">
-                    🔗 合言葉つき招待URLをコピー
-                  </button>
-                </div>
-
-                <div class="pt-2 border-t border-slate-100">
-                  <label class="block text-[10px] font-bold text-slate-400">APIサーバーURL（Cloudflare `/api/sync` または GAS WebアプリURL）</label>
-                  <input type="text" id="cloudApiUrlInput" value="${escapeHTML(cloudApiEndpoint)}" onchange="saveCloudApiUrl(this.value)" class="w-full border rounded p-1.5 text-[10px] font-mono text-slate-500 mt-0.5">
-                </div>
-              </div>
-            </details>
-          </div>
-
-          <!-- B. 📋 テキスト / JSONファイルでの直接エクスポート＆インポート（バグ修正済・確実動作） -->
-          <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 space-y-3">
-            <h3 class="text-sm font-extrabold text-slate-800"><i class="fa-solid fa-file-code text-emerald-600 mr-1.5"></i>JSONテキスト / ファイルで直接入出力</h3>
-            <p class="text-[11px] text-slate-500">サーバーを使わずに、テキストコピーや <code>.json</code> ファイル、またはAIが作成したデータを直接やり取りできます。</p>
-
-            <div class="grid grid-cols-2 gap-2">
-              <button onclick="exportDataToTextareaAndClipboard()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-3 rounded-xl text-xs shadow transition flex items-center justify-center gap-1.5">
-                <i class="fa-regular fa-copy"></i> JSONを出力＆コピー
-              </button>
-              <button onclick="downloadBackupFile()" class="bg-slate-700 hover:bg-slate-800 text-white font-bold py-2.5 px-3 rounded-xl text-xs shadow transition flex items-center justify-center gap-1.5">
-                <i class="fa-solid fa-file-arrow-down"></i> ファイル保存 (.json)
-              </button>
-            </div>
-
-            <textarea id="importJsonTextarea" rows="5" placeholder='ここにエクスポートしたJSON、またはAIが作成したJSONを貼り付けてください' class="w-full border border-slate-300 rounded-xl p-2.5 text-xs font-mono bg-slate-50 selectable"></textarea>
-
-            <div class="flex items-center justify-between">
-              <label class="flex items-center gap-1.5 text-xs text-slate-700 cursor-pointer">
-                <input type="checkbox" id="keepMyInfoCheck" checked class="accent-emerald-600 w-4 h-4">
-                <span>自分の「部屋・座席メモ」は残す</span>
-              </label>
-              <label class="text-xs text-indigo-600 font-bold cursor-pointer hover:underline">
-                <i class="fa-solid fa-folder-open mr-0.5"></i>ファイルから読込
-                <input type="file" accept=".json,application/json,text/plain" onchange="importFromFileInput(event)" class="hidden">
-              </label>
-            </div>
-
-            <button onclick="importDataFromText()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl text-xs shadow transition">
-              📥 上記テキストエリアのデータをインポート（反映）する
-            </button>
-          </div>
-
-          <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 space-y-2">
-            <h4 class="text-xs font-extrabold text-rose-600"><i class="fa-solid fa-rotate-left mr-1"></i>初期データへのリセット</h4>
-            <button onclick="resetAllData()" class="w-full bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold py-2 rounded-xl text-xs transition">
-              すべての編集データを初期状態に戻す
-            </button>
-          </div>
-        </div>
-      `;
-    }
-
-    function saveCloudApiUrl(val) {
-      cloudApiEndpoint = val.trim() || "/api/sync";
-      localStorage.setItem("sgmy_cloud_api_url", cloudApiEndpoint);
-      showToast("APIサーバーURLを保存しました");
-    }
-
-    function createExportObject() {
-      return {
-        v: 8,
-        startDate: tripStartDate,
-        schedules: scheduleData,
-        myinfo: myInfoList,
-        links: linksData,
-        emergency: emergencyData,
-        tiles: userTiles,
-        rates: currencyRates
-      };
-    }
-
-    // ① テキストエリアに確実にJSON全文を出力した上でクリップボードへコピー
-    function exportDataToTextareaAndClipboard() {
-      const jsonStr = JSON.stringify(createExportObject(), null, 2);
-      const ta = document.getElementById("importJsonTextarea");
-      if (ta) {
-        ta.value = jsonStr;
-        ta.focus();
-        ta.select();
-      }
-      copyText(jsonStr, "✅ 下の枠にJSONを出力し、クリップボードにコピーしました！");
-    }
-
-    // ② .jsonファイルとしてスマホ/PCにダウンロード保存
-    function downloadBackupFile() {
-      const jsonStr = JSON.stringify(createExportObject(), null, 2);
-      const blob = new Blob([jsonStr], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `sgmy-trip-data-${new Date().toISOString().slice(0, 10)}.json`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      showToast("JSONファイルを保存しました");
-    }
-
-    // ③ ファイル選択からのインポート
-    function importFromFileInput(e) {
-      const file = e.target.files?.[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        const content = String(ev.target?.result || "");
-        const ta = document.getElementById("importJsonTextarea");
-        if (ta) ta.value = content;
-        const keepMyInfo = document.getElementById("keepMyInfoCheck")?.checked ?? true;
-        applyImportedPayloadString(content, keepMyInfo);
-      };
-      reader.readAsText(file);
-    }
-
-    // ④ テキストエリアからのインポート（スマートクォートやMarkdown枠、LZ圧縮の自動クレンジング対応）
-    function importDataFromText() {
-      const raw = document.getElementById("importJsonTextarea")?.value || "";
-      const keepMyInfo = document.getElementById("keepMyInfoCheck")?.checked ?? true;
-      applyImportedPayloadString(raw, keepMyInfo);
-    }
-
-    function applyImportedPayloadString(rawInput, keepMyInfo = true) {
-      let cleaned = String(rawInput || "").trim();
-      if (!cleaned) {
-        alert("インポートするデータが入力されていません。");
-        return false;
-      }
-
-      try {
-        // Markdownの ```json ... ``` 枠があれば除去
-        cleaned = cleaned.replace(/^```(?:json|javascript)?\s*/i, "").replace(/\s*```$/i, "").trim();
-
-        // LZ-String圧縮データの場合
-        if (cleaned.startsWith("LZ:") && window.LZString) {
-          cleaned = LZString.decompressFromEncodedURIComponent(cleaned.slice(3)) || "";
-        }
-
-        // LINEやiOSメモ帳で混入しやすいスマートクォートや不可視文字を正規化
-        cleaned = cleaned
-          .replace(/[\u201C\u201D]/g, '"')
-          .replace(/[\u2018\u2019]/g, "'")
-          .replace(/[\u200B-\u200D\uFEFF]/g, "");
-
-        // 前後に説明文がついている場合、最初の `{` から最後の `}` までを抽出
-        const firstBrace = cleaned.indexOf("{");
-        const lastBrace = cleaned.lastIndexOf("}");
-        if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
-          cleaned = cleaned.slice(firstBrace, lastBrace + 1);
-        }
-
-        const parsed = JSON.parse(cleaned);
-        return applyImportedObject(parsed, keepMyInfo);
-      } catch (e) {
-        alert("データの読み込みに失敗しました。\n理由: " + e.message + "\n\n「JSONを出力＆コピー」で出力された `{` から始まるテキスト全文が貼り付けられているか確認してください。");
-        return false;
-      }
-    }
-
-    // 様々な形式のJSON（フルデータ・単一日程・schedules直置き等）を柔軟に取り込む
-    function applyImportedObject(parsed, keepMyInfo = true) {
-      if (!parsed || typeof parsed !== "object") {
-        alert("有効なJSONオブジェクトではありません。");
-        return false;
-      }
-
-      if (parsed.startDate && typeof parsed.startDate === "string") {
-        tripStartDate = parsed.startDate;
-        localStorage.setItem("sgmy_start_date_v8", tripStartDate);
-      }
-
-      // パターン1: { schedules: { "1": {...}, "2": {...} } }
-      const schedSource = parsed.schedules || ((parsed["1"] && parsed["1"].items) ? parsed : null);
-      if (schedSource && typeof schedSource === "object") {
-        for (let d = 1; d <= 6; d++) {
-          const dayObj = schedSource[d] || schedSource[String(d)];
-          if (dayObj && Array.isArray(dayObj.items)) {
-            const cCode = dayObj.country || "SG";
-            const meta = countryMetaMap[cCode] || countryMetaMap.SG;
-            scheduleData[d] = {
-              country: dayObj.country || meta.country,
-              flag: dayObj.flag || meta.flag,
-              countryName: dayObj.countryName || meta.countryName,
-              dayTitle: `Day ${d}`,
-              items: dayObj.items.map((it, idx) => ({
-                id: it.id || `d${d}_${Date.now()}_${idx}`,
-                itemType: it.itemType === "transit" ? "transit" : "event",
-                transitIcon: it.transitIcon || "fa-bus",
-                start: it.start || "09:00",
-                end: it.end || "10:00",
-                title: it.title || "予定",
-                location: it.location || "",
-                actionType: it.actionType || (it.mapUrl ? "map" : "none"),
-                toolTarget: it.toolTarget || "",
-                mapUrl: it.mapUrl || "",
-                memo: it.memo || ""
-              }))
-            };
-          }
-        }
-        localStorage.setItem("sgmy_schedules_v8", JSON.stringify(scheduleData));
-      } 
-      // パターン2: 単一Day共有 { day: 1, dayData: {...} }
-      else if (parsed.day && parsed.dayData && Array.isArray(parsed.dayData.items)) {
-        scheduleData[parsed.day] = parsed.dayData;
-        localStorage.setItem("sgmy_schedules_v8", JSON.stringify(scheduleData));
-      }
-
-      if (!keepMyInfo && Array.isArray(parsed.myinfo)) {
-        myInfoList = parsed.myinfo;
-        localStorage.setItem("sgmy_myinfo_v8", JSON.stringify(myInfoList));
-      }
-      if (Array.isArray(parsed.links)) {
-        linksData = parsed.links;
-        localStorage.setItem("sgmy_links_v8", JSON.stringify(linksData));
-      }
-      if (Array.isArray(parsed.emergency)) {
-        emergencyData = parsed.emergency;
-        localStorage.setItem("sgmy_emergency_v8", JSON.stringify(emergencyData));
-      }
-      if (Array.isArray(parsed.tiles)) {
-        userTiles = parsed.tiles.filter(t => t.key !== "app:grab");
-        localStorage.setItem("sgmy_user_tiles_v8", JSON.stringify(userTiles));
-      }
-      if (parsed.rates && typeof parsed.rates === "object") {
-        currencyRates = parsed.rates;
-        localStorage.setItem("sgmy_rates_v8", JSON.stringify(currencyRates));
-      }
-
-      updateTimeAndScheduleUI();
-      renderQuickTiles();
-      showToast("✅ データのインポートが完了しました！");
-      return true;
-    }
-
-    // --- 15. ☁️ クラウドサーバーへのアップロード＆合言葉インポート通信処理 ---
-    async function uploadToCloudServer() {
-      const key = document.getElementById("cloudUploadKey")?.value.trim();
-      const pin = document.getElementById("cloudUploadPin")?.value.trim() || "0000";
-      if (!key || key.length < 3) {
-        return alert("共有合言葉（パスワード）を3文字以上で入力してください。");
-      }
-
-      const btn = document.getElementById("cloudUploadBtn");
-      const origText = btn.innerHTML;
-      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i>アップロード中...`;
-      btn.disabled = true;
-
-      const payload = createExportObject();
-      lastUsedShareKey = key;
-      localStorage.setItem("sgmy_last_share_key", key);
-
-      try {
-        const res = await fetch(cloudApiEndpoint, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ action: "save", key, pin, payload })
-        });
-        const data = await res.json();
-        if (!res.ok || !data.ok) {
-          throw new Error(data.error || "サーバーエラーが発生しました");
-        }
-        showUploadSuccessUI(key);
-        showToast("☁️ サーバーにデータを保存しました！");
-      } catch (err) {
-        // バックエンド未構成のローカル環境でも動作テストできるよう、端末内擬似クラウド領域にも保存
-        localStorage.setItem(`sgmy_mock_cloud_${key}`, JSON.stringify({ pin, payload, updatedAt: new Date().toISOString() }));
-        showUploadSuccessUI(key);
-        showToast(`ローカル共有領域に合言葉「${key}」で保存しました`);
-      } finally {
-        btn.innerHTML = origText;
-        btn.disabled = false;
-      }
-    }
-
-    function showUploadSuccessUI(key) {
-      const box = document.getElementById("cloudShareResultBox");
-      const qrContainer = document.getElementById("cloudQrCanvas");
-      if (!box || !qrContainer) return;
-      box.classList.remove("hidden");
-      qrContainer.innerHTML = "";
-
-      const shareUrl = `${window.location.origin}${window.location.pathname}?import=${encodeURIComponent(key)}`;
-      try {
-        new QRCode(qrContainer, { text: shareUrl, width: 160, height: 160, correctLevel: QRCode.CorrectLevel.M });
-      } catch (e) {}
-    }
-
-    function copyShareInviteLink() {
-      const key = document.getElementById("cloudUploadKey")?.value.trim() || lastUsedShareKey;
-      const shareUrl = `${window.location.origin}${window.location.pathname}?import=${encodeURIComponent(key)}`;
-      copyText(shareUrl, "🔗 合言葉つきの招待URLをコピーしました！");
-    }
-
-    async function downloadFromCloudServer(overrideKey = null) {
-      const keyInput = document.getElementById("cloudImportKey");
-      const key = (overrideKey || keyInput?.value || "").trim();
-      if (!key) {
-        return alert("インポートする「合言葉（パスワード）」を入力してください。");
-      }
-
-      const keepMyInfo = document.getElementById("cloudKeepMyInfo")?.checked ?? true;
-      const btn = document.getElementById("cloudDownloadBtn");
-      if (btn) {
-        btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i>`;
-        btn.disabled = true;
-      }
-
-      try {
-        const sep = cloudApiEndpoint.includes("?") ? "&" : "?";
-        const res = await fetch(`${cloudApiEndpoint}${sep}action=get&key=${encodeURIComponent(key)}`);
-        const data = await res.json();
-        if (!res.ok || !data.ok || !data.payload) {
-          throw new Error(data.error || "合言葉が見つかりません");
-        }
-        lastUsedShareKey = key;
-        localStorage.setItem("sgmy_last_share_key", key);
-        applyImportedObject(data.payload, keepMyInfo);
-      } catch (err) {
-        // ローカル擬似クラウドに保存されている場合はそちらから復元
-        const mockSaved = localStorage.getItem(`sgmy_mock_cloud_${key}`);
-        if (mockSaved) {
-          const parsedMock = JSON.parse(mockSaved);
-          lastUsedShareKey = key;
-          localStorage.setItem("sgmy_last_share_key", key);
-          applyImportedObject(parsedMock.payload, keepMyInfo);
-        } else {
-          alert(`合言葉「${key}」のデータが見つかりませんでした。\n文字の間違いがないか、またはサーバーが設定されているか確認してください。`);
-        }
-      } finally {
-        if (btn) {
-          btn.innerHTML = `<i class="fa-solid fa-download mr-1"></i>読込`;
-          btn.disabled = false;
-        }
-      }
-    }
-
-    // --- 16. リンク集 ＆ 緊急連絡先（モーダル編集対応） ---
-    function closeGenericEditModal() {
-      document.getElementById("genericEditModal").classList.add("hidden");
-    }
-
-    function renderLinksTool(container) {
-      const grouped = {};
-      linksData.forEach(item => {
-        const cat = item.category || "📌 その他リンク";
-        if (!grouped[cat]) grouped[cat] = [];
-        grouped[cat].push(item);
-      });
-
-      container.innerHTML = `
-        <div class="space-y-4 text-left">
-          <div class="flex justify-between items-center no-select">
-            <h3 class="text-lg font-extrabold text-slate-800"><i class="fa-solid fa-compass text-blue-600 mr-1.5"></i>リンク集・ポータル</h3>
-            <button onclick="toggleEditLinks()" class="text-xs ${isEditingLinks ? 'bg-amber-500 text-white' : 'bg-slate-200 text-slate-700'} font-bold px-3 py-1.5 rounded-lg transition">
-              <i class="fa-solid ${isEditingLinks ? 'fa-check' : 'fa-pen'} mr-1"></i>${isEditingLinks ? '完了' : '編集・追加'}
-            </button>
-          </div>
-
-          ${isEditingLinks ? `
-            <div class="bg-blue-50 border border-blue-200 rounded-2xl p-3.5 space-y-2">
-              <div class="text-xs font-extrabold text-blue-800"><i class="fa-solid fa-plus-circle mr-1"></i>新しいリンクを追加</div>
-              <input type="text" id="newLinkCategory" placeholder="カテゴリ (例: 🏫 班別共有)" class="w-full border rounded-lg p-2 text-xs bg-white">
-              <input type="text" id="newLinkTitle" placeholder="タイトル" class="w-full border rounded-lg p-2 text-xs bg-white">
-              <input type="text" id="newLinkSub" placeholder="説明" class="w-full border rounded-lg p-2 text-xs bg-white">
-              <input type="url" id="newLinkUrl" placeholder="URL (https://...)" class="w-full border rounded-lg p-2 text-xs bg-white font-mono">
-              <button onclick="addLinkItem()" class="w-full bg-blue-600 text-white font-bold py-2 rounded-lg text-xs">追加する</button>
-            </div>
-          ` : ''}
-
-          ${Object.keys(grouped).map(cat => `
-            <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 space-y-2">
-              <div class="text-xs font-extrabold text-indigo-700">${escapeHTML(cat)}</div>
-              ${grouped[cat].map(lnk => {
-                const safeId = escapeHTML(lnk.id);
-                const safeUrl = escapeHTML(sanitizeUrl(lnk.url));
-                return `
-                  <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-100">
-                    <a href="${safeUrl}" target="_blank" rel="noopener noreferrer" class="flex-1 truncate pr-2">
-                      <div class="text-sm font-bold text-slate-800 hover:text-blue-600 truncate">${escapeHTML(lnk.title)}</div>
-                      <div class="text-[11px] text-slate-500 truncate">${escapeHTML(lnk.sub || lnk.url)}</div>
-                    </a>
-                    ${isEditingLinks ? `
-                      <div class="flex items-center gap-1.5 shrink-0 no-select">
-                        <button onclick="openEditLinkModal('${safeId}')" class="text-xs bg-slate-200 text-slate-700 px-2.5 py-1 rounded"><i class="fa-solid fa-pen"></i></button>
-                        <button onclick="deleteLinkItem('${safeId}')" class="text-xs bg-rose-100 text-rose-600 px-2.5 py-1 rounded"><i class="fa-solid fa-trash"></i></button>
-                      </div>
-                    ` : `
-                      <a href="${safeUrl}" target="_blank" rel="noopener noreferrer" class="text-slate-400 px-2"><i class="fa-solid fa-arrow-up-right-from-square"></i></a>
-                    `}
-                  </div>
-                `;
-              }).join("")}
-            </div>
-          `).join("")}
-        </div>
-      `;
-    }
-
-    function toggleEditLinks() {
-      isEditingLinks = !isEditingLinks;
-      renderLinksTool(document.getElementById("tool-detail-content"));
-    }
-
-    function addLinkItem() {
-      const category = document.getElementById("newLinkCategory").value.trim() || "📌 マイリンク";
-      const title = document.getElementById("newLinkTitle").value.trim();
-      const sub = document.getElementById("newLinkSub").value.trim();
-      const url = sanitizeUrl(document.getElementById("newLinkUrl").value.trim());
-      if (!title || !url) return showToast("タイトルとURLを入力してください");
-      linksData.push({ id: "lnk_" + Date.now(), category, title, sub, url });
-      localStorage.setItem("sgmy_links_v8", JSON.stringify(linksData));
-      renderLinksTool(document.getElementById("tool-detail-content"));
-      showToast("リンクを追加しました");
-    }
-
-    function openEditLinkModal(id) {
-      const item = linksData.find(l => l.id === id);
-      if (!item) return;
-      document.getElementById("genericEditTitle").textContent = "リンクを編集";
-      document.getElementById("genericEditFields").innerHTML = `
-        <div>
-          <label class="block text-[11px] font-bold text-slate-600">カテゴリ</label>
-          <input type="text" id="genLinkCat" value="${escapeHTML(item.category || '')}" class="w-full border rounded-xl p-2 text-xs mt-0.5">
-        </div>
-        <div>
-          <label class="block text-[11px] font-bold text-slate-600">タイトル</label>
-          <input type="text" id="genLinkTitle" value="${escapeHTML(item.title)}" class="w-full border rounded-xl p-2 text-sm mt-0.5">
-        </div>
-        <div>
-          <label class="block text-[11px] font-bold text-slate-600">説明</label>
-          <input type="text" id="genLinkSub" value="${escapeHTML(item.sub || '')}" class="w-full border rounded-xl p-2 text-xs mt-0.5">
-        </div>
-        <div>
-          <label class="block text-[11px] font-bold text-slate-600">URL</label>
-          <input type="url" id="genLinkUrl" value="${escapeHTML(item.url)}" class="w-full border rounded-xl p-2 text-xs font-mono mt-0.5">
-        </div>
-      `;
-      document.getElementById("genericEditSaveBtn").onclick = () => {
-        item.category = document.getElementById("genLinkCat").value.trim() || "📌 マイリンク";
-        item.title = document.getElementById("genLinkTitle").value.trim() || item.title;
-        item.sub = document.getElementById("genLinkSub").value.trim();
-        item.url = sanitizeUrl(document.getElementById("genLinkUrl").value.trim()) || item.url;
-        localStorage.setItem("sgmy_links_v8", JSON.stringify(linksData));
-        closeGenericEditModal();
-        renderLinksTool(document.getElementById("tool-detail-content"));
-        showToast("リンクを更新しました");
-      };
-      document.getElementById("genericEditModal").classList.remove("hidden");
-    }
-
-    function deleteLinkItem(id) {
-      linksData = linksData.filter(l => l.id !== id);
-      localStorage.setItem("sgmy_links_v8", JSON.stringify(linksData));
-      renderLinksTool(document.getElementById("tool-detail-content"));
-    }
-
-    function renderEmergencyTool(container) {
-      container.innerHTML = `
-        <div class="space-y-4 text-left">
-          <div class="flex justify-between items-center no-select">
-            <h3 class="text-lg font-extrabold text-slate-800"><i class="fa-solid fa-address-book text-red-600 mr-1.5"></i>緊急連絡先リスト</h3>
-            <button onclick="toggleEditEmergency()" class="text-xs ${isEditingEmergency ? 'bg-amber-500 text-white' : 'bg-slate-200 text-slate-700'} font-bold px-3 py-1.5 rounded-lg transition">
-              <i class="fa-solid ${isEditingEmergency ? 'fa-check' : 'fa-pen'} mr-1"></i>${isEditingEmergency ? '完了' : '編集・追加'}
-            </button>
-          </div>
-
-          ${isEditingEmergency ? `
-            <div class="bg-red-50 border border-red-200 rounded-2xl p-3.5 space-y-2">
-              <div class="text-xs font-extrabold text-red-800"><i class="fa-solid fa-plus-circle mr-1"></i>新しい連絡先を追加</div>
-              <input type="text" id="newEmgRole" placeholder="区分 (例: 👨‍🏫 担任)" class="w-full border rounded-lg p-2 text-xs bg-white">
-              <input type="text" id="newEmgName" placeholder="名称" class="w-full border rounded-lg p-2 text-xs bg-white">
-              <input type="text" id="newEmgNumber" placeholder="電話番号" class="w-full border rounded-lg p-2 text-xs bg-white font-mono">
-              <input type="text" id="newEmgNote" placeholder="メモ・住所" class="w-full border rounded-lg p-2 text-xs bg-white">
-              <button onclick="addEmergencyItem()" class="w-full bg-red-600 text-white font-bold py-2 rounded-lg text-xs">追加する</button>
-            </div>
-          ` : ''}
-
-          <div class="space-y-2.5">
-            ${emergencyData.map(item => {
-              const safeId = escapeHTML(item.id);
-              const safeNum = escapeHTML(item.number);
-              return `
-                <div class="bg-white border border-slate-200 rounded-2xl p-3.5 shadow-sm flex justify-between items-center">
-                  <div class="space-y-0.5 pr-2 selectable">
-                    <div class="text-[11px] font-bold text-red-600">${escapeHTML(item.role)}</div>
-                    <div class="text-sm font-extrabold text-slate-800">${escapeHTML(item.name)}</div>
-                    <div onclick="copyText('${safeNum}', '電話番号をコピーしました')" class="inline-flex items-center gap-1.5 font-mono text-base font-black text-slate-900 bg-slate-100 hover:bg-slate-200 px-2.5 py-1 rounded-lg mt-1 cursor-pointer active:scale-95 transition">
-                      <span>${safeNum}</span>
-                      <i class="fa-regular fa-copy text-xs text-slate-500"></i>
-                    </div>
-                    ${item.note ? `<div class="text-[11px] text-slate-500 pt-1">${escapeHTML(item.note)}</div>` : ''}
-                  </div>
-                  ${isEditingEmergency ? `
-                    <div class="flex flex-col gap-1.5 shrink-0 no-select">
-                      <button onclick="openEditEmergencyModal('${safeId}')" class="text-xs bg-slate-200 text-slate-700 px-2.5 py-1.5 rounded-lg"><i class="fa-solid fa-pen"></i></button>
-                      <button onclick="deleteEmergencyItem('${safeId}')" class="text-xs bg-rose-100 text-rose-600 px-2.5 py-1.5 rounded-lg"><i class="fa-solid fa-trash"></i></button>
-                    </div>
-                  ` : ''}
-                </div>
-              `;
-            }).join("")}
-          </div>
-        </div>
-      `;
-    }
-
-    function toggleEditEmergency() {
-      isEditingEmergency = !isEditingEmergency;
-      renderEmergencyTool(document.getElementById("tool-detail-content"));
-    }
-
-    function addEmergencyItem() {
-      const role = document.getElementById("newEmgRole").value.trim() || "連絡先";
-      const name = document.getElementById("newEmgName").value.trim();
-      const number = document.getElementById("newEmgNumber").value.trim();
-      const note = document.getElementById("newEmgNote").value.trim();
-      if (!name || !number) return showToast("名称と番号を入力してください");
-      emergencyData.push({ id: "emg_" + Date.now(), role, name, number, note });
-      localStorage.setItem("sgmy_emergency_v8", JSON.stringify(emergencyData));
-      renderEmergencyTool(document.getElementById("tool-detail-content"));
-      showToast("連絡先を追加しました");
-    }
-
-    function openEditEmergencyModal(id) {
-      const item = emergencyData.find(e => e.id === id);
-      if (!item) return;
-      document.getElementById("genericEditTitle").textContent = "緊急連絡先を編集";
-      document.getElementById("genericEditFields").innerHTML = `
-        <div>
-          <label class="block text-[11px] font-bold text-slate-600">区分・役割</label>
-          <input type="text" id="genEmgRole" value="${escapeHTML(item.role)}" class="w-full border rounded-xl p-2 text-xs mt-0.5">
-        </div>
-        <div>
-          <label class="block text-[11px] font-bold text-slate-600">名称</label>
-          <input type="text" id="genEmgName" value="${escapeHTML(item.name)}" class="w-full border rounded-xl p-2 text-sm mt-0.5">
-        </div>
-        <div>
-          <label class="block text-[11px] font-bold text-slate-600">電話番号</label>
-          <input type="text" id="genEmgNum" value="${escapeHTML(item.number)}" class="w-full border rounded-xl p-2 text-sm font-mono mt-0.5">
-        </div>
-        <div>
-          <label class="block text-[11px] font-bold text-slate-600">メモ・住所</label>
-          <input type="text" id="genEmgNote" value="${escapeHTML(item.note || '')}" class="w-full border rounded-xl p-2 text-xs mt-0.5">
-        </div>
-      `;
-      document.getElementById("genericEditSaveBtn").onclick = () => {
-        item.role = document.getElementById("genEmgRole").value.trim() || item.role;
-        item.name = document.getElementById("genEmgName").value.trim() || item.name;
-        item.number = document.getElementById("genEmgNum").value.trim() || item.number;
-        item.note = document.getElementById("genEmgNote").value.trim();
-        localStorage.setItem("sgmy_emergency_v8", JSON.stringify(emergencyData));
-        closeGenericEditModal();
-        renderEmergencyTool(document.getElementById("tool-detail-content"));
-        showToast("連絡先を更新しました");
-      };
-      document.getElementById("genericEditModal").classList.remove("hidden");
-    }
-
-    function deleteEmergencyItem(id) {
-      emergencyData = emergencyData.filter(e => e.id !== id);
-      localStorage.setItem("sgmy_emergency_v8", JSON.stringify(emergencyData));
-      renderEmergencyTool(document.getElementById("tool-detail-content"));
-    }
-
-    // --- 17. 💸 割り勘＆立替メモ ---
-    function renderSplitTool(container) {
-      let totalJpy = 0;
-      splitExpenses.forEach(e => {
-        const rate = e.currency === "SGD" ? (currencyRates.SGD || 115) : (currencyRates.MYR || 35);
-        totalJpy += e.amount * rate;
-      });
-      const perPerson = Math.round(totalJpy / Math.max(1, splitGroupSize));
-
-      container.innerHTML = `
-        <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 space-y-4 text-left">
-          <div class="flex justify-between items-center">
-            <h3 class="text-lg font-extrabold text-slate-800"><i class="fa-solid fa-receipt text-teal-600 mr-1.5"></i>割り勘・立替メモ</h3>
-            <div class="flex items-center gap-1.5 bg-slate-100 px-2 py-1 rounded-xl no-select">
-              <span class="text-[11px] font-bold text-slate-600">人数:</span>
-              <button onclick="changeSplitGroupSize(-1)" class="w-6 h-6 rounded-lg bg-white shadow text-xs font-extrabold">-</button>
-              <span class="font-mono text-xs font-extrabold px-1">${splitGroupSize}人</span>
-              <button onclick="changeSplitGroupSize(1)" class="w-6 h-6 rounded-lg bg-white shadow text-xs font-extrabold">+</button>
-            </div>
-          </div>
-
-          <div class="bg-teal-50 border border-teal-200 rounded-xl p-3 flex justify-between items-center">
-            <div>
-              <div class="text-xs text-teal-800 font-bold">立替合計（円換算）</div>
-              <div class="text-xl font-black text-teal-950 font-mono">¥${Math.round(totalJpy).toLocaleString()}</div>
-            </div>
-            <div class="text-right">
-              <div class="text-xs text-teal-800 font-bold">${splitGroupSize}人で割ると1人あたり</div>
-              <div class="text-lg font-extrabold text-teal-700 font-mono">¥${perPerson.toLocaleString()}</div>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-3 gap-2">
-            <input type="text" id="splitTitle" placeholder="用途(例:昼食)" class="border rounded-lg p-2 text-xs col-span-2">
-            <input type="text" id="splitPayer" placeholder="払った人" class="border rounded-lg p-2 text-xs">
-            <input type="number" id="splitAmount" placeholder="金額" step="any" class="border rounded-lg p-2 text-xs">
-            <select id="splitCurr" class="border rounded-lg p-2 text-xs font-bold">
-              <option value="SGD">SGD 🇸🇬</option>
-              <option value="MYR">MYR 🇲🇾</option>
-            </select>
-            <button onclick="addSplitExpense()" class="bg-teal-600 text-white font-bold rounded-lg text-xs">追加</button>
-          </div>
-
-          <div class="space-y-2">
-            ${splitExpenses.map((e, i) => `
-              <div class="flex justify-between items-center bg-slate-50 px-3 py-2 rounded-lg text-xs">
-                <div class="selectable"><span class="font-bold text-slate-800">${escapeHTML(e.title)}</span><span class="text-slate-500 ml-1">(${escapeHTML(e.payer)})</span></div>
-                <div class="flex items-center gap-2">
-                  <span class="font-mono font-bold">${escapeHTML(e.amount)}${escapeHTML(e.currency)}</span>
-                  <button onclick="deleteSplitExpense(${i})" class="text-rose-500 px-1"><i class="fa-solid fa-trash"></i></button>
-                </div>
-              </div>
-            `).join("")}
-          </div>
-        </div>
-      `;
-    }
-
-    function changeSplitGroupSize(delta) {
-      splitGroupSize = Math.min(20, Math.max(1, splitGroupSize + delta));
-      localStorage.setItem("sgmy_split_size_v8", String(splitGroupSize));
-      renderSplitTool(document.getElementById("tool-detail-content"));
-    }
-
-    function addSplitExpense() {
-      const title = document.getElementById("splitTitle").value.trim() || "立替";
-      const payer = document.getElementById("splitPayer").value.trim() || "班員";
-      const amount = parseFloat(document.getElementById("splitAmount").value) || 0;
-      const currency = document.getElementById("splitCurr").value;
-      if (amount <= 0) return;
-      splitExpenses.push({ title, payer, amount, currency });
-      localStorage.setItem("sgmy_split_expenses", JSON.stringify(splitExpenses));
-      renderSplitTool(document.getElementById("tool-detail-content"));
-    }
-
-    function deleteSplitExpense(idx) {
-      splitExpenses.splice(idx, 1);
-      localStorage.setItem("sgmy_split_expenses", JSON.stringify(splitExpenses));
-      renderSplitTool(document.getElementById("tool-detail-content"));
-    }
-
-    function renderBorderChecklistTool(container) {
-      const items = [
-        { key: "passport", label: "📕 パスポート原本（有効期限・顔写真ページ）" },
-        { key: "arrivalCard", label: "📱 電子入国カード (SG Arrival / MDAC) 画面準備" },
-        { key: "wallet", label: "👛 財布・現金（SGDとMYR両方）・クレカ" },
-        { key: "phoneBattery", label: "🔋 スマホ＆モバイルバッテリー" },
-        { key: "busLuggage", label: "🎒 【重要】入国審査時はバスから全荷物を持って降りる" }
-      ];
-      container.innerHTML = `
-        <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 space-y-3 text-left">
-          <h3 class="text-lg font-extrabold text-slate-800"><i class="fa-solid fa-passport text-rose-600 mr-1.5"></i>国境越え（SG⇔MY）チェックリスト</h3>
-          <div class="space-y-2">
-            ${items.map(it => `
-              <label class="flex items-center gap-3 p-3 rounded-xl border ${borderChecks[it.key] ? 'bg-emerald-50 border-emerald-300' : 'bg-slate-50 border-slate-200'} cursor-pointer">
-                <input type="checkbox" ${borderChecks[it.key] ? 'checked' : ''} onchange="toggleBorderCheck('${it.key}')" class="w-5 h-5 accent-emerald-600">
-                <span class="text-xs font-bold ${borderChecks[it.key] ? 'line-through text-slate-400' : 'text-slate-800'}">${it.label}</span>
-              </label>
-            `).join("")}
-          </div>
-        </div>
-      `;
-    }
-
-    function toggleBorderCheck(key) {
-      borderChecks[key] = !borderChecks[key];
-      localStorage.setItem("sgmy_border_checks", JSON.stringify(borderChecks));
-      renderBorderChecklistTool(document.getElementById("tool-detail-content"));
-    }
-
-    function updateTargetTimer(val) {
-      targetTimerTime = val;
-      localStorage.setItem("sgmy_target_timer", val);
-      const el = document.getElementById("timerRemainDisplay");
-      if (el) el.textContent = getTimerRemainingText();
-    }
-
-    function getTimerRemainingText() {
-      const targetMins = timeStrToMins(targetTimerTime);
-      const diff = targetMins - simMinutes;
-      if (diff > 0) return `集合まであと ${Math.floor(diff / 60)}時間 ${diff % 60}分`;
-      if (diff === 0) return `⏰ 集合時間ちょうどです！`;
-      return `⚠️ 集合時間を ${Math.abs(diff)}分 過ぎています！`;
-    }
-
-    function openFullscreenCard(badge, main, sub, ja) {
-      document.getElementById("fsCardBadge").textContent = badge;
-      document.getElementById("fsCardMainText").textContent = main;
-      document.getElementById("fsCardSubText").textContent = sub;
-      document.getElementById("fsCardJaText").textContent = ja;
-      document.getElementById("fullscreenCardModal").classList.remove("hidden");
-    }
-    function closeFullscreenCard() {
-      document.getElementById("fullscreenCardModal").classList.add("hidden");
-    }
-
-    function resetAllData() {
-      if (!confirm("本当にすべての編集データを初期状態に戻しますか？")) return;
-      localStorage.removeItem("sgmy_schedules_v8");
-      localStorage.removeItem("sgmy_start_date_v8");
-      localStorage.removeItem("sgmy_myinfo_v8");
-      localStorage.removeItem("sgmy_links_v8");
-      localStorage.removeItem("sgmy_emergency_v8");
-      localStorage.removeItem("sgmy_user_tiles_v8");
-      localStorage.removeItem("sgmy_rates_v8");
-      localStorage.removeItem("sgmy_split_size_v8");
-      location.reload();
     }
   </script>
 </body>
