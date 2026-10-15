@@ -2,9 +2,10 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
-    // APIルートの処理
-    if (url.pathname === "/api/sync") {
-      // 同一オリジンなら不要な場合もありますが、ローカルデバッグ時のためにCORSヘッダーを追加
+    // /api/sync へのリクエストをキャッチ
+    if (url.pathname.startsWith("/api/sync")) {
+      
+      // CORS（クロスドメイン）プリフライト対応
       const corsHeaders = {
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
@@ -15,32 +16,49 @@ export default {
         return new Response(null, { status: 204, headers: corsHeaders });
       }
 
-      // 【POST処理】クラウドへのアップロード（KVへの保存）
+      // 【POST】クラウドへアップロード (KVへ保存)
       if (request.method === "POST") {
         try {
           const body = await request.json();
-          // KVバインディング "TRIP_KV" を使用して保存する例
-          // await env.TRIP_KV.put(`room_${body.roomId}`, JSON.stringify(body));
+          const roomId = body.roomId;
+          
+          // roomIdをキーにしてKV空間にJSONデータを保存
+          await env.TRIP_KV.put(`room_${roomId}`, JSON.stringify(body));
 
-          return Response.json({ ok: true, source: "worker" }, { headers: corsHeaders });
-        } catch (e) {
+          return Response.json({ ok: true, message: "Saved to KV" }, { headers: corsHeaders });
+        } catch (err) {
           return Response.json({ error: "Bad Request" }, { status: 400, headers: corsHeaders });
         }
       }
 
-      // 【GET処理】クラウドからのインポート（KVからの取得）
+      // 【GET】クラウドからインポート (KVから取得)
       if (request.method === "GET") {
         const roomId = url.searchParams.get("roomId");
-        // const data = await env.TRIP_KV.get(`room_${roomId}`, "json");
-        // if (!data) return Response.json({ error: "Not Found" }, { status: 404, headers: corsHeaders });
+        const passHash = url.searchParams.get("passHash");
 
-        return Response.json({ ok: true, method: "GET", roomId }, { headers: corsHeaders });
+        if (!roomId) {
+          return Response.json({ error: "共有IDが指定されていません" }, { status: 400, headers: corsHeaders });
+        }
+
+        // KVからデータを取得
+        const dataStr = await env.TRIP_KV.get(`room_${roomId}`);
+        if (!dataStr) {
+          return Response.json({ error: "指定されたIDのデータが存在しません" }, { status: 404, headers: corsHeaders });
+        }
+
+        const data = JSON.parse(dataStr);
+        // パスワード（ハッシュ値）の照合
+        if (data.passHash !== passHash) {
+          return Response.json({ error: "パスワードが一致しません" }, { status: 403, headers: corsHeaders });
+        }
+
+        return Response.json({ ok: true, payload: data.payload }, { headers: corsHeaders });
       }
 
       return new Response("Method Not Allowed", { status: 405, headers: corsHeaders });
     }
 
-    // --- /api/sync 以外のすべてのリクエストは静的ファイルとして配信 ---
-    return env.ASSETS.fetch(request);
+    // 万が一、該当しないAPIエンドポイントが叩かれた場合
+    return new Response("Not Found", { status: 404 });
   },
 };
