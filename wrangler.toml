@@ -1,0 +1,11 @@
+name = "sgtrip"
+main = "worker.js"
+compatibility_date = "2025-01-01"
+
+[assets]
+directory = "public"
+# binding や run_worker_first は不要なので削除します
+
+[[kv_namespaces]]
+binding = "TRIP_KV"
+id = "7ac3e81099734c96864ee315b0f1ec08"
