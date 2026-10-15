@@ -3,9 +3,11 @@ main = "worker.js"
 compatibility_date = "2025-01-01"
 
 [assets]
-directory = "./"            # 静的ファイルの置き場所(後述の注意参照)
+directory = "./"            
 binding = "ASSETS"
-run_worker_first = ["/api/*"]
+
+# ▼ ここをパスの配列から `true` に変更します
+run_worker_first = true
 
 [[kv_namespaces]]
 binding = "TRIP_KV"
