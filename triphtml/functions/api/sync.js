@@ -1,140 +1,44 @@
-// Cloudflare Pages Functions: /api/sync
-// 必要なKVバインディング変数名: TRIP_KV
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type",
-  "Content-Type": "application/json; charset=utf-8"
-};
-
-export async function onRequestOptions() {
-  return new Response(null, { status: 204, headers: corsHeaders });
+// functions/api/sync.js (Cloudflare Pages Functions + KV)
+async function sha256(text) {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
 }
 
-// POST /api/sync : 予定データのクラウドアップロード（新規保存＆パスワード照合上書き）
-export async function onRequestPost(context) {
-  const { request, env } = context;
-
-  if (!env.TRIP_KV) {
-    return new Response(
-      JSON.stringify({ error: "Cloudflare KV (TRIP_KV) がバインドされていません。setup_instructions.txt のSTEP 4を確認してください。" }),
-      { status: 500, headers: corsHeaders }
-    );
-  }
-
-  try {
-    const body = await request.json();
-    const roomId = String(body.roomId || "").trim().toLowerCase();
-    const passHash = String(body.passHash || "").trim();
-    const payload = body.payload;
-
-    if (!roomId || !/^[a-z0-9_-]{3,32}$/.test(roomId)) {
-      return new Response(
-        JSON.stringify({ error: "共有IDは半角英数字・ハイフン・アンダースコア（3〜32文字）で指定してください。" }),
-        { status: 400, headers: corsHeaders }
-      );
-    }
-
-    if (!passHash || !payload || typeof payload !== "object") {
-      return new Response(
-        JSON.stringify({ error: "パスワードまたは予定データが不足しています。" }),
-        { status: 400, headers: corsHeaders }
-      );
-    }
-
-    const kvKey = `trip_data:${roomId}`;
-    const existingRaw = await env.TRIP_KV.get(kvKey);
-
-    // 既に同じ共有IDが存在する場合は、パスワードハッシュが一致するか検証（勝手な上書きを防止）
-    if (existingRaw) {
-      const existingRecord = JSON.parse(existingRaw);
-      if (existingRecord.passHash !== passHash) {
-        return new Response(
-          JSON.stringify({ error: "この共有IDは既に使用されており、パスワードが一致しません。別の共有IDにするか、正しいパスワードを入力してください。" }),
-          { status: 403, headers: corsHeaders }
-        );
-      }
-    }
-
-    const recordToSave = {
-      roomId,
-      passHash,
-      updatedAt: new Date().toISOString(),
-      payload
-    };
-
-    // 180日間保持
-    await env.TRIP_KV.put(kvKey, JSON.stringify(recordToSave), {
-      expirationTtl: 60 * 60 * 24 * 180
-    });
-
-    return new Response(
-      JSON.stringify({ ok: true, roomId, updatedAt: recordToSave.updatedAt }),
-      { status: 200, headers: corsHeaders }
-    );
-  } catch (err) {
-    return new Response(
-      JSON.stringify({ error: "サーバー処理中にエラーが発生しました。" }),
-      { status: 500, headers: corsHeaders }
-    );
-  }
-}
-
-// GET /api/sync?roomId=xxx&passHash=yyy : パスワード照合＆予定データのインポート
 export async function onRequestGet(context) {
-  const { request, env } = context;
+  const url = new URL(context.request.url);
+  const key = (url.searchParams.get("key") || "").trim();
+  if (!key) return Response.json({ ok: false, error: "合言葉が指定されていません" }, { status: 400 });
 
-  if (!env.TRIP_KV) {
-    return new Response(
-      JSON.stringify({ error: "Cloudflare KV (TRIP_KV) がバインドされていません。" }),
-      { status: 500, headers: corsHeaders }
-    );
+  const raw = await context.env.TRIP_KV.get(`share:${key}`);
+  if (!raw) return Response.json({ ok: false, error: "指定された合言葉のデータが見つかりません" }, { status: 404 });
+
+  const record = JSON.parse(raw);
+  return Response.json({ ok: true, updatedAt: record.updatedAt, payload: record.payload });
+}
+
+export async function onRequestPost(context) {
+  const body = await context.request.json();
+  const key = String(body.key || "").trim();
+  const pin = String(body.pin || "0000").trim();
+  const payload = body.payload;
+
+  if (key.length < 3 || key.length > 30 || !payload) {
+    return Response.json({ ok: false, error: "合言葉またはデータが不正です" }, { status: 400 });
   }
 
-  try {
-    const url = new URL(request.url);
-    const roomId = String(url.searchParams.get("roomId") || "").trim().toLowerCase();
-    const passHash = String(url.searchParams.get("passHash") || "").trim();
+  const kvKey = `share:${key}`;
+  const existingRaw = await context.env.TRIP_KV.get(kvKey);
+  const pinHash = await sha256(pin);
 
-    if (!roomId || !passHash) {
-      return new Response(
-        JSON.stringify({ error: "共有IDとパスワードを入力してください。" }),
-        { status: 400, headers: corsHeaders }
-      );
+  if (existingRaw) {
+    const existing = JSON.parse(existingRaw);
+    if (existing.pinHash !== pinHash) {
+      return Response.json({ ok: false, error: "上書き用PINコードが一致しません" }, { status: 403 });
     }
-
-    const kvKey = `trip_data:${roomId}`;
-    const existingRaw = await env.TRIP_KV.get(kvKey);
-
-    if (!existingRaw) {
-      return new Response(
-        JSON.stringify({ error: "指定された共有IDのデータが見つかりません。" }),
-        { status: 404, headers: corsHeaders }
-      );
-    }
-
-    const record = JSON.parse(existingRaw);
-    if (record.passHash !== passHash) {
-      return new Response(
-        JSON.stringify({ error: "パスワードが一致しません。" }),
-        { status: 403, headers: corsHeaders }
-      );
-    }
-
-    return new Response(
-      JSON.stringify({
-        ok: true,
-        roomId: record.roomId,
-        updatedAt: record.updatedAt,
-        payload: record.payload
-      }),
-      { status: 200, headers: corsHeaders }
-    );
-  } catch (err) {
-    return new Response(
-      JSON.stringify({ error: "データの取得中にエラーが発生しました。" }),
-      { status: 500, headers: corsHeaders }
-    );
   }
+
+  const record = { pinHash, updatedAt: new Date().toISOString(), payload };
+  // 60日間保持
+  await context.env.TRIP_KV.put(kvKey, JSON.stringify(record), { expirationTtl: 60 * 60 * 24 * 60 });
+  return Response.json({ ok: true });
 }

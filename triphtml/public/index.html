@@ -1,0 +1,2871 @@
+<!DOCTYPE html>
+<html lang="ja" id="htmlRoot">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" id="metaThemeColor" content="#1d4ed8">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="修学旅行ナビ">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Crect width='120' height='120' rx='28' fill='%230ea5e9'/%3E%3Cpath d='M52 20 L66 17 L60 24 L68 27 L64 29 L56 25 L50 28 Z' fill='%23fff'/%3E%3Cg fill='%230369a1'%3E%3Crect x='20' y='47' width='6' height='26'/%3E%3Crect x='30' y='47' width='6' height='26'/%3E%3Crect x='40' y='47' width='6' height='26'/%3E%3C/g%3E%3Cpath d='M15 44 Q33 43 51 47 L49 50 Q32 46 16 47 Z' fill='%23f8fafc'/%3E%3Cg fill='%230284c7'%3E%3Crect x='74' y='42' width='8' height='32'/%3E%3Cpolygon points='74,42 78,28 82,42'/%3E%3Crect x='90' y='42' width='8' height='32'/%3E%3Cpolygon points='90,42 94,28 98,42'/%3E%3C/g%3E%3Cpolygon points='26,108 42,82 78,82 94,108 60,115' fill='%23fff'/%3E%3Cpolygon points='30,106 44,85 76,85 90,106 60,112' fill='%230284c7'/%3E%3Ccircle cx='44' cy='94' r='6' fill='%23ef4444' stroke='%23fff' stroke-width='1.5'/%3E%3Ccircle cx='76' cy='94' r='6' fill='%23facc15' stroke='%23fff' stroke-width='1.5'/%3E%3C/svg%3E">
+  <title>SG & MY 修学旅行ナビ</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- SortableJS -->
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+  <!-- QRCode.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <style id="base-styles">
+    :root {
+      --header-bg: #1d4ed8;
+    }
+    html, body {
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      background-color: var(--header-bg);
+      margin: 0;
+      padding: 0;
+    }
+    .app-header {
+      padding-top: max(0.65rem, env(safe-area-inset-top)) !important;
+    }
+
+    .no-select {
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+    }
+    .selectable {
+      user-select: text;
+      -webkit-user-select: text;
+    }
+
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    .sortable-ghost { opacity: 0.3; transform: scale(0.95); }
+    .sortable-drag {
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.25);
+      transform: scale(1.03);
+      z-index: 50;
+    }
+
+    @keyframes wiggle {
+      0%, 100% { transform: rotate(-0.7deg); }
+      50% { transform: rotate(0.7deg); }
+    }
+    .edit-wiggle { animation: wiggle 0.4s ease-in-out infinite; }
+
+    .tile-pressing {
+      transform: scale(0.94) !important;
+      transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+    }
+
+    @keyframes pulse-border {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.45); }
+      50% { box-shadow: 0 0 0 6px rgba(59, 130, 246, 0); }
+    }
+    .current-schedule-card { animation: pulse-border 2s infinite; }
+
+    #demoControlBar {
+      transition: opacity 0.25s ease, transform 0.25s ease, background-color 0.25s ease;
+    }
+    #demoControlBar.demo-bar-dimmed {
+      opacity: 0.22;
+      backdrop-filter: blur(2px);
+    }
+
+    /* ==========================================================
+       🎨 CSS着せ替えテーマ定義（5パターン + 最上部ステータスバー色連動）
+       ========================================================== */
+
+    /* 1. 現行パターン (theme-default) */
+    body.theme-default { --header-bg: #1d4ed8; }
+
+    /* 2. モダンパターン (theme-modern) */
+    body.theme-modern { --header-bg: #f5f5f7; }
+    body.theme-modern .app-shell { background-color: #f5f5f7 !important; color: #1d1d1f !important; }
+    body.theme-modern .app-header { background: rgba(245, 245, 247, 0.94) !important; backdrop-filter: blur(16px); color: #1d1d1f !important; border-bottom: 1px solid rgba(0,0,0,0.08); }
+    body.theme-modern .app-header .header-sub { color: #6e6e73 !important; }
+    body.theme-modern #clockArea { background: rgba(0,0,0,0.06) !important; color: #1d1d1f !important; }
+    body.theme-modern #clockPrimaryTime { color: #1d1d1f !important; }
+    body.theme-modern .now-card { background: #ffffff !important; border-left: none !important; border-radius: 24px !important; box-shadow: 0 10px 30px -10px rgba(0,0,0,0.08) !important; border: 1px solid rgba(0,0,0,0.06); }
+    body.theme-modern .next-card { background: #1d1d1f !important; border-radius: 20px !important; }
+    body.theme-modern .tile-card, body.theme-modern .tool-list-item, body.theme-modern .sched-event-card { border-radius: 20px !important; border: 1px solid rgba(0,0,0,0.06) !important; box-shadow: 0 4px 14px rgba(0,0,0,0.03) !important; }
+    body.theme-modern .nav-home-btn { background: #1d1d1f !important; box-shadow: 0 8px 20px rgba(0,0,0,0.25) !important; }
+
+    /* 3. PayPayっぽい感じパターン (theme-paypay) */
+    body.theme-paypay { --header-bg: #ff0033; }
+    body.theme-paypay .app-shell { background-color: #f4f5f7 !important; }
+    body.theme-paypay .app-header { background: #ff0033 !important; color: #ffffff !important; }
+    body.theme-paypay .app-header .header-sub { color: #ffd6de !important; }
+    body.theme-paypay .now-card { border-left: 8px solid #ff0033 !important; border-radius: 16px !important; box-shadow: 0 6px 18px rgba(255, 0, 51, 0.12) !important; }
+    body.theme-paypay #nowProgressBar { background-color: #ff0033 !important; }
+    body.theme-paypay #nowTimeRange, body.theme-paypay #nowRemaining { color: #ff0033 !important; }
+    body.theme-paypay .next-card { background: #22252a !important; border-left: 4px solid #ff0033 !important; }
+    body.theme-paypay .tile-card { border-radius: 14px !important; border: 1px solid #e5e8ec !important; box-shadow: 0 2px 6px rgba(0,0,0,0.05) !important; }
+    body.theme-paypay .current-schedule-card { border-color: #ff0033 !important; background-color: #fff5f7 !important; }
+    body.theme-paypay .nav-home-btn { background: linear-gradient(135deg, #ff0033, #d9002b) !important; box-shadow: 0 6px 18px rgba(255, 0, 51, 0.4) !important; }
+
+    /* 4. 三井住友銀行アプリっぽい感じパターン (theme-smbc) */
+    body.theme-smbc { --header-bg: #004831; }
+    body.theme-smbc .app-shell { background-color: #eef3f0 !important; }
+    body.theme-smbc .app-header { background: linear-gradient(135deg, #004831, #006847) !important; color: #ffffff !important; }
+    body.theme-smbc .app-header .header-sub { color: #b7e4c7 !important; }
+    body.theme-smbc .now-card { background: #ffffff !important; border-left: 8px solid #004831 !important; border-radius: 16px !important; box-shadow: 0 8px 20px rgba(0, 72, 49, 0.08) !important; }
+    body.theme-smbc #nowProgressBar { background-color: #00a040 !important; }
+    body.theme-smbc #nowTimeRange, body.theme-smbc #nowRemaining { color: #004831 !important; background-color: #e6f4ec !important; }
+    body.theme-smbc .next-card { background: #003322 !important; border: 1px solid #004831 !important; }
+    body.theme-smbc .tile-card, body.theme-smbc .tool-list-item { border-radius: 14px !important; border: 1px solid #d5e2da !important; }
+    body.theme-smbc .current-schedule-card { border-color: #00a040 !important; background-color: #f0faf4 !important; }
+    body.theme-smbc .nav-home-btn { background: linear-gradient(135deg, #00a040, #004831) !important; box-shadow: 0 6px 18px rgba(0, 72, 49, 0.35) !important; }
+
+    /* 5. Geminiのおすすめパターン (theme-gemini) */
+    body.theme-gemini { --header-bg: #0f766e; }
+    body.theme-gemini .app-shell { background: linear-gradient(180deg, #f0fdfa 0%, #f8fafc 45%, #fffbeb 100%) !important; }
+    body.theme-gemini .app-header { background: linear-gradient(135deg, #0f766e 0%, #0369a1 55%, #1e1b4b 100%) !important; color: #ffffff !important; }
+    body.theme-gemini .app-header .header-sub { color: #99f6e4 !important; }
+    body.theme-gemini .now-card { background: rgba(255, 255, 255, 0.96) !important; border-left: 8px solid #0d9488 !important; border-radius: 22px !important; box-shadow: 0 12px 28px -6px rgba(13, 148, 136, 0.18) !important; }
+    body.theme-gemini #nowProgressBar { background: linear-gradient(90deg, #0d9488, #f59e0b) !important; }
+    body.theme-gemini #nowTimeRange, body.theme-gemini #nowRemaining { color: #0f766e !important; }
+    body.theme-gemini .next-card { background: linear-gradient(135deg, #134e4a, #0f172a) !important; border-radius: 18px !important; }
+    body.theme-gemini .tile-card, body.theme-gemini .tool-list-item { border-radius: 18px !important; border: 1px solid rgba(13, 148, 136, 0.15) !important; box-shadow: 0 4px 12px rgba(15, 118, 110, 0.06) !important; }
+    body.theme-gemini .current-schedule-card { border-color: #0d9488 !important; background-color: #f0fdfa !important; }
+    body.theme-gemini .nav-home-btn { background: linear-gradient(135deg, #0d9488, #0284c7) !important; box-shadow: 0 8px 20px rgba(13, 148, 136, 0.4) !important; }
+  </style>
+</head>
+<body class="text-slate-800 flex justify-center theme-default">
+
+  <!-- スマホ枠コンテナ -->
+  <div class="app-shell w-full max-w-md bg-slate-50 min-h-screen flex flex-col relative shadow-2xl pb-28">
+
+    <!-- トースト通知 -->
+    <div id="toast" class="fixed top-20 left-1/2 -translate-x-1/2 bg-slate-900/95 text-white text-xs font-bold px-4 py-2.5 rounded-full shadow-lg z-50 hidden transition-all whitespace-nowrap no-select">
+      保存しました
+    </div>
+
+    <!-- 📌 スクロールしても隠れない上部固定バー -->
+    <div class="sticky top-0 z-40 shadow-md no-select">
+      <!-- 🌐 メインステータスヘッダー -->
+      <header id="appHeaderBar" class="app-header bg-gradient-to-r from-blue-700 to-indigo-800 text-white px-4 pb-2.5 flex justify-between items-center gap-2 transition-colors duration-300">
+        <!-- 左側：アプリアイコン（添付画像＋SG/MY国旗モチーフ）＆ 現在のDay表記（滞在国表示は廃止） -->
+        <div class="flex items-center gap-2.5 min-w-0 flex-1">
+          <!-- 添付画像(MBS・マーライオン・ツインタワー・飛行機・マップピン)＋2カ国旗を組み込んだアプリアイコン -->
+          <div class="w-10 h-10 rounded-xl shadow-md overflow-hidden shrink-0 border border-white/25 bg-sky-500">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" class="w-full h-full">
+              <defs>
+                <linearGradient id="hdrSky" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#0ea5e9"/>
+                  <stop offset="100%" stop-color="#38bdf8"/>
+                </linearGradient>
+              </defs>
+              <rect width="120" height="120" rx="24" fill="url(#hdrSky)"/>
+              <!-- 飛行機と軌跡 -->
+              <path d="M22 36 Q42 20 62 24" stroke="#fff" stroke-width="2" stroke-dasharray="3 3" fill="none"/>
+              <path d="M52 20 L66 17 L60 24 L68 27 L64 29 L56 25 L50 28 Z" fill="#fff"/>
+              <!-- 左：マリーナベイ・サンズ＆マーライオン -->
+              <g fill="#0369a1">
+                <rect x="20" y="47" width="6" height="26"/>
+                <rect x="30" y="47" width="6" height="26"/>
+                <rect x="40" y="47" width="6" height="26"/>
+              </g>
+              <path d="M15 44 Q33 43 51 47 L49 50 Q32 46 16 47 Z" fill="#f8fafc"/>
+              <!-- 右：ペトロナスツインタワー＆KLタワー -->
+              <g fill="#0284c7">
+                <rect x="74" y="42" width="8" height="32"/>
+                <polygon points="74,42 78,28 82,42"/>
+                <rect x="90" y="42" width="8" height="32"/>
+                <polygon points="90,42 94,28 98,42"/>
+                <rect x="82" y="55" width="8" height="2.5" fill="#e0f2fe"/>
+              </g>
+              <!-- マーライオン＆噴水 -->
+              <path d="M16 74 C16 58 29 58 29 70 L29 82 L16 82 Z" fill="#fff"/>
+              <path d="M28 65 Q40 67 44 76" stroke="#bae6fd" stroke-width="2.5" fill="none"/>
+              <!-- グリーン＆下部ルートマップ -->
+              <path d="M8 76 Q60 66 112 78 L112 120 L8 120 Z" fill="#15803d"/>
+              <polygon points="24,110 40,82 80,82 96,110 60,117" fill="#fff"/>
+              <polygon points="28,108 42,85 78,85 92,108 60,114" fill="#0284c7"/>
+              <path d="M44 98 Q60 104 75 98" stroke="#fff" stroke-width="2" stroke-dasharray="3 3" fill="none"/>
+              <circle cx="44" cy="94" r="6" fill="#ef4444" stroke="#fff" stroke-width="1.5"/>
+              <circle cx="76" cy="94" r="6" fill="#facc15" stroke="#fff" stroke-width="1.5"/>
+              <!-- 左上：シンガポール国旗バッジ -->
+              <g transform="translate(8,10)">
+                <rect width="26" height="18" rx="3" fill="#fff" stroke="#e2e8f0" stroke-width="1"/>
+                <rect width="26" height="9" rx="2" fill="#ef4444"/>
+                <circle cx="7" cy="4.5" r="2.8" fill="#fff"/>
+                <circle cx="8.2" cy="4.5" r="2.3" fill="#ef4444"/>
+              </g>
+              <!-- 右上：マレーシア国旗バッジ -->
+              <g transform="translate(86,10)">
+                <rect width="26" height="18" rx="3" fill="#fff" stroke="#e2e8f0" stroke-width="1"/>
+                <rect y="0" width="26" height="3" fill="#dc2626"/>
+                <rect y="6" width="26" height="3" fill="#dc2626"/>
+                <rect y="12" width="26" height="3" fill="#dc2626"/>
+                <rect width="14" height="10" rx="1" fill="#1e3a8a"/>
+                <circle cx="6.5" cy="5" r="2.8" fill="#facc15"/>
+              </g>
+            </svg>
+          </div>
+          <div class="min-w-0 leading-tight text-left">
+            <div id="dayTitle" class="text-lg font-extrabold tracking-tight break-words">Day 1</div>
+          </div>
+        </div>
+
+        <!-- 右側：時計エリア（短押しで現地⇔日本切替 / 長押しでデモバー開閉 / 2段崩れ防止固定） -->
+        <div id="clockArea" 
+             oncontextmenu="return false;"
+             class="shrink-0 whitespace-nowrap text-right font-mono bg-white/10 hover:bg-white/15 active:scale-95 px-3 py-1 rounded-xl cursor-pointer transition">
+          <div class="flex items-center justify-end gap-1.5 whitespace-nowrap">
+            <span id="demoModeBadge" class="hidden text-[9px] font-sans font-extrabold px-1.5 py-0.2 rounded bg-amber-400 text-slate-900">DEMO</span>
+            <span id="clockPrimaryLabel" class="header-sub text-[11px] text-blue-200 font-sans font-semibold">現地</span>
+            <span id="clockPrimaryTime" class="text-base font-extrabold text-white">12:30</span>
+          </div>
+          <div class="header-sub text-[10px] text-blue-200 flex items-center justify-end gap-1 whitespace-nowrap font-sans">
+            <span id="clockSecondaryLabel">日本</span>
+            <span id="clockSecondaryTime" class="font-mono">13:30</span>
+            <i class="fa-solid fa-repeat text-[9px] opacity-75 ml-0.5"></i>
+          </div>
+        </div>
+      </header>
+
+      <!-- 🛠 デモ時間操作ドロワー（ここで変更したDayは activeTripDay として現在日程に反映） -->
+      <div id="demoControlBar" onclick="restoreDemoBarOpacity()" class="bg-slate-800 text-white px-3.5 py-2.5 text-xs border-b border-slate-700 hidden cursor-pointer">
+        <div class="flex items-center justify-between mb-2">
+          <div class="flex items-center gap-2">
+            <span class="font-bold text-amber-400"><i class="fa-solid fa-clock-rotate-left mr-1"></i>DEMO時間モード中</span>
+            <span class="text-[10px] text-slate-300">（現在日程のシミュレート）</span>
+          </div>
+          <button type="button" onclick="event.stopPropagation(); closeDemoBar()" class="bg-slate-700 hover:bg-slate-600 text-white px-2.5 py-1 rounded-lg font-bold">
+            <i class="fa-solid fa-xmark mr-0.5"></i>閉じる
+          </button>
+        </div>
+
+        <div class="space-y-2">
+          <div class="grid grid-cols-6 gap-1" onclick="event.stopPropagation()">
+            <button type="button" onclick="setActiveTripDay(1)" id="dayBtn-1" class="py-1 rounded bg-blue-600 font-bold text-[11px] transition">Day1</button>
+            <button type="button" onclick="setActiveTripDay(2)" id="dayBtn-2" class="py-1 rounded bg-slate-700 font-bold text-[11px] transition">Day2</button>
+            <button type="button" onclick="setActiveTripDay(3)" id="dayBtn-3" class="py-1 rounded bg-slate-700 font-bold text-[11px] transition">Day3</button>
+            <button type="button" onclick="setActiveTripDay(4)" id="dayBtn-4" class="py-1 rounded bg-slate-700 font-bold text-[11px] transition">Day4</button>
+            <button type="button" onclick="setActiveTripDay(5)" id="dayBtn-5" class="py-1 rounded bg-slate-700 font-bold text-[11px] transition">Day5</button>
+            <button type="button" onclick="setActiveTripDay(6)" id="dayBtn-6" class="py-1 rounded bg-slate-700 font-bold text-[11px] transition">Day6</button>
+          </div>
+          <div class="flex items-center gap-2" onclick="event.stopPropagation()">
+            <span id="simTimeDisplay" class="font-mono text-sm font-bold text-emerald-400 w-12">12:30</span>
+            <input type="range" id="timeSlider" min="0" max="1435" step="5" value="750" 
+                   class="w-full accent-emerald-400 cursor-pointer" oninput="onTimeSliderChange(this.value)">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="flex-1 px-4 pt-4">
+
+      <!-- ================= 🏠 1. ホームタブ ================= -->
+      <section id="view-home" class="space-y-4">
+
+        <!-- メイン予定カード（常に activeTripDay の予定を表示） -->
+        <div id="mainScheduleCard" onclick="onMainCardClick()" 
+             class="now-card bg-white rounded-2xl p-4 shadow-md border-l-8 border-blue-600 cursor-pointer active:scale-[0.99] transition relative overflow-hidden">
+          
+          <div class="flex justify-between items-center no-select">
+            <div class="flex items-center gap-2">
+              <span id="nowPulseDot" class="w-2.5 h-2.5 rounded-full bg-blue-600 animate-ping"></span>
+              <span id="nowNextBadge" class="hidden text-[10px] font-extrabold bg-amber-500 text-slate-950 px-2 py-0.5 rounded">NEXT</span>
+              <span id="nowTimeRange" class="text-xs font-mono font-bold text-blue-700">12:00 - 13:30</span>
+            </div>
+            <span id="nowRemaining" class="text-xs font-mono font-extrabold text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded-full">
+              あと 60分
+            </span>
+          </div>
+
+          <h2 id="nowTitle" class="text-xl font-extrabold text-slate-900 mt-1.5 leading-snug text-left selectable">昼食 @ パームビーチ・シーフード</h2>
+          
+          <div class="flex flex-wrap items-center gap-2 mt-2.5 text-xs text-slate-600">
+            <span id="nowLocation" class="inline-flex items-center gap-1 bg-slate-100 px-2.5 py-1 rounded-md font-medium selectable">
+              <i class="fa-solid fa-location-dot text-rose-500"></i> ワン・フラトン
+            </span>
+            <div id="nowActionContainer" onclick="event.stopPropagation()" class="no-select"></div>
+          </div>
+
+          <div id="nowMemoBox" class="mt-2.5 text-xs bg-amber-50 text-amber-900 px-3 py-2 rounded-lg border border-amber-200/80 text-left selectable whitespace-pre-wrap">
+            <i class="fa-solid fa-note-sticky text-amber-500 mr-1.5"></i><span id="nowMemo">チリクラブ！13:20にバス前集合</span>
+          </div>
+
+          <div id="nowProgressWrapper" class="mt-3 w-full h-1.5 bg-slate-100 rounded-full overflow-hidden no-select">
+            <div id="nowProgressBar" class="h-full bg-blue-600 rounded-full transition-all duration-300" style="width: 33%"></div>
+          </div>
+        </div>
+
+        <!-- 次の予定 (NEXT) カード -->
+        <div id="nextCardContainer" onclick="jumpToNextSchedule()" 
+             class="next-card bg-slate-800 text-white rounded-xl p-3.5 shadow-sm flex items-center justify-between cursor-pointer active:scale-[0.99] transition no-select">
+          <div class="flex items-center gap-3 overflow-hidden">
+            <div class="bg-white/10 text-amber-400 font-bold text-xs px-2.5 py-1.5 rounded-lg text-center shrink-0 font-mono">
+              NEXT<br><span id="nextStartTime" class="text-white text-sm">13:30</span>
+            </div>
+            <div class="truncate text-left">
+              <div id="nextTitle" class="font-bold text-sm truncate">徒歩移動 ➔ マーライオン公園</div>
+              <div id="nextSub" class="text-xs text-slate-300 truncate mt-0.5">📍Merlion Park</div>
+            </div>
+          </div>
+          <div class="text-right shrink-0 ml-2">
+            <span id="nextCountdown" class="text-xs bg-amber-500/20 text-amber-300 border border-amber-400/30 px-2.5 py-1 rounded-full font-mono font-semibold">
+              60分後
+            </span>
+          </div>
+        </div>
+
+        <!-- クイックタイルエリア -->
+        <div class="pt-1 no-select">
+          <div class="flex justify-between items-center mb-3">
+            <h3 class="font-bold text-slate-700 text-sm flex items-center gap-1.5">
+              <i class="fa-solid fa-table-cells-large text-indigo-600"></i> クイックタイル
+            </h3>
+            <div class="flex gap-2">
+              <button type="button" onclick="finishEditTiles()" id="doneEditTileBtn" class="hidden text-xs bg-amber-500 hover:bg-amber-600 text-white font-extrabold px-3.5 py-1.5 rounded-xl shadow-md transition">
+                <i class="fa-solid fa-check mr-1"></i>編集完了
+              </button>
+              <button type="button" onclick="openAddTileModal()" class="text-xs bg-indigo-50 text-indigo-700 hover:bg-indigo-100 font-bold px-3 py-1.5 rounded-xl border border-indigo-200 transition">
+                <i class="fa-solid fa-plus mr-0.5"></i>追加
+              </button>
+            </div>
+          </div>
+
+          <div id="quickTilesGrid" class="grid grid-cols-2 gap-3.5 pt-1"></div>
+        </div>
+
+      </section>
+
+      <!-- ================= 📅 2. スケジュールタブ ================= -->
+      <section id="view-schedule" class="hidden space-y-3.5">
+        <div class="flex justify-between items-center no-select">
+          <h2 class="text-lg font-extrabold text-slate-800"><i class="fa-regular fa-calendar-days text-blue-600 mr-1.5"></i>スケジュール</h2>
+          <div class="flex gap-1.5">
+            <button type="button" onclick="jumpToActiveDayCurrentPosition()" class="text-xs bg-blue-100 text-blue-700 font-bold px-2.5 py-1.5 rounded-lg hover:bg-blue-200 transition">
+              <i class="fa-solid fa-location-crosshairs mr-1"></i>現在地
+            </button>
+            <button type="button" onclick="openScheduleEditModal(null, 'transit')" class="text-xs bg-emerald-600 text-white font-bold px-3 py-1.5 rounded-lg hover:bg-emerald-700 shadow-sm transition">
+              <i class="fa-solid fa-bus mr-1"></i>移動
+            </button>
+            <button type="button" onclick="openScheduleEditModal(null, 'event')" class="text-xs bg-indigo-600 text-white font-bold px-3 py-1.5 rounded-lg hover:bg-indigo-700 shadow-sm transition">
+              <i class="fa-regular fa-calendar-plus mr-1"></i>予定
+            </button>
+          </div>
+        </div>
+
+        <!-- スケジュール閲覧日切り替えタブ（viewingScheduleDay のみを変更し、activeTripDay は変えない） -->
+        <div class="grid grid-cols-6 gap-1 bg-slate-200 p-1 rounded-xl text-xs font-bold no-select">
+          <button type="button" onclick="setViewingScheduleDay(1)" id="schedTab-1" class="py-2 rounded-lg bg-white text-blue-700 shadow-sm transition">Day 1</button>
+          <button type="button" onclick="setViewingScheduleDay(2)" id="schedTab-2" class="py-2 rounded-lg text-slate-600 transition">Day 2</button>
+          <button type="button" onclick="setViewingScheduleDay(3)" id="schedTab-3" class="py-2 rounded-lg text-slate-600 transition">Day 3</button>
+          <button type="button" onclick="setViewingScheduleDay(4)" id="schedTab-4" class="py-2 rounded-lg text-slate-600 transition">Day 4</button>
+          <button type="button" onclick="setViewingScheduleDay(5)" id="schedTab-5" class="py-2 rounded-lg text-slate-600 transition">Day 5</button>
+          <button type="button" onclick="setViewingScheduleDay(6)" id="schedTab-6" class="py-2 rounded-lg text-slate-600 transition">Day 6</button>
+        </div>
+
+        <div id="scheduleTimeline" class="space-y-2.5 relative before:content-[''] before:absolute before:left-4 before:top-4 before:bottom-4 before:w-0.5 before:bg-slate-300"></div>
+      </section>
+
+      <!-- ================= 🧰 3. ツールタブ ================= -->
+      <section id="view-tools" class="hidden">
+
+        <div id="tools-hub" class="space-y-3 no-select">
+          <h2 class="text-lg font-extrabold text-slate-800 text-left"><i class="fa-solid fa-toolbox text-indigo-600 mr-1.5"></i>ツール一覧</h2>
+          <div id="toolsHubList" class="space-y-2.5"></div>
+        </div>
+
+        <div id="tool-detail-container" class="hidden space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-200 pb-3 no-select">
+            <button type="button" id="toolBackBtn" onclick="handleToolBackButton()" class="inline-flex items-center gap-1.5 text-sm font-bold text-indigo-600 hover:text-indigo-800 py-1 pr-3">
+              <i class="fa-solid fa-arrow-left"></i> <span id="toolBackBtnText">ツール一覧へ戻る</span>
+            </button>
+            <button type="button" onclick="switchTab('home')" class="text-xs text-slate-500 hover:text-slate-700 py-1 pl-3">
+              <i class="fa-solid fa-house mr-1"></i>ホームへ
+            </button>
+          </div>
+
+          <div id="tool-detail-content"></div>
+        </div>
+
+      </section>
+
+    </main>
+
+    <!-- 🔻 下部固定ボトムナビゲーション -->
+    <nav class="fixed bottom-0 w-full max-w-md bg-white border-t border-slate-200 px-6 py-2 flex justify-around items-center z-40 shadow-[0_-4px_15px_-3px_rgba(0,0,0,0.08)] no-select">
+      <button type="button" onclick="switchTab('schedule', true)" id="nav-schedule" class="flex flex-col items-center w-20 py-1 text-slate-400 hover:text-blue-600 transition">
+        <i class="fa-regular fa-calendar-check text-xl"></i>
+        <span class="text-[11px] font-bold mt-1">スケジュール</span>
+      </button>
+
+      <div class="relative -top-5">
+        <button type="button" onclick="switchTab('home')" id="nav-home" 
+                class="nav-home-btn w-16 h-16 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/40 flex flex-col items-center justify-center border-4 border-slate-50 active:scale-95 transition">
+          <i class="fa-solid fa-house text-xl"></i>
+          <span class="text-[10px] font-extrabold mt-0.5 tracking-tight">ホーム</span>
+        </button>
+      </div>
+
+      <button type="button" onclick="switchTab('tools')" id="nav-tools" class="flex flex-col items-center w-20 py-1 text-slate-400 hover:text-indigo-600 transition">
+        <i class="fa-solid fa-toolbox text-xl"></i>
+        <span class="text-[11px] font-bold mt-1">ツール</span>
+      </button>
+    </nav>
+
+    <!-- ================= モーダル群 ================= -->
+
+    <!-- 1. 予定詳細モーダル -->
+    <div id="scheduleDetailModal" onclick="closeScheduleDetailModal()" class="fixed inset-0 bg-black/60 z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+      <div onclick="event.stopPropagation()" class="bg-white w-full max-w-md rounded-t-2xl sm:rounded-2xl p-5 space-y-4 shadow-2xl">
+        <div class="flex justify-between items-start border-b border-slate-100 pb-3">
+          <div class="text-left">
+            <div class="flex items-center gap-2 no-select">
+              <span id="detailBadge" class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">予定</span>
+              <span id="detailTime" class="font-mono text-xs font-bold text-slate-500">12:00 - 13:30</span>
+            </div>
+            <h3 id="detailTitle" class="font-extrabold text-lg text-slate-900 mt-1 selectable">昼食 @ パームビーチ・シーフード</h3>
+          </div>
+          <button type="button" onclick="closeScheduleDetailModal()" class="text-slate-400 hover:text-slate-600 text-xl px-2 no-select"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <div class="space-y-3 text-left">
+          <div class="flex items-center gap-2 text-xs text-slate-700 bg-slate-100 px-3 py-2 rounded-xl font-medium selectable">
+            <i class="fa-solid fa-location-dot text-rose-500"></i>
+            <span id="detailLocation">ワン・フラトン</span>
+          </div>
+
+          <div class="bg-amber-50 border border-amber-200 rounded-xl p-3.5 text-left">
+            <div class="text-[11px] font-bold text-amber-800 mb-1 no-select"><i class="fa-solid fa-note-sticky mr-1"></i>メモ・注意事項</div>
+            <div id="detailMemo" class="text-xs text-slate-800 whitespace-pre-wrap leading-relaxed text-left selectable">メモ内容</div>
+          </div>
+
+          <div id="detailActionArea" class="no-select"></div>
+        </div>
+
+        <div class="flex justify-end border-t border-slate-100 pt-3 no-select">
+          <button type="button" id="detailEditBtn" class="text-xs bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-4 py-2 rounded-xl transition">
+            <i class="fa-solid fa-pen mr-1"></i>この項目を編集・削除
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. スケジュール追加・編集モーダル -->
+    <div id="scheduleEditModal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+      <div class="bg-white w-full max-w-md rounded-t-2xl sm:rounded-2xl p-5 max-h-[92vh] overflow-y-auto space-y-3.5 text-left">
+        <div class="flex justify-between items-center border-b pb-2">
+          <h3 id="scheduleEditModalTitle" class="font-extrabold text-base text-slate-800">スケジュール項目を編集</h3>
+          <button type="button" onclick="closeScheduleEditModal()" class="text-slate-400 hover:text-slate-600 text-xl px-2"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <input type="hidden" id="schedEditId">
+
+        <div>
+          <label class="block text-[11px] font-bold text-slate-600 mb-1">項目の種類</label>
+          <div class="grid grid-cols-2 gap-2 bg-slate-100 p-1 rounded-xl text-xs font-bold">
+            <button type="button" onclick="setSchedFormType('event')" id="typeBtnEvent" class="py-2 rounded-lg bg-white text-indigo-700 shadow-sm transition">
+              <i class="fa-regular fa-calendar-check mr-1"></i>予定
+            </button>
+            <button type="button" onclick="setSchedFormType('transit')" id="typeBtnTransit" class="py-2 rounded-lg text-slate-600 transition">
+              <i class="fa-solid fa-bus mr-1"></i>移動
+            </button>
+          </div>
+        </div>
+
+        <div id="transitIconField" class="hidden">
+          <label class="block text-[11px] font-bold text-emerald-700">移動アイコン</label>
+          <select id="schedTransitIcon" class="w-full border border-emerald-300 bg-emerald-50/30 rounded-xl p-2 text-xs font-bold mt-0.5">
+            <option value="fa-bus">🚌 バス移動</option>
+            <option value="fa-train-subway">🚇 MRT（地下鉄）・電車</option>
+            <option value="fa-person-walking">🚶 徒歩移動</option>
+            <option value="fa-plane">✈️ 飛行機・フライト</option>
+            <option value="fa-taxi">🚕 タクシー</option>
+            <option value="fa-passport">🛂 出入国・徒歩ゲート移動</option>
+          </select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2.5">
+          <div>
+            <label class="block text-[11px] font-bold text-slate-600">開始時間</label>
+            <input type="time" id="schedStart" class="w-full border border-slate-300 rounded-xl p-2 text-sm font-mono mt-0.5">
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-600">終了時間</label>
+            <input type="time" id="schedEnd" class="w-full border border-slate-300 rounded-xl p-2 text-sm font-mono mt-0.5">
+          </div>
+        </div>
+
+        <div>
+          <label id="schedTitleLabel" class="block text-[11px] font-bold text-slate-600">タイトル</label>
+          <input type="text" id="schedTitle" placeholder="例: 昼食 @ パームビーチ / バス移動" class="w-full border border-slate-300 rounded-xl p-2 text-sm mt-0.5">
+        </div>
+
+        <div>
+          <label id="schedLocationLabel" class="block text-[11px] font-bold text-slate-600">場所 / 区間メモ</label>
+          <input type="text" id="schedLocation" placeholder="例: ワン・フラトン / 空港 ➔ 市内" class="w-full border border-slate-300 rounded-xl p-2 text-sm mt-0.5">
+        </div>
+
+        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2.5">
+          <label class="block text-[11px] font-bold text-slate-700">アクションボタンの設定（マップ or ツール）</label>
+          <select id="schedActionType" onchange="onSchedActionTypeChange()" class="w-full border border-slate-300 rounded-lg p-2 text-xs font-bold bg-white">
+            <option value="map">🗺️ マップボタンを表示</option>
+            <option value="tool">🧰 アプリ内の指定ツールへのリンクを表示</option>
+            <option value="none">なし（ボタンを表示しない）</option>
+          </select>
+
+          <div id="schedActionMapBox">
+            <input type="text" id="schedMapUrl" placeholder="URL または 検索場所名（空欄なら場所名で検索）" class="w-full border border-emerald-300 rounded-lg p-2 text-xs font-mono bg-white">
+          </div>
+
+          <div id="schedActionToolBox" class="hidden">
+            <select id="schedToolTarget" class="w-full border border-indigo-300 rounded-lg p-2 text-xs font-semibold bg-white">
+              <option value="tool:myinfo">🎫 部屋・座席メモ</option>
+              <option value="tool:currency">💱 通貨換算電卓 (SGD/MYR)</option>
+              <option value="tool:border">🛂 国境越え＆持ち物チェック</option>
+              <option value="tool:split">💸 班別・割り勘＆立替メモ</option>
+              <option value="tool:phrases">🗣️ 指差し会話＆ヘルプカード</option>
+              <option value="tool:links">🔗 リンク集・ポータル</option>
+              <option value="tool:timer">⏱️ 班別行動・集合タイマー</option>
+              <option value="tool:rules">🚨 現地の厳罰ルール＆プラグ</option>
+              <option value="tool:emergency">📋 緊急連絡先リスト</option>
+              <option value="tool:share">☁️ データ共有・クラウド同期</option>
+              <option value="tool:appsettings">🎨 App設定（UI変更）</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-bold text-amber-700"><i class="fa-solid fa-note-sticky mr-1"></i>メモ・注意事項</label>
+          <textarea id="schedMemo" rows="3" placeholder="例: 集合は13:20にバス前。" class="w-full border border-amber-300 bg-amber-50/30 rounded-xl p-2 text-xs mt-0.5 text-left"></textarea>
+        </div>
+
+        <div class="flex gap-2 pt-2">
+          <button type="button" id="schedDeleteBtn" onclick="deleteScheduleItem()" class="w-1/3 bg-rose-100 text-rose-700 hover:bg-rose-200 font-bold py-2.5 rounded-xl text-xs transition">
+            <i class="fa-solid fa-trash mr-1"></i>削除
+          </button>
+          <button type="button" onclick="saveScheduleItem()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl text-sm shadow-md transition">
+            保存する
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. クイックタイル追加モーダル（ホテル提示カード削除済） -->
+    <div id="addTileModal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+      <div class="bg-white w-full max-w-md rounded-t-2xl sm:rounded-2xl p-5 max-h-[85vh] overflow-y-auto space-y-4 text-left">
+        <div class="flex justify-between items-center border-b pb-2">
+          <h3 class="font-extrabold text-base text-slate-800">クイックタイルを追加</h3>
+          <button type="button" onclick="closeAddTileModal()" class="text-slate-400 hover:text-slate-600 text-xl px-2"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <div class="space-y-3">
+          <label class="block text-xs font-bold text-slate-600">タイルの種類を選択</label>
+          <select id="newTileType" onchange="onNewTileTypeChange()" class="w-full border border-slate-300 rounded-xl p-2.5 text-sm font-semibold bg-slate-50">
+            <optgroup label="🧰 アプリ内ツールへ飛ぶ">
+              <option value="tool:myinfo">🎫 部屋・座席メモ</option>
+              <option value="tool:currency">💱 通貨換算電卓 (SGD/MYR)</option>
+              <option value="tool:links">🔗 リンク集・ポータル</option>
+              <option value="tool:phrases">🗣️ 指差し会話＆ヘルプカード</option>
+              <option value="tool:split">💸 班別・割り勘＆立替メモ</option>
+              <option value="tool:border">🛂 国境越え＆持ち物チェック</option>
+              <option value="tool:timer">⏱️ 班別行動・集合タイマー</option>
+              <option value="tool:rules">🚨 現地の厳罰ルール＆プラグ</option>
+              <option value="tool:emergency">📋 緊急連絡先リスト</option>
+              <option value="tool:share">☁️ データ共有・クラウド同期</option>
+              <option value="tool:appsettings">🎨 App設定（UIテーマ変更）</option>
+            </optgroup>
+            <optgroup label="🚀 外部アプリの起動ショートカット">
+              <option value="app:gmaps">🗺️ Googleマップアプリを起動</option>
+              <option value="app:gtranslate">🌐 Google翻訳アプリを起動</option>
+              <option value="app:camera">📷 カメラ / Googleレンズを起動</option>
+              <option value="app:custom">⚙️ カスタムアプリ / Webリンクを作成</option>
+            </optgroup>
+          </select>
+
+          <div id="customTileFields" class="hidden space-y-2.5 bg-slate-100 p-3 rounded-xl border border-slate-200">
+            <div>
+              <label class="block text-[11px] font-bold text-slate-600">タイル名</label>
+              <input type="text" id="customTileTitle" placeholder="例: 3班行動スプレッドシート" class="w-full border rounded-lg p-2 text-sm mt-0.5 bg-white">
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-600">サブテキスト</label>
+              <input type="text" id="customTileSub" placeholder="例: スプシを開く" class="w-full border rounded-lg p-2 text-sm mt-0.5 bg-white">
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-600">URL または アプリURLスキーム</label>
+              <input type="text" id="customTileUrl" placeholder="例: https://... または line://" class="w-full border rounded-lg p-2 text-sm mt-0.5 font-mono bg-white">
+            </div>
+          </div>
+        </div>
+
+        <button type="button" onclick="confirmAddTile()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl shadow-md transition">
+          ホームに追加する
+        </button>
+      </div>
+    </div>
+
+    <!-- 4. 汎用アイテム編集モーダル -->
+    <div id="genericEditModal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+      <div class="bg-white w-full max-w-md rounded-t-2xl sm:rounded-2xl p-5 space-y-3.5 text-left">
+        <div class="flex justify-between items-center border-b pb-2">
+          <h3 id="genericEditModalTitle" class="font-extrabold text-base text-slate-800">項目を編集</h3>
+          <button type="button" onclick="closeGenericEditModal()" class="text-slate-400 hover:text-slate-600 text-xl px-2"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div id="genericEditFields" class="space-y-2.5"></div>
+        <div class="flex gap-2 pt-2">
+          <button type="button" onclick="closeGenericEditModal()" class="w-1/3 bg-slate-100 text-slate-600 font-bold py-2.5 rounded-xl text-xs">キャンセル</button>
+          <button type="button" id="genericEditSaveBtn" class="flex-1 bg-indigo-600 text-white font-bold py-2.5 rounded-xl text-sm shadow-md">保存する</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. 全画面提示カードモーダル（指差し会話用） -->
+    <div id="fullscreenCardModal" onclick="closeFullscreenCard()" class="fixed inset-0 bg-slate-900/95 z-50 hidden flex flex-col justify-between p-6 text-white cursor-pointer">
+      <div class="flex justify-between items-center text-slate-400 text-xs no-select">
+        <span>指差し会話・提示モード</span>
+        <span class="bg-slate-800 px-3 py-1 rounded-full text-white"><i class="fa-solid fa-xmark mr-1"></i>画面タップで閉じる</span>
+      </div>
+      <div class="my-auto space-y-4 text-center selectable">
+        <div id="fsCardBadge" class="inline-block bg-amber-500 text-slate-950 text-xs font-extrabold px-3 py-1 rounded-full">会話</div>
+        <h2 id="fsCardMainText" class="text-3xl font-black leading-tight tracking-wide text-amber-300">Where is the restroom?</h2>
+        <p id="fsCardSubText" class="text-lg text-slate-200 font-medium">Di mana tandas?</p>
+        <div id="fsCardJaText" class="text-sm text-slate-400 border-t border-slate-700 pt-4 mt-6">トイレはどこですか？</div>
+      </div>
+      <div class="text-center text-xs text-slate-500 no-select">Thank you for your help! 🙏</div>
+    </div>
+
+  </div>
+
+  <!-- ================= JAVASCRIPT LOGIC ================= -->
+  <script>
+    // --- 0. XSS対策サニタイズ関数 & URL検証関数 & モーダル背面スクロールロック ---
+    function escapeHTML(str) {
+      if (str === null || str === undefined) return "";
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function sanitizeUrl(url) {
+      if (!url) return "#";
+      const trimmed = String(url).trim();
+      if (/^(javascript|data|vbscript):/i.test(trimmed)) return "#";
+      return trimmed;
+    }
+
+    // 【バグ⑥修正】モーダル開閉時に背面スクロールをロック・解除する
+    function updateBodyScrollLock() {
+      const modalIds = ["scheduleDetailModal", "scheduleEditModal", "addTileModal", "genericEditModal", "fullscreenCardModal"];
+      const anyOpen = modalIds.some(id => {
+        const el = document.getElementById(id);
+        return el && !el.classList.contains("hidden");
+      });
+      document.body.style.overflow = anyOpen ? "hidden" : "";
+    }
+
+    // パスワードのSHA-256ハッシュ生成（Web Crypto API）
+    async function sha256Hex(text) {
+      const encoder = new TextEncoder();
+      const data = encoder.encode("sgmy_salt_v8_" + text);
+      const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+    }
+
+    // --- 1. 初期マスターデータ（6日間 Day 1 〜 Day 6 対応） ---
+    const defaultScheduleData = {
+      1: {
+        dayTitle: "Day 1",
+        items: [
+          { id: "d1-1", itemType: "event", start: "09:00", end: "11:00", title: "チャンギ国際空港 到着・入国審査", location: "Changi Airport Terminal 2", actionType: "tool", toolTarget: "tool:border", mapUrl: "", memo: "・パスポートとSG Arrival Card画面を準備\n・入国審査後、ターンテーブルでスーツケース受取" },
+          { id: "d1-t1", itemType: "transit", transitIcon: "fa-bus", start: "11:00", end: "12:00", title: "貸切バスで市内レストランへ移動", location: "クラス別号車（空港 ➔ ワン・フラトン）", actionType: "tool", toolTarget: "tool:myinfo", mapUrl: "", memo: "自分のクラスのバス号車を「部屋・座席メモ」で確認して乗車してください。" },
+          { id: "d1-2", itemType: "event", start: "12:00", end: "13:30", title: "昼食 @ パームビーチ・シーフード", location: "One Fullerton", actionType: "map", toolTarget: "", mapUrl: "https://www.google.com/maps/search/?api=1&query=Palm+Beach+Seafood+Singapore", memo: "名物チリクラブ！\nエプロンが配られます。13:20にバス前集合。" },
+          { id: "d1-t2", itemType: "transit", transitIcon: "fa-person-walking", start: "13:30", end: "13:40", title: "徒歩移動（マーライオン公園へ）", location: "遊歩道を徒歩移動", actionType: "none", toolTarget: "", mapUrl: "", memo: "段差に注意して班ごとに移動。" },
+          { id: "d1-3", itemType: "event", start: "13:40", end: "15:00", title: "マーライオン公園 見学＆クラス写真", location: "Merlion Park", actionType: "map", toolTarget: "", mapUrl: "https://www.google.com/maps/search/?api=1&query=Merlion+Park+Singapore", memo: "日差しが強いので帽子・水分必須。\nクラス写真撮影の順番：1組➔2組➔3組" },
+          { id: "d1-4", itemType: "event", start: "15:30", end: "18:00", title: "ガーデンズ・バイ・ザ・ベイ", location: "Gardens by the Bay", actionType: "map", toolTarget: "", mapUrl: "https://www.google.com/maps/search/?api=1&query=Gardens+by+the+Bay", memo: "クラウド・フォレスト内は冷房でかなり寒いので羽織ものを持参すること！" },
+          { id: "d1-5", itemType: "event", start: "20:00", end: "22:00", title: "ホテル到着・チェックイン・室長会議", location: "York Hotel Singapore", actionType: "tool", toolTarget: "tool:myinfo", mapUrl: "", memo: "カードキー紛失注意。\n自分の部屋番号はツール「部屋・座席メモ」に記録しておきましょう。" }
+        ]
+      },
+      2: {
+        dayTitle: "Day 2",
+        items: [
+          { id: "d2-1", itemType: "transit", transitIcon: "fa-passport", start: "08:00", end: "10:00", title: "国境越え（ウッドランズ検問所）", location: "SG出国 ➔ MY入国", actionType: "tool", toolTarget: "tool:border", mapUrl: "", memo: "【最重要】マレーシア入国審査ではバスから「全ての荷物」を持って降ります！忘れ物厳禁。" },
+          { id: "d2-2", itemType: "event", start: "10:30", end: "12:30", title: "現地姉妹校との学校交流プログラム", location: "Johor Bahru", actionType: "tool", toolTarget: "tool:phrases", mapUrl: "", memo: "英語・マレー語で自己紹介＆文化紹介パフォーマンス。" },
+          { id: "d2-3", itemType: "event", start: "12:30", end: "14:00", title: "昼食 @ マレーシア伝統料理", location: "ジョホールバル市内レストラン", actionType: "map", toolTarget: "", mapUrl: "Johor Bahru Restaurant", memo: "ナシレマ・サテーなど（ハラル対応メニュー）。" },
+          { id: "d2-4", itemType: "event", start: "14:30", end: "16:30", title: "スルタン・アブ・バカール・モスク見学", location: "Sultan Abu Bakar Mosque", actionType: "map", toolTarget: "", mapUrl: "https://www.google.com/maps/search/?api=1&query=Sultan+Abu+Bakar+State+Mosque", memo: "肌を露出しない服装。入口で靴を脱いで見学します。" }
+        ]
+      },
+      3: {
+        dayTitle: "Day 3",
+        items: [
+          { id: "d3-1", itemType: "event", start: "09:00", end: "13:00", title: "B&Sプログラム（班別自主研修）", location: "チャイナタウン・アラブストリート等", actionType: "tool", toolTarget: "tool:split", mapUrl: "", memo: "現地の大学生と班別行動。昼食の割り勘は「割り勘・立替メモ」を使うと便利です。" },
+          { id: "d3-t1", itemType: "transit", transitIcon: "fa-train-subway", start: "13:00", end: "13:30", title: "MRT＆セントーサエクスプレスで移動", location: "HarbourFront駅 ➔ VivoCity 3F ➔ Sentosa", actionType: "tool", toolTarget: "tool:links", mapUrl: "", memo: "MRT車内は飲食・水飲み厳禁（罰金対象）です！" },
+          { id: "d3-2", itemType: "event", start: "13:30", end: "18:30", title: "ユニバーサル・スタジオ・シンガポール", location: "Universal Studios Singapore", actionType: "tool", toolTarget: "tool:timer", mapUrl: "", memo: "18:20に地球儀モニュメント前に絶対集合！集合タイマーをセットしておきましょう。" }
+        ]
+      },
+      4: {
+        dayTitle: "Day 4",
+        items: [
+          { id: "d4-t1", itemType: "transit", transitIcon: "fa-bus", start: "08:30", end: "12:30", title: "シンガポールから世界遺産マラッカへ移動", location: "国境検問所経由・高速バス移動", actionType: "tool", toolTarget: "tool:border", mapUrl: "", memo: "パスポート・MDAC登録画面を確認。途中サービスエリアでトイレ休憩あり。" },
+          { id: "d4-1", itemType: "event", start: "12:30", end: "14:00", title: "昼食 @ ニョニャ料理（ババ・ニョニャ）", location: "マラッカ市内レストラン", actionType: "map", toolTarget: "", mapUrl: "Malacca Jonker Street", memo: "中国とマレーの融合文化「プラナカン（ニョニャ）料理」を体験。" },
+          { id: "d4-2", itemType: "event", start: "14:00", end: "17:00", title: "世界遺産マラッカ歴史地区 散策", location: "オランダ広場・ジョンカーストリート", actionType: "map", toolTarget: "", mapUrl: "Dutch Square Malacca", memo: "セントポール教会跡、サンチャゴ砦を見学後、ジョンカーストリート散策。" }
+        ]
+      },
+      5: {
+        dayTitle: "Day 5",
+        items: [
+          { id: "d5-1", itemType: "event", start: "09:30", end: "12:00", title: "クアラルンプール市内研修（ツインタワー等）", location: "Petronas Twin Towers / KLCC", actionType: "map", toolTarget: "", mapUrl: "Petronas Twin Towers", memo: "ペトロナスツインタワー前で記念撮影＆周辺見学。" },
+          { id: "d5-2", itemType: "event", start: "12:30", end: "16:30", title: "KL班別ショッピング＆お土産購入", location: "セントラルマーケット / パビリオンKL", actionType: "tool", toolTarget: "tool:currency", mapUrl: "", memo: "なまこ石鹸やBeryl'sチョコレートなどのお土産購入。通貨換算電卓を活用しましょう。" }
+        ]
+      },
+      6: {
+        dayTitle: "Day 6",
+        items: [
+          { id: "d6-t1", itemType: "transit", transitIcon: "fa-bus", start: "08:00", end: "09:30", title: "ホテル出発 ➔ クアラルンプール国際空港へ", location: "KL市内 ➔ KLIA", actionType: "tool", toolTarget: "tool:myinfo", mapUrl: "", memo: "部屋の忘れ物・パスポート・モバイルバッテリーの手荷物入れ替えを再確認！" },
+          { id: "d6-1", itemType: "event", start: "09:30", end: "12:00", title: "出国審査・搭乗手続き", location: "Kuala Lumpur International Airport (KLIA)", actionType: "tool", toolTarget: "tool:links", mapUrl: "", memo: "帰国便の搭乗までに Visit Japan Web のQRコードを準備しておきましょう。" },
+          { id: "d6-t2", itemType: "transit", transitIcon: "fa-plane", start: "12:00", end: "19:30", title: "帰国フライト（日本へ移動）", location: "KLIA ➔ 日本到着・解散", actionType: "tool", toolTarget: "tool:myinfo", mapUrl: "", memo: "気をつけて帰国しましょう！お疲れ様でした。" }
+        ]
+      }
+    };
+
+    const defaultMyInfoList = [
+      { id: "mi-1", icon: "fa-hotel", label: "宿泊ホテル 部屋番号", value: "1405号室（ヨーク・ホテル）" },
+      { id: "mi-2", icon: "fa-user-group", label: "同室メンバー", value: "佐藤・鈴木・高橋" },
+      { id: "mi-3", icon: "fa-bus", label: "🇸🇬 シンガポール バス座席", value: "2号車（前方3列目・窓側）" },
+      { id: "mi-4", icon: "fa-bus", label: "🇲🇾 マレーシア バス座席", value: "現地バス B号車" },
+      { id: "mi-5", icon: "fa-plane-departure", label: "✈️ 往路（行き）便名・座席", value: "SQ637便 / 座席 42A" },
+      { id: "mi-6", icon: "fa-plane-arrival", label: "✈️ 復路（帰り）便名・座席", value: "SQ638便 / 座席 45C" },
+      { id: "mi-7", icon: "fa-users", label: "班・係・個人メモ", value: "3組4班（会計係）/ スーツケース番号: 0328" }
+    ];
+
+    const defaultLinksData = [
+      { id: "lnk-1", category: "🛂 入国手続き・公的サイト", title: "🇸🇬 SG Arrival Card", sub: "シンガポール電子入国カード", url: "https://eservices.ica.gov.sg/sgarrivalcard/" },
+      { id: "lnk-2", category: "🛂 入国手続き・公的サイト", title: "🇲🇾 MDAC (マレーシア入国カード)", sub: "国境越え前に登録必須", url: "https://imigresen-online.imi.gov.my/mdac/main" },
+      { id: "lnk-3", category: "🛂 入国手続き・公的サイト", title: "🇯🇵 Visit Japan Web", sub: "日本帰国時の税関申告", url: "https://services.digital.go.jp/visit-japan-web/" },
+      { id: "lnk-4", category: "🗺️ 路線図・観光・天気", title: "🚇 シンガポール MRT路線図", sub: "B&S班別研修の地下鉄移動に", url: "https://www.lta.gov.sg/content/ltagov/en/getting_around/public_transport/rail_network.html" },
+      { id: "lnk-5", category: "🗺️ 路線図・観光・天気", title: "☔ シンガポール気象庁 スコールレーダー", sub: "急な熱帯スコール・雨雲の動きを確認", url: "https://www.weather.gov.sg/weather-rain-area-50km/" },
+      { id: "lnk-6", category: "🗺️ 路線図・観光・天気", title: "🎢 ユニバーサル・スタジオ・シンガポール", sub: "パークマップ・アトラクション情報", url: "https://www.rwsentosa.com/en/attractions/universal-studios-singapore" }
+    ];
+
+    const defaultEmergencyData = [
+      { id: "emg-1", role: "👨‍🏫 引率本部（学年主任・緊急連絡用）", name: "修学旅行 本部携帯", number: "+65-XXXX-XXXX", note: "夜間・緊急時のみ連絡" },
+      { id: "emg-2", role: "🚌 現地ツアーデスク・ガイド", name: "JTB シンガポール支店デスク", number: "+65-6595-0600", note: "班別行動中のはぐれ・トラブル時" },
+      { id: "emg-3", role: "🏨 宿泊ホテル", name: "York Hotel Singapore", number: "+65-6737-0511", note: "21 Mount Elizabeth, Singapore" },
+      { id: "emg-4", role: "🇸🇬 在シンガポール日本国大使館", name: "領事部（パスポート紛失等）", number: "+65-6235-8855", note: "16 Nassim Road, Singapore" }
+    ];
+
+    // 【バグ⑤修正】ホテル提示カード(tool:hotel)を廃止し、初期タイルを整理
+    const defaultTiles = [
+      { id: "t1", key: "tool:myinfo" },
+      { id: "t2", key: "tool:currency" },
+      { id: "t3", key: "tool:links" },
+      { id: "t4", key: "tool:phrases" },
+      { id: "t5", key: "tool:split" },
+      { id: "t6", key: "tool:share" }
+    ];
+
+    // ツールカタログ（ホテル提示カード削除済）
+    const toolCatalog = {
+      "tool:myinfo":      { title: "部屋・座席メモ", sub: "部屋番号・バス・飛行機座席", icon: "fa-id-card-clip", color: "bg-cyan-600", badge: "自分用" },
+      "tool:currency":    { title: "通貨換算電卓", sub: "SGD🇸🇬 ⇄ MYR🇲🇾 ⇄ 円 双方向換算", icon: "fa-coins", color: "bg-emerald-600", badge: "計算" },
+      "tool:links":       { title: "リンク集・ポータル", sub: "入国カード・路線図・追加編集", icon: "fa-compass", color: "bg-blue-600", badge: "リンク" },
+      "tool:emergency":   { title: "緊急連絡先リスト", sub: "番号コピー・連絡先の追加編集", icon: "fa-address-book", color: "bg-red-600", badge: "連絡先" },
+      "tool:phrases":     { title: "指差し会話カード", sub: "英語・マレー語・トラブル時会話", icon: "fa-comments", color: "bg-amber-500", badge: "会話" },
+      "tool:split":       { title: "割り勘・立替メモ", sub: "人数変更対応・班別行動の精算", icon: "fa-receipt", color: "bg-teal-600", badge: "精算" },
+      "tool:border":      { title: "国境越え＆持ち物", sub: "SG⇔MY移動時の忘れ物チェック", icon: "fa-passport", color: "bg-rose-600", badge: "必須" },
+      "tool:timer":       { title: "集合時間タイマー", sub: "自由行動の遅刻防止カウントダウン", icon: "fa-stopwatch", color: "bg-purple-600", badge: "時間" },
+      "tool:rules":       { title: "現地ルール＆プラグ", sub: "罰金注意・コンセント形状解説", icon: "fa-triangle-exclamation", color: "bg-orange-600", badge: "知識" },
+      "tool:share":       { title: "データ共有・クラウド同期", sub: "パスワード照合インポート・AI連携", icon: "fa-cloud-arrow-up", color: "bg-slate-700", badge: "同期/読込" },
+      "tool:appsettings": { title: "App設定", sub: "UIテーマ変更・旅行開始日設定", icon: "fa-palette", color: "bg-pink-600", badge: "設定" },
+      "app:gmaps":      { title: "Googleマップ", sub: "現在地＆ルート検索を開く", icon: "fa-map-location-dot", color: "bg-sky-600", badge: "外部アプリ", url: "https://maps.google.com/" },
+      "app:gtranslate": { title: "Google翻訳", sub: "カメラ翻訳・音声翻訳を開く", icon: "fa-language", color: "bg-blue-500", badge: "外部アプリ", url: "https://translate.google.co.jp/" },
+      "app:camera":     { title: "Googleレンズ", sub: "メニュー・看板をカメラ翻訳", icon: "fa-camera", color: "bg-violet-600", badge: "外部アプリ", url: "https://lens.google/" }
+    };
+
+    const themeStatusBarColors = {
+      "theme-default": "#1d4ed8",
+      "theme-modern":  "#f5f5f7",
+      "theme-paypay":  "#ff0033",
+      "theme-smbc":    "#004831",
+      "theme-gemini":  "#0f766e"
+    };
+
+    // --- 2. 状態管理（LocalStorage v8：現在日とスケジュール閲覧日の完全分離） ---
+    let scheduleData = loadSchedulesSafely();
+    let myInfoList = JSON.parse(localStorage.getItem("sgmy_myinfo_v8")) || defaultMyInfoList;
+    let linksData = JSON.parse(localStorage.getItem("sgmy_links_v8")) || defaultLinksData;
+    let emergencyData = JSON.parse(localStorage.getItem("sgmy_emergency_v8")) || defaultEmergencyData;
+    let userTiles = loadTilesSafely();
+
+    let rateSGD = parseFloat(localStorage.getItem("sgmy_rate_sgd")) || 115;
+    let rateMYR = parseFloat(localStorage.getItem("sgmy_rate_myr")) || 35;
+    let splitGroupSize = parseInt(localStorage.getItem("sgmy_split_size"), 10) || 4;
+    let tripStartDate = localStorage.getItem("sgmy_trip_start_date") || "";
+
+    // ★重要修正：現在の旅行日(activeTripDay) と スケジュールタブで閲覧中の日(viewingScheduleDay) を完全分離
+    let activeTripDay = 1;
+    let viewingScheduleDay = 1;
+
+    let isDemoBarOpen = false;
+    let simMinutes = 750;
+    let liveIntervalId = null;
+    let activeToolKey = null;
+
+    let primaryClockZone = localStorage.getItem("sgmy_primary_clock") || "local";
+    let returnToScheduleItemId = null;
+    let isEditingTiles = false;
+    let isEditingMyInfo = false;
+    let isEditingLinks = false;
+    let isEditingEmergency = false;
+    let currentSchedFormType = "event";
+    let sortableInstance = null;
+    let currentScheduleItemId = null;
+    let nextScheduleItemId = null;
+    let mainCardTargetScheduleId = null;
+
+    let splitExpenses = JSON.parse(localStorage.getItem("sgmy_split_expenses")) || [
+      { title: "ホーカーズ昼食代", payer: "Aさん", amount: 24, currency: "SGD" },
+      { title: "お土産まとめ買い", payer: "Bさん", amount: 45, currency: "MYR" }
+    ];
+    let borderChecks = JSON.parse(localStorage.getItem("sgmy_border_checks")) || {
+      passport: false, arrivalCard: false, wallet: false, phoneBattery: false, busLuggage: false
+    };
+    let targetTimerTime = localStorage.getItem("sgmy_target_timer") || "18:20";
+
+    function loadSchedulesSafely() {
+      try {
+        const saved = JSON.parse(localStorage.getItem("sgmy_schedules_v8")) || JSON.parse(localStorage.getItem("sgmy_schedules_v7"));
+        if (saved && typeof saved === "object") {
+          for (let d = 1; d <= 6; d++) {
+            if (!saved[d] || !Array.isArray(saved[d].items)) {
+              saved[d] = JSON.parse(JSON.stringify(defaultScheduleData[d]));
+            }
+          }
+          return saved;
+        }
+      } catch (e) {}
+      return JSON.parse(JSON.stringify(defaultScheduleData));
+    }
+
+    function loadTilesSafely() {
+      try {
+        const saved = JSON.parse(localStorage.getItem("sgmy_user_tiles_v8")) || JSON.parse(localStorage.getItem("sgmy_user_tiles_v7"));
+        if (Array.isArray(saved) && saved.length > 0) {
+          return saved.map(t => {
+            if (t.key === "tool:settings" || t.key === "tool:import") t.key = "tool:share";
+            return t;
+          }).filter(t => t.key !== "tool:hotel" && (t.key === "app:custom" || toolCatalog[t.key]));
+        }
+      } catch (e) {}
+      return JSON.parse(JSON.stringify(defaultTiles));
+    }
+
+    // --- 3. 初期化 ---
+    window.addEventListener("DOMContentLoaded", () => {
+      const savedTheme = localStorage.getItem("sgmy_design_theme") || "theme-default";
+      changeDesignTheme(savedTheme, false);
+
+      autoDetectDayFromDate();
+      setupClockInteractions();
+      setupDemoBarScrollFade();
+      syncTimeModeWithBar();
+      renderQuickTiles();
+      renderToolsHub();
+      initSortable();
+
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("./sw.js").catch(() => {});
+      }
+    });
+
+    function autoDetectDayFromDate() {
+      if (!tripStartDate) return;
+      const start = new Date(tripStartDate + "T00:00:00");
+      const now = new Date();
+      const diffDays = Math.floor((now - start) / (1000 * 60 * 60 * 24)) + 1;
+      if (diffDays >= 1 && diffDays <= 6) {
+        activeTripDay = diffDays;
+        viewingScheduleDay = diffDays;
+        updateDayTabStyles();
+        updateTimeAndScheduleUI();
+      }
+    }
+
+    function changeDesignTheme(themeClass, notify = true) {
+      const validTheme = themeStatusBarColors[themeClass] ? themeClass : "theme-default";
+      document.body.classList.remove("theme-default", "theme-modern", "theme-paypay", "theme-smbc", "theme-gemini");
+      document.body.classList.add(validTheme);
+
+      const hexColor = themeStatusBarColors[validTheme];
+      const metaTag = document.getElementById("metaThemeColor");
+      if (metaTag) metaTag.setAttribute("content", hexColor);
+
+      document.documentElement.style.backgroundColor = hexColor;
+      document.body.style.backgroundColor = hexColor;
+
+      localStorage.setItem("sgmy_design_theme", validTheme);
+      if (notify) showToast("UIデザインを変更しました");
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById("toast");
+      t.textContent = msg;
+      t.classList.remove("hidden");
+      clearTimeout(window._toastTimer);
+      window._toastTimer = setTimeout(() => t.classList.add("hidden"), 2400);
+    }
+
+    function copyText(text, label = "コピーしました") {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => showToast(label)).catch(() => fallbackCopy(text, label));
+      } else {
+        fallbackCopy(text, label);
+      }
+    }
+
+    function fallbackCopy(text, label) {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand("copy"); showToast(label); } catch (e) {}
+      document.body.removeChild(ta);
+    }
+
+    // --- 4. 時計の短押し（現地⇔日本切替）＆ 長押し（DEMO時間設定バー開閉） ---
+    function setupClockInteractions() {
+      const clockEl = document.getElementById("clockArea");
+      let pressTimer = null;
+      let longPressTriggered = false;
+
+      const startPress = () => {
+        longPressTriggered = false;
+        pressTimer = setTimeout(() => {
+          longPressTriggered = true;
+          navigator.vibrate?.(40);
+          if (isDemoBarOpen) closeDemoBar();
+          else openDemoBar();
+        }, 550);
+      };
+
+      const cancelPress = () => {
+        if (pressTimer) clearTimeout(pressTimer);
+      };
+
+      clockEl.addEventListener("touchstart", startPress, { passive: true });
+      clockEl.addEventListener("touchend", cancelPress);
+      clockEl.addEventListener("touchmove", cancelPress);
+      clockEl.addEventListener("mousedown", startPress);
+      clockEl.addEventListener("mouseup", cancelPress);
+      clockEl.addEventListener("mouseleave", cancelPress);
+
+      clockEl.addEventListener("click", () => {
+        if (!longPressTriggered) {
+          primaryClockZone = (primaryClockZone === "local") ? "jst" : "local";
+          localStorage.setItem("sgmy_primary_clock", primaryClockZone);
+          updateTimeAndScheduleUI();
+          showToast(primaryClockZone === "local" ? "現地時間を大きく表示" : "日本時間を大きく表示");
+        }
+      });
+    }
+
+    function openDemoBar() {
+      isDemoBarOpen = true;
+      const bar = document.getElementById("demoControlBar");
+      bar.classList.remove("hidden", "demo-bar-dimmed");
+      syncTimeModeWithBar();
+      showToast("🛠 デモ時間モードを開始しました");
+    }
+
+    function closeDemoBar() {
+      isDemoBarOpen = false;
+      const bar = document.getElementById("demoControlBar");
+      bar.classList.add("hidden");
+      bar.classList.remove("demo-bar-dimmed");
+      autoDetectDayFromDate();
+      syncTimeModeWithBar();
+      showToast("現在時刻に戻りました");
+    }
+
+    function syncTimeModeWithBar() {
+      const demoBadge = document.getElementById("demoModeBadge");
+      if (liveIntervalId) clearInterval(liveIntervalId);
+
+      if (isDemoBarOpen) {
+        demoBadge.classList.remove("hidden");
+        simMinutes = parseInt(document.getElementById("timeSlider").value, 10);
+        updateTimeAndScheduleUI();
+      } else {
+        demoBadge.classList.add("hidden");
+        updateFromRealClock();
+        liveIntervalId = setInterval(updateFromRealClock, 5000);
+      }
+    }
+
+    function updateFromRealClock() {
+      const now = new Date();
+      const utcMs = now.getTime() + (now.getTimezoneOffset() * 60000);
+      const sgTime = new Date(utcMs + (8 * 3600000));
+      simMinutes = sgTime.getHours() * 60 + sgTime.getMinutes();
+      updateTimeAndScheduleUI();
+
+      const timerEl = document.getElementById("timerRemainDisplay");
+      if (timerEl) timerEl.textContent = getTimerRemainingText();
+    }
+
+    function setupDemoBarScrollFade() {
+      let lastScrollY = window.scrollY;
+      window.addEventListener("scroll", () => {
+        if (!isDemoBarOpen) return;
+        const currentY = window.scrollY;
+        const bar = document.getElementById("demoControlBar");
+        if (currentY > lastScrollY + 10 && currentY > 25) {
+          bar.classList.add("demo-bar-dimmed");
+        }
+        lastScrollY = currentY;
+      }, { passive: true });
+    }
+
+    function restoreDemoBarOpacity() {
+      const bar = document.getElementById("demoControlBar");
+      if (bar.classList.contains("demo-bar-dimmed")) {
+        bar.classList.remove("demo-bar-dimmed");
+      }
+    }
+
+    // --- 5. 日付・時間・スケジュール連動（日またぎ計算対応・現在日と閲覧日の分離） ---
+    function minsToTimeStr(mins) {
+      const normalized = ((mins % 1440) + 1440) % 1440;
+      const h = Math.floor(normalized / 60);
+      const m = normalized % 60;
+      return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+    }
+
+    function timeStrToMins(str) {
+      if (!str || !str.includes(":")) return 0;
+      const [h, m] = str.split(":").map(Number);
+      return (h || 0) * 60 + (m || 0);
+    }
+
+    // 【バグ③修正】深夜・日またぎの予定（例: 23:00 - 06:00）でも進行状況・残り時間を正確に判定
+    function evaluateItemTimeState(item, currentMins) {
+      const s = timeStrToMins(item.start);
+      let e = timeStrToMins(item.end);
+
+      if (e < s) {
+        // 日またぎ（終了が翌朝）の場合
+        const totalDuration = (e + 1440) - s;
+        if (currentMins >= s) {
+          const elapsed = currentMins - s;
+          return { isCurrent: true, isPast: false, remain: totalDuration - elapsed, pct: Math.round((elapsed / totalDuration) * 100) };
+        } else if (currentMins < e) {
+          const elapsed = (currentMins + 1440) - s;
+          return { isCurrent: true, isPast: false, remain: e - currentMins, pct: Math.round((elapsed / totalDuration) * 100) };
+        } else {
+          return { isCurrent: false, isPast: false, remain: s - currentMins, pct: 0 };
+        }
+      } else {
+        // 通常の同日内スケジュール
+        const totalDuration = Math.max(1, e - s);
+        if (currentMins >= s && currentMins < e) {
+          const elapsed = currentMins - s;
+          return { isCurrent: true, isPast: false, remain: e - currentMins, pct: Math.min(100, Math.max(0, Math.round((elapsed / totalDuration) * 100))) };
+        } else if (currentMins >= e) {
+          return { isCurrent: false, isPast: true, remain: 0, pct: 100 };
+        } else {
+          return { isCurrent: false, isPast: false, remain: s - currentMins, pct: 0 };
+        }
+      }
+    }
+
+    function getMapHref(item) {
+      if (item.mapUrl && item.mapUrl.trim() !== "") {
+        const val = sanitizeUrl(item.mapUrl.trim());
+        if (val.startsWith("http://") || val.startsWith("https://")) return val;
+        return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(val)}`;
+      }
+      return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.location || item.title)}`;
+    }
+
+    function normalizeToolKey(key) {
+      if (!key) return "tool:myinfo";
+      if (key === "tool:settings" || key === "tool:import" || key === "tool:hotel") return "tool:share";
+      return toolCatalog[key] ? key : "tool:myinfo";
+    }
+
+    function triggerScheduleItemAction(dayNum, itemId, fromScheduleList = false) {
+      const item = scheduleData[dayNum]?.items.find(i => i.id === itemId);
+      if (!item) return;
+
+      if (item.actionType === "map") {
+        window.open(getMapHref(item), "_blank");
+      } else if (item.actionType === "tool" && item.toolTarget) {
+        closeScheduleDetailModal();
+        openSpecificTool(normalizeToolKey(item.toolTarget), fromScheduleList ? item.id : null);
+      }
+    }
+
+    function renderActionButtonHTML(dayNum, item, isFullWidth = false, fromScheduleList = false) {
+      const aType = item.actionType || "map";
+      const widthCls = isFullWidth ? "w-full justify-center py-2.5 text-xs" : "px-2.5 py-1 text-xs";
+
+      if (aType === "map") {
+        const href = escapeHTML(getMapHref(item));
+        return `
+          <a href="${href}" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 rounded-lg font-bold transition ${widthCls}">
+            <i class="fa-solid fa-map-location-dot"></i> マップを開く
+          </a>
+        `;
+      } else if (aType === "tool" && item.toolTarget) {
+        const targetKey = normalizeToolKey(item.toolTarget);
+        const tInfo = toolCatalog[targetKey] || { title: "ツールを開く", icon: "fa-toolbox" };
+        const returnArg = fromScheduleList ? `'${escapeHTML(item.id)}'` : "null";
+        return `
+          <button type="button" onclick="closeScheduleDetailModal(); openSpecificTool('${targetKey}', ${returnArg})" class="inline-flex items-center gap-1.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 rounded-lg font-bold transition ${widthCls}">
+            <i class="fa-solid ${tInfo.icon}"></i> ${escapeHTML(tInfo.title)}を開く
+          </button>
+        `;
+      }
+      return "";
+    }
+
+    function onTimeSliderChange(val) {
+      if (!isDemoBarOpen) return;
+      restoreDemoBarOpacity();
+      simMinutes = parseInt(val, 10);
+      updateTimeAndScheduleUI();
+      const timerEl = document.getElementById("timerRemainDisplay");
+      if (timerEl) timerEl.textContent = getTimerRemainingText();
+    }
+
+    // デモ操作バーでの現在日変更（activeTripDay と viewingScheduleDay の両方を更新）
+    function setActiveTripDay(day) {
+      activeTripDay = day;
+      viewingScheduleDay = day;
+      updateDayTabStyles();
+      updateTimeAndScheduleUI();
+    }
+
+    // スケジュールタブ内での閲覧日変更（viewingScheduleDay のみを更新し、現在日 activeTripDay は絶対に変えない！）
+    function setViewingScheduleDay(day) {
+      viewingScheduleDay = day;
+      updateDayTabStyles();
+      renderScheduleTimeline();
+    }
+
+    function updateDayTabStyles() {
+      [1, 2, 3, 4, 5, 6].forEach(d => {
+        const topBtn = document.getElementById(`dayBtn-${d}`);
+        const schedTab = document.getElementById(`schedTab-${d}`);
+        if (topBtn) {
+          topBtn.className = (d === activeTripDay)
+            ? "py-1 rounded bg-blue-600 font-bold text-[11px] transition"
+            : "py-1 rounded bg-slate-700 hover:bg-slate-600 font-bold text-[11px] transition";
+        }
+        if (schedTab) {
+          schedTab.className = (d === viewingScheduleDay)
+            ? "py-2 rounded-lg bg-white text-blue-700 shadow-sm transition"
+            : "py-2 rounded-lg text-slate-600 transition";
+        }
+      });
+    }
+
+    function updateTimeAndScheduleUI() {
+      // ホーム画面＆ヘッダーは常に activeTripDay を参照する
+      const activeDayInfo = scheduleData[activeTripDay] || scheduleData[1];
+      activeDayInfo.items.sort((a, b) => timeStrToMins(a.start) - timeStrToMins(b.start));
+
+      const localTimeStr = minsToTimeStr(simMinutes);
+      const jstTimeStr = minsToTimeStr((simMinutes + 60) % 1440);
+
+      document.getElementById("simTimeDisplay").textContent = localTimeStr;
+
+      if (primaryClockZone === "local") {
+        document.getElementById("clockPrimaryLabel").textContent = "現地";
+        document.getElementById("clockPrimaryTime").textContent = localTimeStr;
+        document.getElementById("clockSecondaryLabel").textContent = "日本";
+        document.getElementById("clockSecondaryTime").textContent = jstTimeStr;
+      } else {
+        document.getElementById("clockPrimaryLabel").textContent = "日本";
+        document.getElementById("clockPrimaryTime").textContent = jstTimeStr;
+        document.getElementById("clockSecondaryLabel").textContent = "現地";
+        document.getElementById("clockSecondaryTime").textContent = localTimeStr;
+      }
+
+      // ヘッダーのDay表示は常に activeTripDay
+      document.getElementById("dayTitle").textContent = `Day ${activeTripDay}`;
+
+      let currentItem = null;
+      let currentState = null;
+      let nextItem = null;
+
+      for (let i = 0; i < activeDayInfo.items.length; i++) {
+        const item = activeDayInfo.items[i];
+        const st = evaluateItemTimeState(item, simMinutes);
+
+        if (st.isCurrent) {
+          currentItem = item;
+          currentState = st;
+          nextItem = activeDayInfo.items[i + 1] || null;
+          break;
+        } else if (!st.isPast) {
+          nextItem = item;
+          break;
+        }
+      }
+
+      const nowPulseDot = document.getElementById("nowPulseDot");
+      const nowNextBadge = document.getElementById("nowNextBadge");
+      const nowActionContainer = document.getElementById("nowActionContainer");
+      const nowMemoBox = document.getElementById("nowMemoBox");
+      const nowProgressWrapper = document.getElementById("nowProgressWrapper");
+      const nextCardContainer = document.getElementById("nextCardContainer");
+
+      if (currentItem) {
+        currentScheduleItemId = currentItem.id;
+        mainCardTargetScheduleId = currentItem.id;
+
+        nowPulseDot.classList.remove("hidden");
+        nowNextBadge.classList.add("hidden");
+        document.getElementById("nowTimeRange").textContent = `${currentItem.start} - ${currentItem.end}`;
+        document.getElementById("nowTitle").textContent = currentItem.title;
+        document.getElementById("nowLocation").innerHTML = `<i class="fa-solid ${currentItem.itemType === 'transit' ? escapeHTML(currentItem.transitIcon || 'fa-bus') : 'fa-location-dot'} text-rose-500"></i> ${escapeHTML(currentItem.location || "場所未設定")}`;
+        nowActionContainer.innerHTML = renderActionButtonHTML(activeTripDay, currentItem, false, false);
+
+        if (currentItem.memo && currentItem.memo.trim() !== "") {
+          document.getElementById("nowMemo").textContent = currentItem.memo;
+          nowMemoBox.classList.remove("hidden");
+        } else {
+          nowMemoBox.classList.add("hidden");
+        }
+
+        document.getElementById("nowRemaining").textContent = `あと ${currentState.remain}分`;
+        nowProgressWrapper.classList.remove("hidden");
+        document.getElementById("nowProgressBar").style.width = `${currentState.pct}%`;
+
+        if (nextItem) {
+          nextScheduleItemId = nextItem.id;
+          const nextSt = evaluateItemTimeState(nextItem, simMinutes);
+          document.getElementById("nextStartTime").textContent = nextItem.start;
+          document.getElementById("nextTitle").textContent = nextItem.title;
+          document.getElementById("nextSub").textContent = `📍${nextItem.location || "移動・次の予定"}`;
+          document.getElementById("nextCountdown").textContent = `${nextSt.remain}分後`;
+          nextCardContainer.classList.remove("hidden");
+        } else {
+          nextScheduleItemId = null;
+          nextCardContainer.classList.add("hidden");
+        }
+      } else if (nextItem) {
+        currentScheduleItemId = nextItem.id;
+        nextScheduleItemId = nextItem.id;
+        mainCardTargetScheduleId = nextItem.id;
+        const nextSt = evaluateItemTimeState(nextItem, simMinutes);
+
+        nowPulseDot.classList.add("hidden");
+        nowNextBadge.classList.remove("hidden");
+        document.getElementById("nowTimeRange").textContent = `${nextItem.start} - ${nextItem.end}`;
+        document.getElementById("nowTitle").textContent = nextItem.title;
+        document.getElementById("nowLocation").innerHTML = `<i class="fa-solid ${nextItem.itemType === 'transit' ? escapeHTML(nextItem.transitIcon || 'fa-bus') : 'fa-location-dot'} text-rose-500"></i> ${escapeHTML(nextItem.location || "場所未設定")}`;
+        nowActionContainer.innerHTML = renderActionButtonHTML(activeTripDay, nextItem, false, false);
+
+        if (nextItem.memo && nextItem.memo.trim() !== "") {
+          document.getElementById("nowMemo").textContent = nextItem.memo;
+          nowMemoBox.classList.remove("hidden");
+        } else {
+          nowMemoBox.classList.add("hidden");
+        }
+
+        document.getElementById("nowRemaining").textContent = `${nextSt.remain}分後に開始`;
+        nowProgressWrapper.classList.add("hidden");
+        nextCardContainer.classList.add("hidden");
+      } else {
+        currentScheduleItemId = activeDayInfo.items[activeDayInfo.items.length - 1]?.id || null;
+        nextScheduleItemId = null;
+        mainCardTargetScheduleId = currentScheduleItemId;
+
+        nowPulseDot.classList.add("hidden");
+        nowNextBadge.classList.add("hidden");
+        document.getElementById("nowTimeRange").textContent = "本日の予定完了";
+        document.getElementById("nowTitle").textContent = "本日の行程終了（ホテル滞在）";
+        document.getElementById("nowLocation").innerHTML = `<i class="fa-solid fa-bed text-indigo-500"></i> ホテル / 自由時間`;
+        nowActionContainer.innerHTML = "";
+        document.getElementById("nowMemo").textContent = "翌日の準備と体調管理をしてゆっくり休みましょう";
+        nowMemoBox.classList.remove("hidden");
+        document.getElementById("nowRemaining").textContent = `完了`;
+        nowProgressWrapper.classList.add("hidden");
+        nextCardContainer.classList.add("hidden");
+      }
+
+      renderScheduleTimeline();
+    }
+
+    function onMainCardClick() {
+      viewingScheduleDay = activeTripDay;
+      updateDayTabStyles();
+      switchTab("schedule", false);
+      scrollToActiveScheduleItem(mainCardTargetScheduleId);
+    }
+
+    // --- 6. スケジュールタイムライン描画（viewingScheduleDay の予定を描画） ---
+    function renderScheduleTimeline() {
+      const container = document.getElementById("scheduleTimeline");
+      const dayObj = scheduleData[viewingScheduleDay];
+      if (dayObj && Array.isArray(dayObj.items)) {
+        dayObj.items.sort((a, b) => timeStrToMins(a.start) - timeStrToMins(b.start));
+      }
+      const items = dayObj?.items || [];
+      const isViewingActiveDay = (viewingScheduleDay === activeTripDay);
+
+      if (items.length === 0) {
+        container.innerHTML = `<div class="pl-8 text-xs text-slate-400 py-6 text-left">Day ${viewingScheduleDay} の予定がありません。「予定」または「移動」ボタンから登録してください。</div>`;
+        return;
+      }
+
+      container.innerHTML = items.map(item => {
+        const st = evaluateItemTimeState(item, simMinutes);
+        // 閲覧中の日が activeTripDay と一致している時のみ現在地ハイライト・過去透過を行う
+        const isCurrent = isViewingActiveDay && st.isCurrent;
+        const isPast = isViewingActiveDay && st.isPast;
+        const isTransit = item.itemType === "transit";
+        const safeId = escapeHTML(item.id);
+
+        let actionBadge = "";
+        if (item.actionType === "map") {
+          actionBadge = `
+            <button type="button" onclick="event.stopPropagation(); triggerScheduleItemAction(${viewingScheduleDay}, '${safeId}', true)" 
+                    class="text-[11px] text-emerald-700 bg-emerald-50 hover:bg-emerald-100 active:scale-95 border border-emerald-300 px-2 py-0.5 rounded-md font-bold transition inline-flex items-center gap-1 shadow-sm">
+              <i class="fa-solid fa-location-dot"></i>マップ
+            </button>
+          `;
+        } else if (item.actionType === "tool" && item.toolTarget) {
+          const tKey = normalizeToolKey(item.toolTarget);
+          const tInfo = toolCatalog[tKey];
+          if (tInfo) {
+            actionBadge = `
+              <button type="button" onclick="event.stopPropagation(); triggerScheduleItemAction(${viewingScheduleDay}, '${safeId}', true)" 
+                      class="text-[11px] text-indigo-700 bg-indigo-50 hover:bg-indigo-100 active:scale-95 border border-indigo-300 px-2 py-0.5 rounded-md font-bold transition inline-flex items-center gap-1 shadow-sm">
+                <i class="fa-solid ${tInfo.icon}"></i>${escapeHTML(tInfo.title)}
+              </button>
+            `;
+          }
+        }
+
+        if (isTransit) {
+          const icon = escapeHTML(item.transitIcon || "fa-bus");
+          return `
+            <div id="sched-card-${safeId}" onclick="openScheduleDetailModal('${safeId}')" class="relative pl-10 cursor-pointer active:scale-[0.99] transition">
+              <div class="absolute left-2 top-3 w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[9px] shadow">
+                <i class="fa-solid ${icon}"></i>
+              </div>
+              <div class="rounded-xl px-3.5 py-2.5 border border-dashed ${
+                isCurrent ? 'bg-emerald-50 border-emerald-500 border-2 current-schedule-card' : isPast ? 'bg-slate-100/80 border-slate-300 opacity-65' : 'bg-emerald-50/40 border-emerald-300'
+              } flex justify-between items-center text-left">
+                <div class="truncate pr-2 flex-1">
+                  <div class="flex items-center gap-1.5 flex-wrap no-select">
+                    <span class="font-mono text-[11px] font-bold text-emerald-800">${escapeHTML(item.start)} - ${escapeHTML(item.end)}</span>
+                    <span class="text-[10px] bg-emerald-100 text-emerald-800 font-extrabold px-1.5 py-0.2 rounded">移動</span>
+                    ${actionBadge}
+                  </div>
+                  <div class="font-bold text-xs text-slate-800 mt-1 truncate"><i class="fa-solid ${icon} text-emerald-600 mr-1.5"></i>${escapeHTML(item.title)}</div>
+                  ${item.location ? `<div class="text-[11px] text-slate-500 truncate mt-0.5">${escapeHTML(item.location)}</div>` : ''}
+                </div>
+                <i class="fa-solid fa-chevron-right text-xs text-slate-400 shrink-0"></i>
+              </div>
+            </div>
+          `;
+        }
+
+        return `
+          <div id="sched-card-${safeId}" onclick="openScheduleDetailModal('${safeId}')" class="relative pl-10 cursor-pointer active:scale-[0.99] transition">
+            <div class="absolute left-2.5 top-4 w-3.5 h-3.5 rounded-full border-2 ${
+              isCurrent ? 'bg-blue-600 border-white ring-4 ring-blue-200' : isPast ? 'bg-slate-400 border-white' : 'bg-white border-blue-500'
+            }"></div>
+
+            <div class="sched-event-card rounded-2xl p-3.5 border text-left transition ${
+              isCurrent 
+                ? 'bg-blue-50/90 border-blue-500 border-2 shadow-md current-schedule-card' 
+                : isPast 
+                  ? 'bg-slate-100 border-slate-200 opacity-70' 
+                  : 'bg-white border-slate-200 shadow-sm'
+            }">
+              <div class="flex justify-between items-center no-select">
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  <span class="font-mono text-xs font-bold ${isCurrent ? 'text-blue-700' : 'text-slate-500'}">${escapeHTML(item.start)} - ${escapeHTML(item.end)}</span>
+                  ${actionBadge}
+                  ${item.memo ? '<span class="text-[10px] text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded"><i class="fa-solid fa-note-sticky mr-0.5"></i>メモ</span>' : ''}
+                </div>
+                <i class="fa-solid fa-chevron-right text-xs text-slate-400 shrink-0 ml-1"></i>
+              </div>
+
+              <h4 class="font-extrabold text-slate-800 text-sm mt-1.5 leading-snug">${escapeHTML(item.title)}</h4>
+              ${item.location ? `<div class="text-xs text-slate-500 mt-1"><i class="fa-solid fa-location-dot text-rose-500 mr-1"></i>${escapeHTML(item.location)}</div>` : ''}
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    // --- 7. 予定詳細モーダル ＆ 編集モーダル処理 ---
+    function openScheduleDetailModal(itemId) {
+      const item = scheduleData[viewingScheduleDay]?.items.find(i => i.id === itemId);
+      if (!item) return;
+
+      const isTransit = item.itemType === "transit";
+      const badge = document.getElementById("detailBadge");
+      badge.textContent = isTransit ? `Day ${viewingScheduleDay} 🚌 移動` : `Day ${viewingScheduleDay} 📅 予定`;
+      badge.className = `text-[10px] font-extrabold px-2.5 py-0.5 rounded-full ${isTransit ? 'bg-emerald-100 text-emerald-800' : 'bg-blue-100 text-blue-700'}`;
+
+      document.getElementById("detailTime").textContent = `${item.start} - ${item.end}`;
+      document.getElementById("detailTitle").textContent = item.title;
+      document.getElementById("detailLocation").textContent = item.location || "場所・区間情報なし";
+      document.getElementById("detailMemo").textContent = (item.memo && item.memo.trim() !== "") ? item.memo : "（メモは設定されていません）";
+      document.getElementById("detailActionArea").innerHTML = renderActionButtonHTML(viewingScheduleDay, item, true, true);
+
+      document.getElementById("detailEditBtn").onclick = () => {
+        closeScheduleDetailModal();
+        openScheduleEditModal(item.id);
+      };
+
+      document.getElementById("scheduleDetailModal").classList.remove("hidden");
+      updateBodyScrollLock();
+    }
+
+    function closeScheduleDetailModal() {
+      document.getElementById("scheduleDetailModal").classList.add("hidden");
+      updateBodyScrollLock();
+    }
+
+    function setSchedFormType(type) {
+      currentSchedFormType = type;
+      const btnEvent = document.getElementById("typeBtnEvent");
+      const btnTransit = document.getElementById("typeBtnTransit");
+      const transitIconField = document.getElementById("transitIconField");
+
+      if (type === "transit") {
+        btnTransit.className = "py-2 rounded-lg bg-white text-emerald-700 shadow-sm transition";
+        btnEvent.className = "py-2 rounded-lg text-slate-600 transition";
+        transitIconField.classList.remove("hidden");
+        document.getElementById("schedTitleLabel").textContent = "移動手段・タイトル";
+        document.getElementById("schedLocationLabel").textContent = "区間・号車・乗り場メモ";
+      } else {
+        btnEvent.className = "py-2 rounded-lg bg-white text-indigo-700 shadow-sm transition";
+        btnTransit.className = "py-2 rounded-lg text-slate-600 transition";
+        transitIconField.classList.add("hidden");
+        document.getElementById("schedTitleLabel").textContent = "予定タイトル";
+        document.getElementById("schedLocationLabel").textContent = "場所名";
+      }
+    }
+
+    function onSchedActionTypeChange() {
+      const aType = document.getElementById("schedActionType").value;
+      document.getElementById("schedActionMapBox").classList.toggle("hidden", aType !== "map");
+      document.getElementById("schedActionToolBox").classList.toggle("hidden", aType !== "tool");
+    }
+
+    function openScheduleEditModal(itemId = null, defaultType = "event") {
+      const modal = document.getElementById("scheduleEditModal");
+      const delBtn = document.getElementById("schedDeleteBtn");
+      const dayItems = scheduleData[viewingScheduleDay]?.items || [];
+
+      if (itemId) {
+        const item = dayItems.find(i => i.id === itemId);
+        if (!item) return;
+        document.getElementById("scheduleEditModalTitle").textContent = `Day ${viewingScheduleDay} の項目を編集`;
+        document.getElementById("schedEditId").value = item.id;
+        setSchedFormType(item.itemType || "event");
+        document.getElementById("schedTransitIcon").value = item.transitIcon || "fa-bus";
+        document.getElementById("schedStart").value = item.start;
+        document.getElementById("schedEnd").value = item.end;
+        document.getElementById("schedTitle").value = item.title;
+        document.getElementById("schedLocation").value = item.location || "";
+        document.getElementById("schedActionType").value = item.actionType || "map";
+        document.getElementById("schedMapUrl").value = item.mapUrl || "";
+        document.getElementById("schedToolTarget").value = normalizeToolKey(item.toolTarget || "tool:myinfo");
+        document.getElementById("schedMemo").value = item.memo || "";
+        delBtn.classList.remove("hidden");
+      } else {
+        // 【バグ②修正】新規追加時は、その日の最後の予定の終了時刻を自動取得して開始時刻にセット
+        let defaultStart = "09:00";
+        let defaultEnd = "10:00";
+        if (dayItems.length > 0) {
+          const lastItem = dayItems[dayItems.length - 1];
+          if (lastItem && lastItem.end) {
+            defaultStart = lastItem.end;
+            const endMins = (timeStrToMins(defaultStart) + (defaultType === "transit" ? 30 : 60)) % 1440;
+            defaultEnd = minsToTimeStr(endMins);
+          }
+        }
+
+        document.getElementById("scheduleEditModalTitle").textContent = `Day ${viewingScheduleDay} に追加`;
+        document.getElementById("schedEditId").value = "";
+        setSchedFormType(defaultType);
+        document.getElementById("schedTransitIcon").value = "fa-bus";
+        document.getElementById("schedStart").value = defaultStart;
+        document.getElementById("schedEnd").value = defaultEnd;
+        document.getElementById("schedTitle").value = "";
+        document.getElementById("schedLocation").value = "";
+        document.getElementById("schedActionType").value = defaultType === "transit" ? "none" : "map";
+        document.getElementById("schedMapUrl").value = "";
+        document.getElementById("schedToolTarget").value = "tool:myinfo";
+        document.getElementById("schedMemo").value = "";
+        delBtn.classList.add("hidden");
+      }
+      onSchedActionTypeChange();
+      modal.classList.remove("hidden");
+      updateBodyScrollLock();
+    }
+
+    function closeScheduleEditModal() {
+      document.getElementById("scheduleEditModal").classList.add("hidden");
+      updateBodyScrollLock();
+    }
+
+    function saveScheduleItem() {
+      const editId = document.getElementById("schedEditId").value;
+      const start = document.getElementById("schedStart").value || "09:00";
+      const end = document.getElementById("schedEnd").value || "10:00";
+      const title = document.getElementById("schedTitle").value.trim() || (currentSchedFormType === "transit" ? "移動" : "新規予定");
+      const location = document.getElementById("schedLocation").value.trim();
+      const transitIcon = document.getElementById("schedTransitIcon").value;
+      const actionType = document.getElementById("schedActionType").value;
+      const mapUrl = document.getElementById("schedMapUrl").value.trim();
+      const toolTarget = document.getElementById("schedToolTarget").value;
+      const memo = document.getElementById("schedMemo").value.trim();
+
+      const newObj = {
+        id: editId || ("sch_" + Date.now()),
+        itemType: currentSchedFormType,
+        transitIcon,
+        start, end, title, location, actionType, mapUrl, toolTarget, memo
+      };
+
+      const items = scheduleData[viewingScheduleDay].items;
+      if (editId) {
+        const idx = items.findIndex(i => i.id === editId);
+        if (idx !== -1) items[idx] = newObj;
+      } else {
+        items.push(newObj);
+      }
+
+      localStorage.setItem("sgmy_schedules_v8", JSON.stringify(scheduleData));
+      closeScheduleEditModal();
+      updateTimeAndScheduleUI();
+      showToast(`Day ${viewingScheduleDay} のスケジュールを保存しました`);
+    }
+
+    function deleteScheduleItem() {
+      const editId = document.getElementById("schedEditId").value;
+      if (!editId) return;
+      scheduleData[viewingScheduleDay].items = scheduleData[viewingScheduleDay].items.filter(i => i.id !== editId);
+      localStorage.setItem("sgmy_schedules_v8", JSON.stringify(scheduleData));
+      closeScheduleEditModal();
+      updateTimeAndScheduleUI();
+      showToast("削除しました");
+    }
+
+    // 【バグ④修正】「現在地」ボタンやNEXTカードタップ時は、閲覧日を activeTripDay に戻して進行中（または直後のNEXT）の予定へスクロール
+    function jumpToActiveDayCurrentPosition() {
+      viewingScheduleDay = activeTripDay;
+      updateDayTabStyles();
+      renderScheduleTimeline();
+      scrollToActiveScheduleItem(mainCardTargetScheduleId || nextScheduleItemId || currentScheduleItemId);
+    }
+
+    function jumpToNextSchedule() {
+      viewingScheduleDay = activeTripDay;
+      updateDayTabStyles();
+      switchTab("schedule", false);
+      scrollToActiveScheduleItem(nextScheduleItemId || currentScheduleItemId);
+    }
+
+    function scrollToActiveScheduleItem(specificItemId = null) {
+      setTimeout(() => {
+        const targetId = specificItemId || mainCardTargetScheduleId || currentScheduleItemId;
+        const el = document.getElementById(`sched-card-${targetId}`);
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 90);
+    }
+
+    // --- 8. クイックタイル描画 ＆ タッチ/長押し制御 ＆ 大型バツボタン ---
+    let tileGesture = {
+      timer: null,
+      longPressFired: false,
+      startX: 0,
+      startY: 0,
+      moved: false,
+      activeEl: null
+    };
+
+    function renderQuickTiles() {
+      const grid = document.getElementById("quickTilesGrid");
+      grid.innerHTML = userTiles.map(tile => {
+        const normalizedKey = tile.key === "app:custom" ? "app:custom" : normalizeToolKey(tile.key);
+        const info = tile.customData || toolCatalog[normalizedKey];
+        if (!info) return "";
+        const isApp = normalizedKey.startsWith("app:");
+        const safeTileId = escapeHTML(tile.id);
+
+        return `
+          <div data-id="${safeTileId}" 
+               oncontextmenu="return false;"
+               onpointerdown="handleTilePointerDown(event, '${safeTileId}')"
+               onpointermove="handleTilePointerMove(event)"
+               onpointerup="handleTilePointerUp(event, '${safeTileId}')"
+               onpointercancel="handleTilePointerCancel()"
+               class="tile-card bg-white rounded-2xl p-3.5 shadow-sm border border-slate-200/80 flex flex-col justify-between relative cursor-pointer transition select-none text-left ${isEditingTiles ? 'edit-wiggle ring-2 ring-indigo-400' : ''}">
+            
+            ${isEditingTiles ? `
+              <button type="button"
+                      onpointerdown="event.stopPropagation();"
+                      ontouchstart="event.stopPropagation();"
+                      onclick="event.stopPropagation(); removeTile('${safeTileId}')" 
+                      aria-label="タイルを削除"
+                      class="absolute -top-3 -right-2.5 w-9 h-9 rounded-full bg-rose-600 hover:bg-rose-700 active:scale-90 text-white text-sm flex items-center justify-center shadow-lg border-2 border-white z-30 cursor-pointer">
+                <i class="fa-solid fa-xmark text-base"></i>
+              </button>
+              <div class="absolute bottom-2 right-2.5 text-indigo-400 text-xs pointer-events-none">
+                <i class="fa-solid fa-up-down-left-right"></i>
+              </div>
+            ` : ''}
+
+            <div class="flex items-start justify-between pointer-events-none">
+              <div class="w-10 h-10 rounded-xl ${escapeHTML(info.color)} text-white flex items-center justify-center text-lg shadow-sm">
+                <i class="fa-solid ${escapeHTML(info.icon)}"></i>
+              </div>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${isApp ? 'bg-green-100 text-green-800' : 'bg-slate-100 text-slate-600'}">
+                ${escapeHTML(info.badge)}
+              </span>
+            </div>
+
+            <div class="mt-3 pointer-events-none">
+              <div class="font-extrabold text-sm text-slate-800 leading-tight flex items-center justify-between">
+                <span class="truncate">${escapeHTML(info.title)}</span>
+                <i class="fa-solid ${isApp ? 'fa-arrow-up-right-from-square' : 'fa-chevron-right'} text-[10px] text-slate-400 ml-1 shrink-0"></i>
+              </div>
+              <div class="text-[11px] text-slate-500 truncate mt-0.5">${escapeHTML(info.sub)}</div>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function handleTilePointerDown(e, tileId) {
+      if (isEditingTiles) return;
+      if (e.button && e.button !== 0) return;
+
+      tileGesture.startX = e.clientX;
+      tileGesture.startY = e.clientY;
+      tileGesture.moved = false;
+      tileGesture.longPressFired = false;
+      tileGesture.activeEl = e.currentTarget;
+      tileGesture.activeEl.classList.add("tile-pressing");
+
+      if (tileGesture.timer) clearTimeout(tileGesture.timer);
+      tileGesture.timer = setTimeout(() => {
+        if (!tileGesture.moved && !isEditingTiles) {
+          tileGesture.longPressFired = true;
+          if (tileGesture.activeEl) tileGesture.activeEl.classList.remove("tile-pressing");
+          navigator.vibrate?.(50);
+          enterEditTilesMode();
+        }
+      }, 700);
+    }
+
+    function handleTilePointerMove(e) {
+      if (!tileGesture.timer) return;
+      const dx = Math.abs(e.clientX - tileGesture.startX);
+      const dy = Math.abs(e.clientY - tileGesture.startY);
+      if (dx > 10 || dy > 10) {
+        tileGesture.moved = true;
+        handleTilePointerCancel();
+      }
+    }
+
+    function handleTilePointerUp(e, tileId) {
+      if (tileGesture.activeEl) tileGesture.activeEl.classList.remove("tile-pressing");
+      if (tileGesture.timer) {
+        clearTimeout(tileGesture.timer);
+        tileGesture.timer = null;
+      }
+      if (tileGesture.longPressFired || tileGesture.moved || isEditingTiles) {
+        return;
+      }
+      activateTileById(tileId);
+    }
+
+    function handleTilePointerCancel() {
+      if (tileGesture.activeEl) tileGesture.activeEl.classList.remove("tile-pressing");
+      if (tileGesture.timer) {
+        clearTimeout(tileGesture.timer);
+        tileGesture.timer = null;
+      }
+    }
+
+    function activateTileById(tileId) {
+      const tile = userTiles.find(t => t.id === tileId);
+      if (!tile) return;
+
+      if (tile.key === "app:custom") {
+        const url = sanitizeUrl(tile.customData?.url);
+        if (url && url !== "#") window.open(url, "_blank");
+      } else if (tile.key.startsWith("app:")) {
+        const info = toolCatalog[tile.key];
+        if (info && info.url) window.open(info.url, "_blank");
+      } else {
+        openSpecificTool(normalizeToolKey(tile.key), null);
+      }
+    }
+
+    function enterEditTilesMode() {
+      if (isEditingTiles) return;
+      isEditingTiles = true;
+      sortableInstance.option("disabled", false);
+      document.getElementById("doneEditTileBtn").classList.remove("hidden");
+      renderQuickTiles();
+      showToast("タイル編集モード：ドラッグで移動、右上の×で削除");
+    }
+
+    function finishEditTiles() {
+      isEditingTiles = false;
+      sortableInstance.option("disabled", true);
+      document.getElementById("doneEditTileBtn").classList.add("hidden");
+      renderQuickTiles();
+      showToast("タイルの配置を保存しました");
+    }
+
+    function initSortable() {
+      const grid = document.getElementById("quickTilesGrid");
+      sortableInstance = new Sortable(grid, {
+        animation: 200,
+        disabled: true,
+        filter: "button",
+        preventOnFilter: false,
+        ghostClass: "sortable-ghost",
+        dragClass: "sortable-drag",
+        onEnd: function () {
+          const newOrderIds = Array.from(grid.children).map(el => el.getAttribute("data-id"));
+          userTiles = newOrderIds.map(id => userTiles.find(t => t.id === id)).filter(Boolean);
+          localStorage.setItem("sgmy_user_tiles_v8", JSON.stringify(userTiles));
+        }
+      });
+    }
+
+    function removeTile(id) {
+      userTiles = userTiles.filter(t => t.id !== id);
+      localStorage.setItem("sgmy_user_tiles_v8", JSON.stringify(userTiles));
+      renderQuickTiles();
+      showToast("タイルを削除しました");
+    }
+
+    function openAddTileModal() {
+      document.getElementById("addTileModal").classList.remove("hidden");
+      onNewTileTypeChange();
+      updateBodyScrollLock();
+    }
+    function closeAddTileModal() {
+      document.getElementById("addTileModal").classList.add("hidden");
+      updateBodyScrollLock();
+    }
+    function onNewTileTypeChange() {
+      const val = document.getElementById("newTileType").value;
+      document.getElementById("customTileFields").classList.toggle("hidden", val !== "app:custom");
+    }
+    function confirmAddTile() {
+      const val = document.getElementById("newTileType").value;
+      const newId = "tile_" + Date.now();
+
+      if (val === "app:custom") {
+        const title = document.getElementById("customTileTitle").value.trim() || "マイショートカット";
+        const sub = document.getElementById("customTileSub").value.trim() || "タップして開く";
+        const url = sanitizeUrl(document.getElementById("customTileUrl").value.trim() || "https://www.google.com");
+        userTiles.push({
+          id: newId, key: "app:custom",
+          customData: { title, sub, url, icon: "fa-rocket", color: "bg-pink-600", badge: "ショートカット" }
+        });
+      } else {
+        userTiles.push({ id: newId, key: val });
+      }
+      localStorage.setItem("sgmy_user_tiles_v8", JSON.stringify(userTiles));
+      renderQuickTiles();
+      closeAddTileModal();
+      showToast("ホームにタイルを追加しました");
+    }
+
+    // --- 9. ボトムナビゲーション切り替え ---
+    function switchTab(tabName, autoScrollSchedule = false) {
+      ["home", "schedule", "tools"].forEach(t => document.getElementById(`view-${t}`).classList.add("hidden"));
+      document.getElementById(`view-${tabName}`).classList.remove("hidden");
+
+      document.getElementById("nav-schedule").className = `flex flex-col items-center w-20 py-1 transition ${tabName === 'schedule' ? 'text-blue-600' : 'text-slate-400'}`;
+      document.getElementById("nav-tools").className = `flex flex-col items-center w-20 py-1 transition ${tabName === 'tools' ? 'text-indigo-600' : 'text-slate-400'}`;
+
+      if (tabName === "schedule") {
+        if (autoScrollSchedule) {
+          viewingScheduleDay = activeTripDay;
+          updateDayTabStyles();
+          renderScheduleTimeline();
+          scrollToActiveScheduleItem();
+        } else {
+          renderScheduleTimeline();
+        }
+      } else if (tabName === "tools") {
+        returnToScheduleItemId = null;
+        showToolsHub();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      } else if (tabName === "home") {
+        returnToScheduleItemId = null;
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    }
+
+    // --- 10. ツール一覧（リストレイアウト）＆ ツール起動ルーティング ---
+    function renderToolsHub() {
+      const listContainer = document.getElementById("toolsHubList");
+      listContainer.innerHTML = Object.keys(toolCatalog).map(key => {
+        const item = toolCatalog[key];
+        const isApp = key.startsWith("app:");
+        return `
+          <div onclick="${isApp ? `window.open('${escapeHTML(item.url)}', '_blank')` : `openSpecificTool('${key}', null)`}"
+               class="tool-list-item bg-white rounded-2xl p-3.5 shadow-sm border border-slate-200 hover:border-indigo-300 cursor-pointer active:scale-[0.99] transition flex items-center justify-between text-left">
+            <div class="flex items-center gap-3.5 min-w-0">
+              <div class="w-11 h-11 rounded-xl ${escapeHTML(item.color)} text-white flex items-center justify-center text-lg shadow-sm shrink-0">
+                <i class="fa-solid ${escapeHTML(item.icon)}"></i>
+              </div>
+              <div class="min-w-0">
+                <div class="flex items-center gap-2">
+                  <h4 class="font-extrabold text-sm text-slate-800 truncate">${escapeHTML(item.title)}</h4>
+                  <span class="text-[10px] font-bold px-2 py-0.2 rounded-full shrink-0 ${isApp ? 'bg-green-100 text-green-800' : 'bg-slate-100 text-slate-600'}">
+                    ${escapeHTML(item.badge)}
+                  </span>
+                </div>
+                <p class="text-xs text-slate-500 truncate mt-0.5">${escapeHTML(item.sub)}</p>
+              </div>
+            </div>
+            <i class="fa-solid ${isApp ? 'fa-arrow-up-right-from-square' : 'fa-chevron-right'} text-xs text-slate-400 shrink-0 ml-2"></i>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function showToolsHub() {
+      activeToolKey = null;
+      document.getElementById("tools-hub").classList.remove("hidden");
+      document.getElementById("tool-detail-container").classList.add("hidden");
+    }
+
+    function handleToolBackButton() {
+      if (returnToScheduleItemId) {
+        const targetId = returnToScheduleItemId;
+        returnToScheduleItemId = null;
+        switchTab("schedule", false);
+        scrollToActiveScheduleItem(targetId);
+      } else {
+        showToolsHub();
+      }
+    }
+
+    function openSpecificTool(rawKey, fromScheduleId = null) {
+      const toolKey = normalizeToolKey(rawKey);
+      activeToolKey = toolKey;
+
+      ["home", "schedule", "tools"].forEach(t => document.getElementById(`view-${t}`).classList.add("hidden"));
+      document.getElementById("view-tools").classList.remove("hidden");
+      document.getElementById("nav-schedule").className = "flex flex-col items-center w-20 py-1 text-slate-400 transition";
+      document.getElementById("nav-tools").className = "flex flex-col items-center w-20 py-1 text-indigo-600 transition";
+
+      returnToScheduleItemId = fromScheduleId;
+      document.getElementById("toolBackBtnText").textContent = fromScheduleId ? "スケジュールへ戻る" : "ツール一覧へ戻る";
+
+      document.getElementById("tools-hub").classList.add("hidden");
+      document.getElementById("tool-detail-container").classList.remove("hidden");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+
+      const container = document.getElementById("tool-detail-content");
+      container.innerHTML = "";
+
+      try {
+        switch (toolKey) {
+          case "tool:myinfo":      renderMyInfoTool(container); break;
+          case "tool:currency":    renderCurrencyTool(container); break;
+          case "tool:links":       renderLinksTool(container); break;
+          case "tool:emergency":   renderEmergencyTool(container); break;
+          case "tool:phrases":     renderPhrasesTool(container); break;
+          case "tool:split":       renderSplitTool(container); break;
+          case "tool:border":      renderBorderChecklistTool(container); break;
+          case "tool:timer":       renderTimerTool(container); break;
+          case "tool:rules":       renderRulesTool(container); break;
+          case "tool:share":       renderShareTool(container); break;
+          case "tool:appsettings": renderAppSettingsTool(container); break;
+          default:                 renderMyInfoTool(container); break;
+        }
+      } catch (err) {
+        console.error(err);
+        container.innerHTML = `<div class="p-4 bg-rose-50 text-rose-700 rounded-xl text-xs">ツールの読み込み中にエラーが発生しました。</div>`;
+      }
+    }
+
+    // --- 11. 各個別ツールのレンダリング実装 ---
+
+    function renderCurrencyTool(container) {
+      container.innerHTML = `
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-4 text-left">
+          <h3 class="text-lg font-extrabold text-slate-800"><i class="fa-solid fa-coins text-emerald-600 mr-1.5"></i>双方向 通貨換算電卓</h3>
+          <p class="text-xs text-slate-500">どの通貨欄に入力しても、残り2つの通貨へリアルタイムに双方向換算します。</p>
+
+          <div class="space-y-3">
+            <div class="bg-blue-50/70 border border-blue-200 rounded-xl p-3">
+              <label class="text-xs font-extrabold text-blue-800 block">🇸🇬 シンガポールドル (SGD)</label>
+              <input type="number" id="calcSgdInput" value="10" step="any" oninput="onBiCurrencyInput('SGD')"
+                     class="w-full text-2xl font-black text-blue-950 font-mono bg-white border border-blue-300 rounded-lg px-3 py-1.5 mt-1 focus:outline-none">
+            </div>
+
+            <div class="bg-amber-50/70 border border-amber-200 rounded-xl p-3">
+              <label class="text-xs font-extrabold text-amber-800 block">🇲🇾 マレーシアリンギット (MYR)</label>
+              <input type="number" id="calcMyrInput" value="${(10 * rateSGD / rateMYR).toFixed(1)}" step="any" oninput="onBiCurrencyInput('MYR')"
+                     class="w-full text-2xl font-black text-amber-950 font-mono bg-white border border-amber-300 rounded-lg px-3 py-1.5 mt-1 focus:outline-none">
+            </div>
+
+            <div class="bg-emerald-50/70 border border-emerald-200 rounded-xl p-3">
+              <label class="text-xs font-extrabold text-emerald-800 block">🇯🇵 日本円 (JPY)</label>
+              <input type="number" id="calcJpyInput" value="${Math.round(10 * rateSGD)}" step="any" oninput="onBiCurrencyInput('JPY')"
+                     class="w-full text-2xl font-black text-emerald-950 font-mono bg-white border border-emerald-300 rounded-lg px-3 py-1.5 mt-1 focus:outline-none">
+            </div>
+          </div>
+
+          <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-2">
+            <div class="text-xs font-bold text-slate-600"><i class="fa-solid fa-sliders mr-1"></i>為替レート設定（変更すると自動保存）</div>
+            <div class="grid grid-cols-2 gap-2.5 text-xs">
+              <div>
+                <label class="text-[11px] text-slate-500">1 SGD = (円)</label>
+                <input type="number" id="rateSgdInput" value="${rateSGD}" step="0.1" oninput="updateExchangeRates()" class="w-full border rounded-lg p-1.5 font-mono font-bold bg-white mt-0.5">
+              </div>
+              <div>
+                <label class="text-[11px] text-slate-500">1 MYR = (円)</label>
+                <input type="number" id="rateMyrInput" value="${rateMYR}" step="0.1" oninput="updateExchangeRates()" class="w-full border rounded-lg p-1.5 font-mono font-bold bg-white mt-0.5">
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function onBiCurrencyInput(source) {
+      const sgdEl = document.getElementById("calcSgdInput");
+      const myrEl = document.getElementById("calcMyrInput");
+      const jpyEl = document.getElementById("calcJpyInput");
+
+      if (source === "SGD") {
+        const sgd = parseFloat(sgdEl.value) || 0;
+        const jpy = sgd * rateSGD;
+        jpyEl.value = Math.round(jpy);
+        myrEl.value = (jpy / rateMYR).toFixed(2);
+      } else if (source === "MYR") {
+        const myr = parseFloat(myrEl.value) || 0;
+        const jpy = myr * rateMYR;
+        jpyEl.value = Math.round(jpy);
+        sgdEl.value = (jpy / rateSGD).toFixed(2);
+      } else if (source === "JPY") {
+        const jpy = parseFloat(jpyEl.value) || 0;
+        sgdEl.value = (jpy / rateSGD).toFixed(2);
+        myrEl.value = (jpy / rateMYR).toFixed(2);
+      }
+    }
+
+    function updateExchangeRates() {
+      const s = parseFloat(document.getElementById("rateSgdInput").value);
+      const m = parseFloat(document.getElementById("rateMyrInput").value);
+      if (s > 0) { rateSGD = s; localStorage.setItem("sgmy_rate_sgd", rateSGD); }
+      if (m > 0) { rateMYR = m; localStorage.setItem("sgmy_rate_myr", rateMYR); }
+      onBiCurrencyInput("SGD");
+    }
+
+    function renderPhrasesTool(container) {
+      const phrases = [
+        { badge: "🚻 トイレ", main: "Where is the restroom?", sub: "Di mana tandas? / 洗手间在哪里？", ja: "トイレはどこですか？" },
+        { badge: "🌿 食事・苦手", main: "No coriander (cilantro), please.", sub: "不要香菜 / Tak nak daun ketumbar", ja: "パクチーは入れないでください" },
+        { badge: "🌶️ 辛さ確認", main: "Is this spicy? Less spicy, please.", sub: "Kurang pedas, terima kasih.", ja: "辛さ控えめでお願いします" },
+        { badge: "🆘 迷子・トラブル", main: "I lost my school group. Can I use Wi-Fi?", sub: "Saya terpisah daripada kumpulan sekolah saya.", ja: "学校のグループとはぐれました。Wi-Fiを使えますか？" }
+      ];
+      container.innerHTML = `
+        <div class="space-y-3 text-left">
+          <h3 class="text-lg font-extrabold text-slate-800"><i class="fa-solid fa-comments text-amber-500 mr-1.5"></i>指差し会話＆ヘルプカード</h3>
+          ${phrases.map((p, idx) => `
+            <div onclick="openPhraseByIndex(${idx})"
+                 class="bg-white rounded-xl p-3.5 shadow-sm border border-slate-200 cursor-pointer hover:border-amber-400 active:scale-95 transition">
+              <span class="text-xs font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded">${escapeHTML(p.badge)}</span>
+              <div class="font-extrabold text-base text-slate-800 mt-1 selectable">${escapeHTML(p.main)}</div>
+              <div class="text-xs text-slate-500 mt-0.5">${escapeHTML(p.ja)}</div>
+            </div>
+          `).join("")}
+        </div>
+      `;
+      window._phrasesCache = phrases;
+    }
+
+    function openPhraseByIndex(idx) {
+      const p = window._phrasesCache?.[idx];
+      if (p) openFullscreenCard(p.badge, p.main, p.sub, p.ja);
+    }
+
+    function renderTimerTool(container) {
+      container.innerHTML = `
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-4 text-center">
+          <h3 class="text-lg font-extrabold text-slate-800"><i class="fa-solid fa-stopwatch text-purple-600 mr-1.5"></i>班別行動・集合時間タイマー</h3>
+          <div class="bg-purple-50 border border-purple-200 rounded-2xl p-4">
+            <div class="text-xs font-bold text-purple-700">目標の集合時刻</div>
+            <input type="time" value="${escapeHTML(targetTimerTime)}" onchange="updateTargetTimer(this.value)"
+                   class="text-3xl font-black font-mono text-purple-900 bg-transparent text-center mt-1 focus:outline-none">
+            <div id="timerRemainDisplay" class="text-base font-extrabold text-rose-600 mt-2">${getTimerRemainingText()}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderRulesTool(container) {
+      container.innerHTML = `
+        <div class="space-y-4 text-left">
+          <h3 class="text-lg font-extrabold text-slate-800"><i class="fa-solid fa-triangle-exclamation text-orange-600 mr-1.5"></i>現地の厳罰ルール＆プラグ図鑑</h3>
+          <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 space-y-2 text-xs text-slate-700 leading-relaxed selectable">
+            <div class="font-extrabold text-rose-600">🇸🇬 シンガポールの罰金ルール注意</div>
+            <p>🚫 <strong>MRT（地下鉄）車内での飲食禁止</strong>（水・お茶も含め最大500SGDの罰金）</p>
+            <p>🚫 <strong>チューインガムの持ち込み禁止</strong></p>
+            <p>🚫 <strong>ポイ捨て・信号無視・横断歩道以外の横断</strong></p>
+            <p>🚫 <strong>ホテルや電車へのドリアン持ち込み禁止</strong></p>
+          </div>
+          <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 text-xs text-slate-700 selectable">
+            <div class="font-extrabold text-indigo-600 mb-1">🔌 コンセント（両国共通：BFタイプ・3つ穴）</div>
+            <p>電圧は230〜240V。スマホの充電器はそのまま対応していますが、<strong>BFタイプの変換プラグ</strong>が必要です。</p>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderAppSettingsTool(container) {
+      const currentTheme = localStorage.getItem("sgmy_design_theme") || "theme-default";
+      const themes = [
+        { id: "theme-default", name: "1. 現行パターン", desc: "ブルー＆インディゴ基調の標準スタイル", dot: "bg-blue-600" },
+        { id: "theme-modern",  name: "2. モダンパターン", desc: "Apple風のフロストガラス＆モノトーンミニマルUI", dot: "bg-slate-900" },
+        { id: "theme-paypay",  name: "3. PayPayっぽい感じパターン", desc: "ビビッドレッド＆高コントラストなスーパーアプリ風", dot: "bg-[#ff0033]" },
+        { id: "theme-smbc",    name: "4. 三井住友銀行アプリっぽいパターン", desc: "トラストディープグリーン＆フレッシュグリーンの安心感", dot: "bg-[#004831]" },
+        { id: "theme-gemini",  name: "5. Geminiのおすすめパターン", desc: "トロピカル・マリーナ（南国リゾート感＆屋外高視認性）", dot: "bg-teal-600" }
+      ];
+
+      container.innerHTML = `
+        <div class="space-y-4 text-left">
+          <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 space-y-3">
+            <h3 class="text-lg font-extrabold text-slate-800"><i class="fa-solid fa-palette text-pink-600 mr-1.5"></i>UIデザインテーマ変更</h3>
+            <p class="text-xs text-slate-500">テーマを切り替えると、アプリ版の一番上（ステータスバー領域）の色も連動して変わります。</p>
+
+            <div class="space-y-2.5">
+              ${themes.map(t => {
+                const isSelected = currentTheme === t.id;
+                return `
+                  <div onclick="selectThemeFromSettings('${t.id}')" 
+                       class="p-3.5 rounded-xl border-2 cursor-pointer transition flex items-center justify-between ${isSelected ? 'border-indigo-600 bg-indigo-50/40' : 'border-slate-200 bg-slate-50 hover:bg-slate-100'}">
+                    <div class="flex items-center gap-3">
+                      <span class="w-5 h-5 rounded-full ${t.dot} shadow-sm shrink-0"></span>
+                      <div>
+                        <div class="text-sm font-extrabold text-slate-800">${escapeHTML(t.name)}</div>
+                        <div class="text-[11px] text-slate-500 mt-0.5">${escapeHTML(t.desc)}</div>
+                      </div>
+                    </div>
+                    ${isSelected ? '<i class="fa-solid fa-circle-check text-indigo-600 text-lg"></i>' : '<i class="fa-regular fa-circle text-slate-300 text-lg"></i>'}
+                  </div>
+                `;
+              }).join("")}
+            </div>
+          </div>
+
+          <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 space-y-2.5">
+            <h4 class="text-sm font-extrabold text-slate-800"><i class="fa-regular fa-calendar text-blue-600 mr-1.5"></i>旅行開始日（Day 1の日付）設定</h4>
+            <p class="text-[11px] text-slate-500">設定しておくと、旅行当日にアプリを開いた際、自動的に該当するDay（Day 1〜Day 6）が現在日として表示されます。</p>
+            <input type="date" value="${escapeHTML(tripStartDate)}" onchange="saveTripStartDate(this.value)" class="w-full border border-slate-300 rounded-xl p-2.5 text-sm font-mono bg-slate-50">
+          </div>
+
+          <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 space-y-2">
+            <h4 class="text-sm font-extrabold text-slate-800"><i class="fa-solid fa-clock-rotate-left text-amber-500 mr-1.5"></i>時間シミュレーター（DEMOモード）</h4>
+            <p class="text-[11px] text-slate-500">右上の時計を長押しするか、下のボタンを押すとデモ時間操作バーを開閉できます。</p>
+            <button type="button" onclick="openDemoBar()" class="w-full bg-slate-800 text-white font-bold py-2.5 rounded-xl text-xs shadow">
+              🛠 デモ時間操作バーを上部に表示する
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function selectThemeFromSettings(themeId) {
+      changeDesignTheme(themeId, true);
+      renderAppSettingsTool(document.getElementById("tool-detail-content"));
+    }
+
+    function saveTripStartDate(val) {
+      tripStartDate = val;
+      localStorage.setItem("sgmy_trip_start_date", val);
+      autoDetectDayFromDate();
+      showToast("旅行開始日を保存しました");
+    }
+
+    function renderMyInfoTool(container) {
+      container.innerHTML = `
+        <div class="space-y-4 text-left">
+          <div class="flex justify-between items-center">
+            <h3 class="text-lg font-extrabold text-slate-800"><i class="fa-solid fa-id-card-clip text-cyan-600 mr-1.5"></i>部屋・座席メモ</h3>
+            <button type="button" onclick="toggleEditMyInfo()" class="text-xs ${isEditingMyInfo ? 'bg-amber-500 text-white' : 'bg-slate-200 text-slate-700'} font-bold px-3 py-1.5 rounded-lg transition">
+              <i class="fa-solid ${isEditingMyInfo ? 'fa-check' : 'fa-pen'} mr-1"></i>${isEditingMyInfo ? '編集完了' : '内容を編集・追加'}
+            </button>
+          </div>
+
+          ${isEditingMyInfo ? `
+            <div class="bg-cyan-50 border border-cyan-200 rounded-2xl p-3.5 space-y-2">
+              <div class="text-xs font-extrabold text-cyan-800"><i class="fa-solid fa-plus-circle mr-1"></i>新しいメモ項目を追加</div>
+              <input type="text" id="newMyInfoLabel" placeholder="項目名 (例: Day4 マラッカホテル部屋番号)" class="w-full border rounded-lg p-2 text-xs bg-white">
+              <input type="text" id="newMyInfoValue" placeholder="内容 (例: 812号室)" class="w-full border rounded-lg p-2 text-xs bg-white">
+              <button type="button" onclick="addMyInfoItem()" class="w-full bg-cyan-600 text-white font-bold py-2 rounded-lg text-xs shadow-sm">項目を追加する</button>
+            </div>
+          ` : ''}
+
+          <div class="space-y-2.5">
+            ${myInfoList.map((item, idx) => `
+              <div class="bg-white rounded-2xl p-3.5 shadow-sm border border-slate-200">
+                ${isEditingMyInfo ? `
+                  <div class="space-y-2">
+                    <div class="flex items-center justify-between gap-2">
+                      <input type="text" value="${escapeHTML(item.label)}" oninput="updateMyInfoItem(${idx}, 'label', this.value)" 
+                             class="flex-1 text-xs font-bold text-cyan-700 border-b border-cyan-300 pb-0.5 focus:outline-none">
+                      <button type="button" onclick="deleteMyInfoItem(${idx})" class="text-xs bg-rose-100 text-rose-600 px-2.5 py-1 rounded-lg font-bold"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                    <input type="text" value="${escapeHTML(item.value)}" oninput="updateMyInfoItem(${idx}, 'value', this.value)" 
+                           class="w-full text-sm font-extrabold text-slate-900 bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 focus:outline-none">
+                  </div>
+                ` : `
+                  <div class="flex justify-between items-center">
+                    <div class="selectable">
+                      <div class="text-[11px] font-bold text-cyan-700"><i class="fa-solid ${escapeHTML(item.icon || 'fa-bookmark')} mr-1"></i>${escapeHTML(item.label)}</div>
+                      <div class="text-base font-extrabold text-slate-900 mt-0.5">${escapeHTML(item.value || '未設定')}</div>
+                    </div>
+                    <button type="button" onclick="copyByIdxMyInfo(${idx})" class="text-slate-400 hover:text-cyan-600 p-2">
+                      <i class="fa-regular fa-copy"></i>
+                    </button>
+                  </div>
+                `}
+              </div>
+            `).join("")}
+          </div>
+        </div>
+      `;
+    }
+
+    function copyByIdxMyInfo(idx) {
+      const val = myInfoList[idx]?.value || "";
+      copyText(val, "メモをコピーしました");
+    }
+
+    function toggleEditMyInfo() {
+      isEditingMyInfo = !isEditingMyInfo;
+      renderMyInfoTool(document.getElementById("tool-detail-content"));
+      if (!isEditingMyInfo) showToast("部屋・座席メモを保存しました");
+    }
+
+    function updateMyInfoItem(idx, field, val) {
+      if (!myInfoList[idx]) return;
+      myInfoList[idx][field] = val;
+      localStorage.setItem("sgmy_myinfo_v8", JSON.stringify(myInfoList));
+    }
+
+    function addMyInfoItem() {
+      const label = document.getElementById("newMyInfoLabel").value.trim();
+      const value = document.getElementById("newMyInfoValue").value.trim();
+      if (!label) return showToast("項目名を入力してください");
+      myInfoList.push({ id: "mi_" + Date.now(), icon: "fa-bookmark", label, value });
+      localStorage.setItem("sgmy_myinfo_v8", JSON.stringify(myInfoList));
+      renderMyInfoTool(document.getElementById("tool-detail-content"));
+      showToast("メモ項目を追加しました");
+    }
+
+    function deleteMyInfoItem(idx) {
+      myInfoList.splice(idx, 1);
+      localStorage.setItem("sgmy_myinfo_v8", JSON.stringify(myInfoList));
+      renderMyInfoTool(document.getElementById("tool-detail-content"));
+    }
+
+    // --- 12. ☁️ クラウド同期（Cloudflare Pages Functions + KV パスワード照合）＆ JSONインポート ---
+    const AI_PROMPT_TEMPLATE = `あなたは修学旅行の行程データ作成アシスタントです。
+以下の仕様に従い、シンガポール＆マレーシア修学旅行（6日間：Day 1〜Day 6）のインポート用JSONデータを作成してください。
+出力は余計な解説を省き、純粋なJSONテキストのみ（{"v":8, ...}）を出力してください。
+
+【JSONスキーマ構造】
+{
+  "v": 8,
+  "schedules": {
+    "1": {
+      "dayTitle": "Day 1",
+      "items": [
+        {
+          "id": "d1-1",
+          "itemType": "event",
+          "start": "09:00",
+          "end": "11:00",
+          "title": "予定のタイトル",
+          "location": "場所・施設名",
+          "actionType": "map",
+          "toolTarget": "",
+          "mapUrl": "検索キーワードまたはGoogleマップURL",
+          "memo": "注意事項や持ち物メモ（改行は\\n）"
+        },
+        {
+          "id": "d1-t1",
+          "itemType": "transit",
+          "transitIcon": "fa-bus",
+          "start": "11:00",
+          "end": "12:00",
+          "title": "移動手段のタイトル",
+          "location": "出発地 ➔ 到着地 / 号車など",
+          "actionType": "tool",
+          "toolTarget": "tool:myinfo",
+          "mapUrl": "",
+          "memo": "移動時の注意点"
+        }
+      ]
+    },
+    "2": { "dayTitle": "Day 2", "items": [] },
+    "3": { "dayTitle": "Day 3", "items": [] },
+    "4": { "dayTitle": "Day 4", "items": [] },
+    "5": { "dayTitle": "Day 5", "items": [] },
+    "6": { "dayTitle": "Day 6", "items": [] }
+  },
+  "myinfo": [
+    { "id": "mi-1", "icon": "fa-hotel", "label": "宿泊ホテル 部屋番号", "value": "1405号室" }
+  ],
+  "links": [
+    { "id": "lnk-1", "category": "🛂 入国手続き", "title": "SG Arrival Card", "sub": "公式サイト", "url": "https://eservices.ica.gov.sg/sgarrivalcard/" }
+  ],
+  "emergency": [
+    { "id": "emg-1", "role": "👨‍🏫 引率本部", "name": "本部携帯", "number": "+65-XXXX-XXXX", "note": "緊急時のみ" }
+  ]
+}
+
+【制約ルール】
+- schedulesのキーは "1" から "6" まで作成可能（必要な日数分を含める）。
+- itemType は "event"（予定）または "transit"（移動）のどちらか。
+- transitIcon は "fa-bus", "fa-train-subway", "fa-person-walking", "fa-plane", "fa-taxi", "fa-passport" から選択。
+- actionType は "map"（地図を開く）, "tool"（ツールを開く）, "none"（ボタンなし）から選択。
+- toolTarget（actionTypeが"tool"の時のみ）は "tool:myinfo", "tool:currency", "tool:border", "tool:split", "tool:phrases", "tool:links", "tool:timer", "tool:rules", "tool:emergency" から選択。
+- 時刻は必ず "HH:MM"（24時間表記）とすること。
+
+【ここに私の修学旅行の予定メモを入力します】：
+`;
+
+    function renderShareTool(container) {
+      const savedRoomId = localStorage.getItem("sgmy_cloud_room_id") || "";
+
+      container.innerHTML = `
+        <div class="space-y-4 text-left">
+          <!-- 1. ☁️ クラウド同期（パスワード照合によるアップロード＆インポート） -->
+          <div class="bg-white rounded-2xl p-4 shadow-sm border-2 border-blue-500/40 space-y-3">
+            <div class="flex items-center justify-between">
+              <h3 class="text-base font-extrabold text-blue-900"><i class="fa-solid fa-cloud-arrow-up text-blue-600 mr-1.5"></i>クラウド同期（パスワード照合）</h3>
+              <span class="text-[10px] font-bold bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">Cloudflare KV</span>
+            </div>
+            <p class="text-xs text-slate-600 leading-relaxed">
+              「共有ID」と「パスワード」を設定して予定データをクラウドにアップロードしたり、パスワードと照合してクラウドから予定データをインポートできます。
+            </p>
+
+            <div class="space-y-2.5 bg-slate-50 p-3 rounded-xl border border-slate-200">
+              <div>
+                <label class="block text-[11px] font-bold text-slate-700">共有ID（半角英数字・3〜32文字）</label>
+                <input type="text" id="cloudRoomId" value="${escapeHTML(savedRoomId)}" placeholder="例: sgmy-3kumi-4han" 
+                       class="w-full border border-slate-300 rounded-lg p-2 text-xs font-mono bg-white mt-0.5">
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-slate-700">パスワード（合言葉）</label>
+                <input type="password" id="cloudPassword" placeholder="パスワードを入力" 
+                       class="w-full border border-slate-300 rounded-lg p-2 text-xs font-mono bg-white mt-0.5">
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 pt-1">
+              <button type="button" onclick="uploadToCloud()" id="btnCloudUpload"
+                      class="bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white font-extrabold py-3 px-2 rounded-xl text-xs shadow transition flex items-center justify-center gap-1.5">
+                <i class="fa-solid fa-cloud-arrow-up"></i> アップロード(保存)
+              </button>
+              <button type="button" onclick="downloadFromCloud()" id="btnCloudDownload"
+                      class="bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-extrabold py-3 px-2 rounded-xl text-xs shadow transition flex items-center justify-center gap-1.5">
+                <i class="fa-solid fa-cloud-arrow-down"></i> 照合してインポート
+              </button>
+            </div>
+            <div id="cloudStatusMsg" class="text-[11px] font-bold text-center hidden py-1 rounded-lg"></div>
+          </div>
+
+          <!-- 2. テキストによる直接インポート（AI出力JSONの貼り付けにも対応） -->
+          <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 space-y-3">
+            <h4 class="text-sm font-extrabold text-slate-800"><i class="fa-solid fa-file-import text-emerald-600 mr-1.5"></i>JSONテキストから直接インポート</h4>
+            <p class="text-xs text-slate-500">AIが作成したJSONデータや、コピーしたJSONテキストを貼り付けて反映できます。</p>
+            <textarea id="importJsonTextarea" rows="4" placeholder='{"v": 8, "schedules": ...} をここに貼り付け' class="w-full border border-slate-300 rounded-xl p-2.5 text-xs font-mono bg-slate-50 selectable"></textarea>
+            <div class="grid grid-cols-2 gap-2">
+              <button type="button" onclick="exportDataToClipboard()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-2.5 rounded-xl text-xs transition">
+                <i class="fa-regular fa-copy mr-1"></i>現在データをコピー
+              </button>
+              <button type="button" onclick="importDataFromText()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-2.5 rounded-xl text-xs shadow transition">
+                <i class="fa-solid fa-check mr-1"></i>貼り付けデータを反映
+              </button>
+            </div>
+          </div>
+
+          <!-- 3. 🤖 AIでインポートデータを作成するプロンプト -->
+          <div class="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-2xl p-4 shadow-sm border border-indigo-200 space-y-2.5">
+            <div class="flex items-center justify-between">
+              <h4 class="text-sm font-extrabold text-indigo-900"><i class="fa-solid fa-robot text-indigo-600 mr-1.5"></i>AIで予定データを作成する</h4>
+              <span class="text-[10px] font-bold bg-indigo-600 text-white px-2 py-0.5 rounded-full">6日間対応</span>
+            </div>
+            <p class="text-xs text-slate-600 leading-relaxed">
+              しおりの写真やテキストをAIに渡して、このアプリ用のデータを自動作成させるための<strong>「AI指示プロンプト（仕様書）」</strong>です。
+            </p>
+            <button type="button" onclick="copyAiPrompt()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-3 rounded-xl text-xs shadow transition flex items-center justify-center gap-1.5">
+              <i class="fa-regular fa-copy"></i> AI用プロンプト（仕様説明文）をコピー
+            </button>
+          </div>
+
+          <!-- 4. リセット -->
+          <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 space-y-2">
+            <h4 class="text-xs font-extrabold text-rose-600"><i class="fa-solid fa-rotate-left mr-1"></i>初期データへのリセット</h4>
+            <button type="button" onclick="resetAllData()" class="w-full bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold py-2 rounded-xl text-xs transition">
+              すべての編集データを初期状態に戻す
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function setCloudStatus(msg, isError = false) {
+      const el = document.getElementById("cloudStatusMsg");
+      if (!el) return;
+      el.textContent = msg;
+      el.className = `text-xs font-bold text-center py-2 px-3 rounded-xl ${isError ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-emerald-50 text-emerald-800 border border-emerald-200'}`;
+      el.classList.remove("hidden");
+    }
+
+    function createExportObject() {
+      return {
+        v: 8,
+        schedules: scheduleData,
+        myinfo: myInfoList,
+        links: linksData,
+        emergency: emergencyData,
+        tiles: userTiles
+      };
+    }
+
+    function applyImportedPayload(parsed) {
+      if (!parsed || typeof parsed !== "object") throw new Error("Invalid payload");
+
+      if (parsed.schedules && typeof parsed.schedules === "object") {
+        for (let d = 1; d <= 6; d++) {
+          if (parsed.schedules[d] && Array.isArray(parsed.schedules[d].items)) {
+            scheduleData[d] = parsed.schedules[d];
+          }
+        }
+        localStorage.setItem("sgmy_schedules_v8", JSON.stringify(scheduleData));
+      } else if (parsed.day && parsed.dayData && Array.isArray(parsed.dayData.items)) {
+        scheduleData[parsed.day] = parsed.dayData;
+        localStorage.setItem("sgmy_schedules_v8", JSON.stringify(scheduleData));
+      }
+
+      if (Array.isArray(parsed.myinfo)) {
+        myInfoList = parsed.myinfo;
+        localStorage.setItem("sgmy_myinfo_v8", JSON.stringify(myInfoList));
+      }
+      if (Array.isArray(parsed.links)) {
+        linksData = parsed.links;
+        localStorage.setItem("sgmy_links_v8", JSON.stringify(linksData));
+      }
+      if (Array.isArray(parsed.emergency)) {
+        emergencyData = parsed.emergency;
+        localStorage.setItem("sgmy_emergency_v8", JSON.stringify(emergencyData));
+      }
+      if (Array.isArray(parsed.tiles)) {
+        userTiles = parsed.tiles.filter(t => t.key !== "tool:hotel" && (t.key === "app:custom" || toolCatalog[normalizeToolKey(t.key)]));
+        localStorage.setItem("sgmy_user_tiles_v8", JSON.stringify(userTiles));
+      }
+
+      updateTimeAndScheduleUI();
+      renderQuickTiles();
+    }
+
+    // ☁️ クラウドへエクスポート＆アップロード (POST /api/sync)
+    async function uploadToCloud() {
+      const roomId = document.getElementById("cloudRoomId").value.trim().toLowerCase();
+      const password = document.getElementById("cloudPassword").value;
+
+      if (!roomId || !/^[a-z0-9_-]{3,32}$/.test(roomId)) {
+        return setCloudStatus("共有IDは半角英数字・ハイフン（3〜32文字）で入力してください", true);
+      }
+      if (!password || password.length < 3) {
+        return setCloudStatus("パスワードを3文字以上で入力してください", true);
+      }
+
+      localStorage.setItem("sgmy_cloud_room_id", roomId);
+      setCloudStatus("☁️ クラウドへアップロード中...", false);
+
+      try {
+        const passHash = await sha256Hex(password);
+        const payload = createExportObject();
+
+        const res = await fetch("/api/sync", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ roomId, passHash, payload })
+        });
+
+        const data = await res.json();
+        if (!res.ok || data.error) {
+          return setCloudStatus(data.error || "アップロードに失敗しました", true);
+        }
+
+        setCloudStatus(`✅ 共有ID「${roomId}」でクラウドに保存しました！`, false);
+        showToast("クラウドへアップロードしました！");
+      } catch (err) {
+        // Cloudflareデプロイ前のローカルテスト環境用フォールバック
+        const passHash = await sha256Hex(password);
+        const localCloudKey = `sgmy_local_cloud_${roomId}`;
+        const existing = JSON.parse(localStorage.getItem(localCloudKey) || "null");
+        if (existing && existing.passHash !== passHash) {
+          return setCloudStatus("この共有IDは既に使用されており、パスワードが一致しません", true);
+        }
+        localStorage.setItem(localCloudKey, JSON.stringify({ roomId, passHash, payload: createExportObject() }));
+        setCloudStatus(`✅ 保存しました（※現在はローカルテスト環境のため端末内に擬似クラウド保存されました。Cloudflare公開後は本番KVに保存されます）`, false);
+      }
+    }
+
+    // ☁️ パスワードと照合してクラウドからインポート (GET /api/sync)
+    async function downloadFromCloud() {
+      const roomId = document.getElementById("cloudRoomId").value.trim().toLowerCase();
+      const password = document.getElementById("cloudPassword").value;
+
+      if (!roomId || !password) {
+        return setCloudStatus("共有IDとパスワードの両方を入力してください", true);
+      }
+
+      localStorage.setItem("sgmy_cloud_room_id", roomId);
+      setCloudStatus("🔍 パスワードを照合してデータを取得中...", false);
+
+      try {
+        const passHash = await sha256Hex(password);
+        const res = await fetch(`/api/sync?roomId=${encodeURIComponent(roomId)}&passHash=${encodeURIComponent(passHash)}`);
+        const data = await res.json();
+
+        if (!res.ok || data.error) {
+          return setCloudStatus(data.error || "パスワードが違うか、データが存在しません", true);
+        }
+
+        applyImportedPayload(data.payload);
+        setCloudStatus(`🎉 照合成功！「${roomId}」の予定データをインポートしました！`, false);
+        showToast("クラウドから予定を反映しました！");
+      } catch (err) {
+        // ローカルテスト環境用フォールバック照合
+        const passHash = await sha256Hex(password);
+        const localCloudKey = `sgmy_local_cloud_${roomId}`;
+        const record = JSON.parse(localStorage.getItem(localCloudKey) || "null");
+        if (!record) {
+          return setCloudStatus("指定された共有IDのデータが見つかりません", true);
+        }
+        if (record.passHash !== passHash) {
+          return setCloudStatus("❌ パスワードが一致しません", true);
+        }
+        applyImportedPayload(record.payload);
+        setCloudStatus(`🎉 照合成功！「${roomId}」の予定データをインポートしました！`, false);
+        showToast("予定データを反映しました！");
+      }
+    }
+
+    function copyAiPrompt() {
+      copyText(AI_PROMPT_TEMPLATE, "AI用プロンプトをコピーしました！");
+    }
+
+    function exportDataToClipboard() {
+      const jsonStr = JSON.stringify(createExportObject(), null, 2);
+      const inputEl = document.getElementById("importJsonTextarea");
+      if (inputEl) inputEl.value = jsonStr;
+      copyText(jsonStr, "現在の全設定JSONをコピーしました！");
+    }
+
+    function importDataFromText() {
+      let raw = document.getElementById("importJsonTextarea").value.trim();
+      if (!raw) return showToast("JSONテキストを貼り付けてください");
+
+      raw = raw.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "").trim();
+
+      try {
+        const parsed = JSON.parse(raw);
+        applyImportedPayload(parsed);
+        showToast("🎉 インポートデータを正常に反映しました！");
+      } catch (e) {
+        alert("JSONデータの解析に失敗しました。カッコの閉じ忘れ等がないか確認してください。");
+      }
+    }
+
+    // --- 13. リンク集 ＆ 緊急連絡先 ---
+    function renderLinksTool(container) {
+      const grouped = {};
+      linksData.forEach(item => {
+        const cat = item.category || "📌 その他リンク";
+        if (!grouped[cat]) grouped[cat] = [];
+        grouped[cat].push(item);
+      });
+
+      container.innerHTML = `
+        <div class="space-y-4 text-left">
+          <div class="flex justify-between items-center">
+            <h3 class="text-lg font-extrabold text-slate-800"><i class="fa-solid fa-compass text-blue-600 mr-1.5"></i>リンク集・ポータル</h3>
+            <button type="button" onclick="toggleEditLinks()" class="text-xs ${isEditingLinks ? 'bg-amber-500 text-white' : 'bg-slate-200 text-slate-700'} font-bold px-3 py-1.5 rounded-lg transition">
+              <i class="fa-solid ${isEditingLinks ? 'fa-check' : 'fa-pen'} mr-1"></i>${isEditingLinks ? '完了' : '編集・追加'}
+            </button>
+          </div>
+
+          ${isEditingLinks ? `
+            <div class="bg-blue-50 border border-blue-200 rounded-2xl p-3.5 space-y-2">
+              <div class="text-xs font-extrabold text-blue-800"><i class="fa-solid fa-plus-circle mr-1"></i>新しいリンクを追加</div>
+              <input type="text" id="newLinkCategory" placeholder="カテゴリ (例: 🏫 班別共有)" class="w-full border rounded-lg p-2 text-xs bg-white">
+              <input type="text" id="newLinkTitle" placeholder="タイトル" class="w-full border rounded-lg p-2 text-xs bg-white">
+              <input type="text" id="newLinkSub" placeholder="説明" class="w-full border rounded-lg p-2 text-xs bg-white">
+              <input type="url" id="newLinkUrl" placeholder="URL (https://...)" class="w-full border rounded-lg p-2 text-xs bg-white font-mono">
+              <button type="button" onclick="addLinkItem()" class="w-full bg-blue-600 text-white font-bold py-2 rounded-lg text-xs">追加する</button>
+            </div>
+          ` : ''}
+
+          ${Object.keys(grouped).map(cat => `
+            <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 space-y-2">
+              <div class="text-xs font-extrabold text-indigo-700">${escapeHTML(cat)}</div>${grouped[cat].map(lnk => {
+                const safeId = escapeHTML(lnk.id);
+                const safeUrl = escapeHTML(sanitizeUrl(lnk.url));
+                return `
+                  <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+                    <a href="${safeUrl}" target="_blank" rel="noopener" class="flex-1 truncate pr-2">
+                      <div class="text-sm font-bold text-slate-800 hover:text-blue-600 truncate">${escapeHTML(lnk.title)}</div>
+                      <div class="text-[11px] text-slate-500 truncate">${escapeHTML(lnk.sub || lnk.url)}</div>
+                    </a>
+                    ${isEditingLinks ? `
+                      <div class="flex items-center gap-1.5 shrink-0">
+                        <button type="button" onclick="openEditLinkModal('${safeId}')" class="text-xs bg-slate-200 text-slate-700 px-2.5 py-1.5 rounded-lg"><i class="fa-solid fa-pen"></i></button>
+                        <button type="button" onclick="deleteLinkItem('${safeId}')" class="text-xs bg-rose-100 text-rose-600 px-2.5 py-1.5 rounded-lg"><i class="fa-solid fa-trash"></i></button>
+                      </div>
+                    ` : `
+                      <a href="${safeUrl}" target="_blank" rel="noopener" class="text-slate-400 px-2"><i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+                    `}
+                  </div>
+                `;
+              }).join("")}
+            </div>
+          `).join("")}
+        </div>
+      `;
+    }
+
+    function toggleEditLinks() {
+      isEditingLinks = !isEditingLinks;
+      renderLinksTool(document.getElementById("tool-detail-content"));
+    }
+
+    function addLinkItem() {
+      const category = document.getElementById("newLinkCategory").value.trim() || "📌 マイリンク";
+      const title = document.getElementById("newLinkTitle").value.trim();
+      const sub = document.getElementById("newLinkSub").value.trim();
+      const url = sanitizeUrl(document.getElementById("newLinkUrl").value.trim());
+      if (!title || url === "#") return showToast("タイトルと正しいURLを入力してください");
+      linksData.push({ id: "lnk_" + Date.now(), category, title, sub, url });
+      localStorage.setItem("sgmy_links_v8", JSON.stringify(linksData));
+      renderLinksTool(document.getElementById("tool-detail-content"));
+      showToast("リンクを追加しました");
+    }
+
+    function openEditLinkModal(id) {
+      const item = linksData.find(l => l.id === id);
+      if (!item) return;
+      document.getElementById("genericEditModalTitle").textContent = "リンクを編集";
+      document.getElementById("genericEditFields").innerHTML = `
+        <div><label class="text-[11px] font-bold text-slate-600">カテゴリ</label><input id="geCat" value="${escapeHTML(item.category)}" class="w-full border rounded-lg p-2 text-xs mt-0.5"></div>
+        <div><label class="text-[11px] font-bold text-slate-600">タイトル</label><input id="geTitle" value="${escapeHTML(item.title)}" class="w-full border rounded-lg p-2 text-xs mt-0.5"></div>
+        <div><label class="text-[11px] font-bold text-slate-600">説明</label><input id="geSub" value="${escapeHTML(item.sub || '')}" class="w-full border rounded-lg p-2 text-xs mt-0.5"></div>
+        <div><label class="text-[11px] font-bold text-slate-600">URL</label><input id="geUrl" value="${escapeHTML(item.url)}" class="w-full border rounded-lg p-2 text-xs font-mono mt-0.5"></div>
+      `;
+      document.getElementById("genericEditSaveBtn").onclick = () => {
+        item.category = document.getElementById("geCat").value.trim() || item.category;
+        item.title = document.getElementById("geTitle").value.trim() || item.title;
+        item.sub = document.getElementById("geSub").value.trim();
+        item.url = sanitizeUrl(document.getElementById("geUrl").value.trim());
+        localStorage.setItem("sgmy_links_v8", JSON.stringify(linksData));
+        closeGenericEditModal();
+        renderLinksTool(document.getElementById("tool-detail-content"));
+        showToast("リンクを更新しました");
+      };
+      document.getElementById("genericEditModal").classList.remove("hidden");
+      updateBodyScrollLock();
+    }
+
+    function deleteLinkItem(id) {
+      linksData = linksData.filter(l => l.id !== id);
+      localStorage.setItem("sgmy_links_v8", JSON.stringify(linksData));
+      renderLinksTool(document.getElementById("tool-detail-content"));
+    }
+
+    function renderEmergencyTool(container) {
+      container.innerHTML = `
+        <div class="space-y-4 text-left">
+          <div class="flex justify-between items-center">
+            <h3 class="text-lg font-extrabold text-slate-800"><i class="fa-solid fa-address-book text-red-600 mr-1.5"></i>緊急連絡先リスト</h3>
+            <button type="button" onclick="toggleEditEmergency()" class="text-xs ${isEditingEmergency ? 'bg-amber-500 text-white' : 'bg-slate-200 text-slate-700'} font-bold px-3 py-1.5 rounded-lg transition">
+              <i class="fa-solid ${isEditingEmergency ? 'fa-check' : 'fa-pen'} mr-1"></i>${isEditingEmergency ? '完了' : '編集・追加'}
+            </button>
+          </div>
+
+          ${isEditingEmergency ? `
+            <div class="bg-red-50 border border-red-200 rounded-2xl p-3.5 space-y-2">
+              <div class="text-xs font-extrabold text-red-800"><i class="fa-solid fa-plus-circle mr-1"></i>新しい連絡先を追加</div>
+              <input type="text" id="newEmgRole" placeholder="区分 (例: 👨‍🏫 担任)" class="w-full border rounded-lg p-2 text-xs bg-white">
+              <input type="text" id="newEmgName" placeholder="名称" class="w-full border rounded-lg p-2 text-xs bg-white">
+              <input type="text" id="newEmgNumber" placeholder="電話番号" class="w-full border rounded-lg p-2 text-xs bg-white font-mono">
+              <input type="text" id="newEmgNote" placeholder="メモ・住所" class="w-full border rounded-lg p-2 text-xs bg-white">
+              <button type="button" onclick="addEmergencyItem()" class="w-full bg-red-600 text-white font-bold py-2 rounded-lg text-xs">追加する</button>
+            </div>
+          ` : ''}
+
+          <div class="space-y-2.5">
+            ${emergencyData.map((item, idx) => {
+              const safeId = escapeHTML(item.id);
+              return `
+                <div class="bg-white border border-slate-200 rounded-2xl p-3.5 shadow-sm flex justify-between items-center">
+                  <div class="space-y-0.5 pr-2 selectable">
+                    <div class="text-[11px] font-bold text-red-600">${escapeHTML(item.role)}</div>
+                    <div class="text-sm font-extrabold text-slate-800">${escapeHTML(item.name)}</div>
+                    <div onclick="copyEmgNumber(${idx})" class="inline-flex items-center gap-1.5 font-mono text-base font-black text-slate-900 bg-slate-100 hover:bg-slate-200 px-2.5 py-1 rounded-lg mt-1 cursor-pointer active:scale-95 transition">
+                      <span>${escapeHTML(item.number)}</span>
+                      <i class="fa-regular fa-copy text-xs text-slate-500"></i>
+                    </div>
+                    ${item.note ? `<div class="text-[11px] text-slate-500 pt-1">${escapeHTML(item.note)}</div>` : ''}
+                  </div>
+                  ${isEditingEmergency ? `
+                    <div class="flex flex-col gap-1.5 shrink-0">
+                      <button type="button" onclick="openEditEmergencyModal('${safeId}')" class="text-xs bg-slate-200 text-slate-700 px-2.5 py-1.5 rounded-lg"><i class="fa-solid fa-pen"></i></button>
+                      <button type="button" onclick="deleteEmergencyItem('${safeId}')" class="text-xs bg-rose-100 text-rose-600 px-2.5 py-1.5 rounded-lg"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                  ` : ''}
+                </div>
+              `;
+            }).join("")}
+          </div>
+        </div>
+      `;
+    }
+
+    function copyEmgNumber(idx) {
+      const num = emergencyData[idx]?.number || "";
+      copyText(num, "電話番号をコピーしました");
+    }
+
+    function toggleEditEmergency() {
+      isEditingEmergency = !isEditingEmergency;
+      renderEmergencyTool(document.getElementById("tool-detail-content"));
+    }
+
+    function addEmergencyItem() {
+      const role = document.getElementById("newEmgRole").value.trim() || "連絡先";
+      const name = document.getElementById("newEmgName").value.trim();
+      const number = document.getElementById("newEmgNumber").value.trim();
+      const note = document.getElementById("newEmgNote").value.trim();
+      if (!name || !number) return showToast("名称と番号を入力してください");
+      emergencyData.push({ id: "emg_" + Date.now(), role, name, number, note });
+      localStorage.setItem("sgmy_emergency_v8", JSON.stringify(emergencyData));
+      renderEmergencyTool(document.getElementById("tool-detail-content"));
+      showToast("連絡先を追加しました");
+    }
+
+    function openEditEmergencyModal(id) {
+      const item = emergencyData.find(e => e.id === id);
+      if (!item) return;
+      document.getElementById("genericEditModalTitle").textContent = "緊急連絡先を編集";
+      document.getElementById("genericEditFields").innerHTML = `
+        <div><label class="text-[11px] font-bold text-slate-600">区分・役割</label><input id="geEmgRole" value="${escapeHTML(item.role)}" class="w-full border rounded-lg p-2 text-xs mt-0.5"></div>
+        <div><label class="text-[11px] font-bold text-slate-600">名称</label><input id="geEmgName" value="${escapeHTML(item.name)}" class="w-full border rounded-lg p-2 text-xs mt-0.5"></div>
+        <div><label class="text-[11px] font-bold text-slate-600">電話番号</label><input id="geEmgNum" value="${escapeHTML(item.number)}" class="w-full border rounded-lg p-2 text-xs font-mono mt-0.5"></div>
+        <div><label class="text-[11px] font-bold text-slate-600">メモ・住所</label><input id="geEmgNote" value="${escapeHTML(item.note || '')}" class="w-full border rounded-lg p-2 text-xs mt-0.5"></div>
+      `;
+      document.getElementById("genericEditSaveBtn").onclick = () => {
+        item.role = document.getElementById("geEmgRole").value.trim() || item.role;
+        item.name = document.getElementById("geEmgName").value.trim() || item.name;
+        item.number = document.getElementById("geEmgNum").value.trim() || item.number;
+        item.note = document.getElementById("geEmgNote").value.trim();
+        localStorage.setItem("sgmy_emergency_v8", JSON.stringify(emergencyData));
+        closeGenericEditModal();
+        renderEmergencyTool(document.getElementById("tool-detail-content"));
+        showToast("連絡先を更新しました");
+      };
+      document.getElementById("genericEditModal").classList.remove("hidden");
+      updateBodyScrollLock();
+    }
+
+    function closeGenericEditModal() {
+      document.getElementById("genericEditModal").classList.add("hidden");
+      updateBodyScrollLock();
+    }
+
+    function deleteEmergencyItem(id) {
+      emergencyData = emergencyData.filter(e => e.id !== id);
+      localStorage.setItem("sgmy_emergency_v8", JSON.stringify(emergencyData));
+      renderEmergencyTool(document.getElementById("tool-detail-content"));
+    }
+
+    function renderSplitTool(container) {
+      let totalJpy = 0;
+      splitExpenses.forEach(e => { totalJpy += e.amount * (e.currency === "SGD" ? rateSGD : rateMYR); });
+      const perPerson = Math.round(totalJpy / Math.max(1, splitGroupSize));
+
+      container.innerHTML = `
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 space-y-4 text-left">
+          <div class="flex justify-between items-center">
+            <h3 class="text-lg font-extrabold text-slate-800"><i class="fa-solid fa-receipt text-teal-600 mr-1.5"></i>班別・割り勘＆立替メモ</h3>
+            <div class="flex items-center gap-1.5 bg-slate-100 px-2 py-1 rounded-xl text-xs font-bold">
+              <button type="button" onclick="changeSplitGroupSize(-1)" class="w-6 h-6 rounded bg-white shadow text-slate-700">-</button>
+              <span class="px-1.5">${splitGroupSize}人班</span>
+              <button type="button" onclick="changeSplitGroupSize(1)" class="w-6 h-6 rounded bg-white shadow text-slate-700">+</button>
+            </div>
+          </div>
+
+          <div class="bg-teal-50 border border-teal-200 rounded-xl p-3 flex justify-between items-center">
+            <div>
+              <div class="text-xs text-teal-800 font-bold">立替合計（円換算）</div>
+              <div class="text-xl font-black text-teal-950 font-mono">¥${Math.round(totalJpy).toLocaleString()}</div>
+            </div>
+            <div class="text-right">
+              <div class="text-xs text-teal-800 font-bold">${splitGroupSize}人で割ると1人あたり</div>
+              <div class="text-lg font-extrabold text-teal-700 font-mono">¥${perPerson.toLocaleString()}</div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2">
+            <input type="text" id="splitTitle" placeholder="用途(例:昼食)" class="border rounded-lg p-2 text-xs col-span-2">
+            <input type="text" id="splitPayer" placeholder="払った人" class="border rounded-lg p-2 text-xs">
+            <input type="number" id="splitAmount" placeholder="金額" step="any" class="border rounded-lg p-2 text-xs">
+            <select id="splitCurr" class="border rounded-lg p-2 text-xs font-bold">
+              <option value="SGD">SGD 🇸🇬</option>
+              <option value="MYR">MYR 🇲🇾</option>
+            </select>
+            <button type="button" onclick="addSplitExpense()" class="bg-teal-600 text-white font-bold rounded-lg text-xs">追加</button>
+          </div>
+
+          <div class="space-y-2">
+            ${splitExpenses.map((e, i) => `
+              <div class="flex justify-between items-center bg-slate-50 px-3 py-2 rounded-lg text-xs">
+                <div><span class="font-bold text-slate-800">${escapeHTML(e.title)}</span><span class="text-slate-500 ml-1">(${escapeHTML(e.payer)})</span></div>
+                <div class="flex items-center gap-2">
+                  <span class="font-mono font-bold">${escapeHTML(e.amount)}${escapeHTML(e.currency)}</span>
+                  <button type="button" onclick="deleteSplitExpense(${i})" class="text-rose-500 px-1"><i class="fa-solid fa-trash"></i></button>
+                </div>
+              </div>
+            `).join("")}
+          </div>
+        </div>
+      `;
+    }
+
+    function changeSplitGroupSize(delta) {
+      splitGroupSize = Math.min(20, Math.max(1, splitGroupSize + delta));
+      localStorage.setItem("sgmy_split_size", splitGroupSize);
+      renderSplitTool(document.getElementById("tool-detail-content"));
+    }
+
+    function addSplitExpense() {
+      const title = document.getElementById("splitTitle").value.trim() || "立替";
+      const payer = document.getElementById("splitPayer").value.trim() || "班員";
+      const amount = parseFloat(document.getElementById("splitAmount").value) || 0;
+      const currency = document.getElementById("splitCurr").value;
+      if (amount <= 0) return;
+      splitExpenses.push({ title, payer, amount, currency });
+      localStorage.setItem("sgmy_split_expenses", JSON.stringify(splitExpenses));
+      renderSplitTool(document.getElementById("tool-detail-content"));
+    }
+
+    function deleteSplitExpense(idx) {
+      splitExpenses.splice(idx, 1);
+      localStorage.setItem("sgmy_split_expenses", JSON.stringify(splitExpenses));
+      renderSplitTool(document.getElementById("tool-detail-content"));
+    }
+
+    function renderBorderChecklistTool(container) {
+      const items = [
+        { key: "passport", label: "📕 パスポート原本（有効期限・顔写真ページ）" },
+        { key: "arrivalCard", label: "📱 電子入国カード (SG Arrival / MDAC) 画面準備" },
+        { key: "wallet", label: "👛 財布・現金（SGDとMYR両方）・クレカ" },
+        { key: "phoneBattery", label: "🔋 スマホ＆モバイルバッテリー" },
+        { key: "busLuggage", label: "🎒 【重要】入国審査時はバスから全荷物を持って降りる" }
+      ];
+      container.innerHTML = `
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 space-y-3 text-left">
+          <h3 class="text-lg font-extrabold text-slate-800"><i class="fa-solid fa-passport text-rose-600 mr-1.5"></i>国境越え（SG⇔MY）チェックリスト</h3>
+          <div class="space-y-2">
+            ${items.map(it => `
+              <label class="flex items-center gap-3 p-3 rounded-xl border ${borderChecks[it.key] ? 'bg-emerald-50 border-emerald-300' : 'bg-slate-50 border-slate-200'} cursor-pointer">
+                <input type="checkbox" ${borderChecks[it.key] ? 'checked' : ''} onchange="toggleBorderCheck('${it.key}')" class="w-5 h-5 accent-emerald-600">
+                <span class="text-xs font-bold ${borderChecks[it.key] ? 'line-through text-slate-400' : 'text-slate-800'}">${escapeHTML(it.label)}</span>
+              </label>
+            `).join("")}
+          </div>
+        </div>
+      `;
+    }
+
+    function toggleBorderCheck(key) {
+      borderChecks[key] = !borderChecks[key];
+      localStorage.setItem("sgmy_border_checks", JSON.stringify(borderChecks));
+      renderBorderChecklistTool(document.getElementById("tool-detail-content"));
+    }
+
+    function updateTargetTimer(val) {
+      targetTimerTime = val;
+      localStorage.setItem("sgmy_target_timer", val);
+      const el = document.getElementById("timerRemainDisplay");
+      if (el) el.textContent = getTimerRemainingText();
+    }
+
+    function getTimerRemainingText() {
+      const targetMins = timeStrToMins(targetTimerTime);
+      const diff = targetMins - simMinutes;
+      if (diff > 0) return `集合まであと ${Math.floor(diff / 60)}時間 ${diff % 60}分`;
+      if (diff === 0) return `⏰ 集合時間ちょうどです！`;
+      return `⚠️ 集合時間を ${Math.abs(diff)}分 過ぎています！`;
+    }
+
+    function openFullscreenCard(badge, main, sub, ja) {
+      document.getElementById("fsCardBadge").textContent = badge;
+      document.getElementById("fsCardMainText").textContent = main;
+      document.getElementById("fsCardSubText").textContent = sub;
+      document.getElementById("fsCardJaText").textContent = ja;
+      document.getElementById("fullscreenCardModal").classList.remove("hidden");
+      updateBodyScrollLock();
+    }
+    function closeFullscreenCard() {
+      document.getElementById("fullscreenCardModal").classList.add("hidden");
+      updateBodyScrollLock();
+    }
+
+    function resetAllData() {
+      if (!confirm("本当にすべての編集データを初期状態に戻しますか？")) return;
+      localStorage.removeItem("sgmy_schedules_v8");
+      localStorage.removeItem("sgmy_myinfo_v8");
+      localStorage.removeItem("sgmy_links_v8");
+      localStorage.removeItem("sgmy_emergency_v8");
+      localStorage.removeItem("sgmy_user_tiles_v8");
+      location.reload();
+    }
+  </script>
+</body>
+</html>
