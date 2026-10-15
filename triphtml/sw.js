@@ -1,4 +1,4 @@
-const CACHE_NAME = "sgmy-trip-nav-v8";
+const CACHE_NAME = "sgmy-trip-nav-v9";
 
 const PRECACHE_URLS = [
   "./",
@@ -10,38 +10,31 @@ const PRECACHE_URLS = [
   "https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"
 ];
 
-// インストール時に基本アセットをキャッシュ
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(PRECACHE_URLS);
-    }).then(() => self.skipWaiting())
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_URLS)).then(() => self.skipWaiting())
   );
 });
 
-// 古いキャッシュの削除
 self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches.keys().then((keys) => {
-      return Promise.all(
-        keys.map((key) => {
-          if (key !== CACHE_NAME) {
-            return caches.delete(key);
-          }
-        })
-      );
-    }).then(() => self.clients.claim())
+    caches.keys().then((keys) =>
+      Promise.all(keys.map((key) => (key !== CACHE_NAME ? caches.delete(key) : null)))
+    ).then(() => self.clients.claim())
   );
 });
 
-// オフラインファースト（キャッシュ優先＋動的キャッシュ保存）
 self.addEventListener("fetch", (event) => {
-  if (event.request.method !== "GET") return;
+  const reqUrl = new URL(event.request.url);
+
+  // クラウド同期API (/api/sync) やPOSTリクエストはキャッシュせず直接ネットワークへ通す
+  if (event.request.method !== "GET" || reqUrl.pathname.startsWith("/api/")) {
+    return;
+  }
 
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) {
-        // バックグラウンドでキャッシュ更新を試みる（Stale-While-Revalidate）
         fetch(event.request).then((networkResponse) => {
           if (networkResponse && networkResponse.status === 200) {
             caches.open(CACHE_NAME).then((cache) => cache.put(event.request, networkResponse));
@@ -50,18 +43,12 @@ self.addEventListener("fetch", (event) => {
         return cachedResponse;
       }
 
-      // キャッシュになければネットワークから取得してキャッシュに保存（Webフォント等）
       return fetch(event.request).then((networkResponse) => {
-        if (!networkResponse || networkResponse.status !== 200) {
-          return networkResponse;
-        }
+        if (!networkResponse || networkResponse.status !== 200) return networkResponse;
         const responseClone = networkResponse.clone();
-        caches.open(CACHE_NAME).then((cache) => {
-          cache.put(event.request, responseClone);
-        });
+        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseClone));
         return networkResponse;
       }).catch(() => {
-        // オフラインでページ遷移した場合はindex.htmlを返す
         if (event.request.mode === "navigate") {
           return caches.match("./index.html");
         }
