@@ -1,12 +1,15 @@
 <!DOCTYPE html>
-<html lang="ja" id="htmlRoot" class="bg-blue-800">
+<html lang="ja" id="htmlRoot">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <!-- スマホ最上部（ステータスバー・アドレスバー）の色をテーマと連動させるメタタグ -->
+  <!-- Android PWA / ブラウザのアドレスバー・ステータスバー色 -->
   <meta name="theme-color" id="metaThemeColor" content="#1d4ed8">
+  <!-- iOS PWA（ホーム画面に追加時）に最上部ステータスバーまでヘッダー色を透過・連動させる設定 -->
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="修学旅行ナビ">
+  <link rel="manifest" href="./manifest.json">
   <title>SG & MY 修学旅行ナビ (6日間対応)</title>
 
   <!-- Tailwind CSS -->
@@ -19,11 +22,22 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
   <style id="base-styles">
-    body {
+    :root {
+      --header-bg: #1d4ed8;
+    }
+    html, body {
       font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
       -webkit-tap-highlight-color: transparent;
+      /* アプリ版で上部に引っ張った際（オーバースクロール時）や最上部ステータスバーの背景色をテーマと完全一致させる */
+      background-color: var(--header-bg);
+      margin: 0;
+      padding: 0;
     }
-    /* ボタンやタイルのみ文字選択を無効化（メモや住所は長押しコピー可能にする） */
+    /* iOS PWA（black-translucent）で最上部の時計・バッテリー裏までヘッダー背景色を広げる */
+    .app-header {
+      padding-top: max(0.65rem, env(safe-area-inset-top)) !important;
+    }
+
     .no-select {
       user-select: none;
       -webkit-user-select: none;
@@ -44,14 +58,12 @@
       z-index: 50;
     }
 
-    /* 編集モード時の揺れ（バツボタンが押しやすいよう控えめで滑らかな揺れに調整） */
     @keyframes wiggle {
       0%, 100% { transform: rotate(-0.7deg); }
       50% { transform: rotate(0.7deg); }
     }
     .edit-wiggle { animation: wiggle 0.4s ease-in-out infinite; }
 
-    /* タイル長押し中の視覚フィードバック */
     .tile-pressing {
       transform: scale(0.94) !important;
       transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
@@ -63,7 +75,6 @@
     }
     .current-schedule-card { animation: pulse-border 2s infinite; }
 
-    /* デモバーのスクロール時透過スタイル */
     #demoControlBar {
       transition: opacity 0.25s ease, transform 0.25s ease, background-color 0.25s ease;
     }
@@ -73,14 +84,16 @@
     }
 
     /* ==========================================================
-       🎨 CSS着せ替えテーマ定義（5パターン）
+       🎨 CSS着せ替えテーマ定義（5パターン + 最上部ステータスバー色連動）
        ========================================================== */
 
     /* 1. 現行パターン (theme-default) */
+    body.theme-default { --header-bg: #1d4ed8; }
 
     /* 2. モダンパターン (theme-modern) */
+    body.theme-modern { --header-bg: #f5f5f7; }
     body.theme-modern .app-shell { background-color: #f5f5f7 !important; color: #1d1d1f !important; }
-    body.theme-modern .app-header { background: rgba(255, 255, 255, 0.92) !important; backdrop-filter: blur(16px); color: #1d1d1f !important; border-bottom: 1px solid rgba(0,0,0,0.08); }
+    body.theme-modern .app-header { background: rgba(245, 245, 247, 0.94) !important; backdrop-filter: blur(16px); color: #1d1d1f !important; border-bottom: 1px solid rgba(0,0,0,0.08); }
     body.theme-modern .app-header .header-sub { color: #6e6e73 !important; }
     body.theme-modern #clockArea { background: rgba(0,0,0,0.06) !important; color: #1d1d1f !important; }
     body.theme-modern #clockPrimaryTime { color: #1d1d1f !important; }
@@ -90,6 +103,7 @@
     body.theme-modern .nav-home-btn { background: #1d1d1f !important; box-shadow: 0 8px 20px rgba(0,0,0,0.25) !important; }
 
     /* 3. PayPayっぽい感じパターン (theme-paypay) */
+    body.theme-paypay { --header-bg: #ff0033; }
     body.theme-paypay .app-shell { background-color: #f4f5f7 !important; }
     body.theme-paypay .app-header { background: #ff0033 !important; color: #ffffff !important; }
     body.theme-paypay .app-header .header-sub { color: #ffd6de !important; }
@@ -102,6 +116,7 @@
     body.theme-paypay .nav-home-btn { background: linear-gradient(135deg, #ff0033, #d9002b) !important; box-shadow: 0 6px 18px rgba(255, 0, 51, 0.4) !important; }
 
     /* 4. 三井住友銀行アプリっぽい感じパターン (theme-smbc) */
+    body.theme-smbc { --header-bg: #004831; }
     body.theme-smbc .app-shell { background-color: #eef3f0 !important; }
     body.theme-smbc .app-header { background: linear-gradient(135deg, #004831, #006847) !important; color: #ffffff !important; }
     body.theme-smbc .app-header .header-sub { color: #b7e4c7 !important; }
@@ -114,6 +129,7 @@
     body.theme-smbc .nav-home-btn { background: linear-gradient(135deg, #00a040, #004831) !important; box-shadow: 0 6px 18px rgba(0, 72, 49, 0.35) !important; }
 
     /* 5. Geminiのおすすめパターン (theme-gemini) */
+    body.theme-gemini { --header-bg: #0f766e; }
     body.theme-gemini .app-shell { background: linear-gradient(180deg, #f0fdfa 0%, #f8fafc 45%, #fffbeb 100%) !important; }
     body.theme-gemini .app-header { background: linear-gradient(135deg, #0f766e 0%, #0369a1 55%, #1e1b4b 100%) !important; color: #ffffff !important; }
     body.theme-gemini .app-header .header-sub { color: #99f6e4 !important; }
@@ -126,7 +142,7 @@
     body.theme-gemini .nav-home-btn { background: linear-gradient(135deg, #0d9488, #0284c7) !important; box-shadow: 0 8px 20px rgba(13, 148, 136, 0.4) !important; }
   </style>
 </head>
-<body class="bg-slate-900 text-slate-800 flex justify-center theme-default">
+<body class="text-slate-800 flex justify-center theme-default">
 
   <!-- スマホ枠コンテナ -->
   <div class="app-shell w-full max-w-md bg-slate-50 min-h-screen flex flex-col relative shadow-2xl pb-28">
@@ -139,7 +155,7 @@
     <!-- 📌 スクロールしても隠れない上部固定バー -->
     <div class="sticky top-0 z-40 shadow-md no-select">
       <!-- 🌐 メインステータスヘッダー -->
-      <header id="appHeaderBar" class="app-header bg-gradient-to-r from-blue-700 to-indigo-800 text-white px-4 py-2.5 flex justify-between items-center gap-2 transition-colors duration-300">
+      <header id="appHeaderBar" class="app-header bg-gradient-to-r from-blue-700 to-indigo-800 text-white px-4 pb-2.5 flex justify-between items-center gap-2 transition-colors duration-300">
         <!-- 左側：国旗＆Day表記 -->
         <div class="flex items-center gap-2.5 min-w-0 flex-1">
           <span id="countryFlag" class="text-2xl shrink-0">🇸🇬</span>
@@ -149,7 +165,7 @@
           </div>
         </div>
 
-        <!-- 右側：時計エリア（短押しで現地⇔日本切替 / 長押しでデモバー開閉 / 絶対に2段崩れしない固定幅） -->
+        <!-- 右側：時計エリア（短押しで現地⇔日本切替 / 長押しでデモバー開閉 / 2段崩れ防止固定） -->
         <div id="clockArea" 
              oncontextmenu="return false;"
              class="shrink-0 whitespace-nowrap text-right font-mono bg-white/10 hover:bg-white/15 active:scale-95 px-3 py-1 rounded-xl cursor-pointer transition">
@@ -179,7 +195,6 @@
         </div>
 
         <div class="space-y-2">
-          <!-- 6日間切り替えボタン -->
           <div class="grid grid-cols-6 gap-1" onclick="event.stopPropagation()">
             <button type="button" onclick="setDay(1)" id="dayBtn-1" class="py-1 rounded bg-blue-600 font-bold text-[11px] transition">Day1</button>
             <button type="button" onclick="setDay(2)" id="dayBtn-2" class="py-1 rounded bg-slate-700 font-bold text-[11px] transition">Day2</button>
@@ -203,7 +218,7 @@
       <!-- ================= 🏠 1. ホームタブ ================= -->
       <section id="view-home" class="space-y-4">
 
-        <!-- メイン予定カード（進行中の予定がない場合は次の予定[NEXT]をここに昇格表示） -->
+        <!-- メイン予定カード -->
         <div id="mainScheduleCard" onclick="onMainCardClick()" 
              class="now-card bg-white rounded-2xl p-4 shadow-md border-l-8 border-blue-600 cursor-pointer active:scale-[0.99] transition relative overflow-hidden">
           
@@ -236,7 +251,7 @@
           </div>
         </div>
 
-        <!-- 次の予定 (NEXT) カード ※進行中の予定がない時は自動で非表示 -->
+        <!-- 次の予定 (NEXT) カード -->
         <div id="nextCardContainer" onclick="jumpToNextSchedule()" 
              class="next-card bg-slate-800 text-white rounded-xl p-3.5 shadow-sm flex items-center justify-between cursor-pointer active:scale-[0.99] transition no-select">
           <div class="flex items-center gap-3 overflow-hidden">
@@ -255,7 +270,7 @@
           </div>
         </div>
 
-        <!-- クイックタイルエリア（長押しで編集モード・バツボタン大型化） -->
+        <!-- クイックタイルエリア -->
         <div class="pt-1 no-select">
           <div class="flex justify-between items-center mb-3">
             <h3 class="font-bold text-slate-700 text-sm flex items-center gap-1.5">
@@ -271,7 +286,6 @@
             </div>
           </div>
 
-          <!-- タイルグリッド（バツボタンが見切れないよう pt-1 px-1 余白確保） -->
           <div id="quickTilesGrid" class="grid grid-cols-2 gap-3.5 pt-1"></div>
         </div>
 
@@ -294,7 +308,6 @@
           </div>
         </div>
 
-        <!-- 6日間切り替えタブ（Day 1 〜 Day 6） -->
         <div class="grid grid-cols-6 gap-1 bg-slate-200 p-1 rounded-xl text-xs font-bold no-select">
           <button type="button" onclick="setDay(1)" id="schedTab-1" class="py-2 rounded-lg bg-white text-blue-700 shadow-sm transition">Day 1</button>
           <button type="button" onclick="setDay(2)" id="schedTab-2" class="py-2 rounded-lg text-slate-600 transition">Day 2</button>
@@ -304,22 +317,17 @@
           <button type="button" onclick="setDay(6)" id="schedTab-6" class="py-2 rounded-lg text-slate-600 transition">Day 6</button>
         </div>
 
-        <!-- タイムラインリスト -->
-        <div id="scheduleTimeline" class="space-y-2.5 relative before:content-[''] before:absolute before:left-4 before:top-4 before:bottom-4 before:w-0.5 before:bg-slate-300">
-          <!-- JSで生成 -->
-        </div>
+        <div id="scheduleTimeline" class="space-y-2.5 relative before:content-[''] before:absolute before:left-4 before:top-4 before:bottom-4 before:w-0.5 before:bg-slate-300"></div>
       </section>
 
-      <!-- ================= 🧰 3. ツールタブ（リストレイアウト＆個別ツール） ================= -->
+      <!-- ================= 🧰 3. ツールタブ ================= -->
       <section id="view-tools" class="hidden">
 
-        <!-- 3-A. ツール一覧ハブ画面（1列リストレイアウト） -->
         <div id="tools-hub" class="space-y-3 no-select">
           <h2 class="text-lg font-extrabold text-slate-800 text-left"><i class="fa-solid fa-toolbox text-indigo-600 mr-1.5"></i>ツール一覧</h2>
           <div id="toolsHubList" class="space-y-2.5"></div>
         </div>
 
-        <!-- 3-B. 個別ツール表示コンテナ -->
         <div id="tool-detail-container" class="hidden space-y-4">
           <div class="flex items-center justify-between border-b border-slate-200 pb-3 no-select">
             <button type="button" id="toolBackBtn" onclick="handleToolBackButton()" class="inline-flex items-center gap-1.5 text-sm font-bold text-indigo-600 hover:text-indigo-800 py-1 pr-3">
@@ -552,7 +560,7 @@
       </div>
     </div>
 
-    <!-- 4. 汎用アイテム編集モーダル（prompt廃止・リンク集や緊急連絡先の編集用） -->
+    <!-- 4. 汎用アイテム編集モーダル -->
     <div id="genericEditModal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
       <div class="bg-white w-full max-w-md rounded-t-2xl sm:rounded-2xl p-5 space-y-3.5 text-left">
         <div class="flex justify-between items-center border-b pb-2">
@@ -695,7 +703,6 @@
       { id: "t6", key: "tool:share" }
     ];
 
-    // ツールカタログ（キー名を完全統一し、不一致バグを防止）
     const toolCatalog = {
       "tool:myinfo":      { title: "部屋・座席メモ", sub: "部屋番号・バス・飛行機座席", icon: "fa-id-card-clip", color: "bg-cyan-600", badge: "自分用" },
       "tool:currency":    { title: "通貨換算電卓", sub: "SGD🇸🇬 ⇄ MYR🇲🇾 ⇄ 円 双方向換算", icon: "fa-coins", color: "bg-emerald-600", badge: "計算" },
@@ -709,19 +716,18 @@
       "tool:rules":       { title: "現地ルール＆プラグ", sub: "罰金注意・コンセント形状解説", icon: "fa-triangle-exclamation", color: "bg-orange-600", badge: "知識" },
       "tool:share":       { title: "データ共有・インポート", sub: "JSON読込・班員共有・AIプロンプト", icon: "fa-file-import", color: "bg-slate-700", badge: "共有/読込" },
       "tool:appsettings": { title: "App設定", sub: "UIテーマ変更・旅行開始日設定", icon: "fa-palette", color: "bg-pink-600", badge: "設定" },
-      // 外部アプリ起動ショートカット
       "app:gmaps":      { title: "Googleマップ", sub: "現在地＆ルート検索を開く", icon: "fa-map-location-dot", color: "bg-sky-600", badge: "外部アプリ", url: "https://maps.google.com/" },
       "app:gtranslate": { title: "Google翻訳", sub: "カメラ翻訳・音声翻訳を開く", icon: "fa-language", color: "bg-blue-500", badge: "外部アプリ", url: "https://translate.google.co.jp/" },
       "app:camera":     { title: "Googleレンズ", sub: "メニュー・看板をカメラ翻訳", icon: "fa-camera", color: "bg-violet-600", badge: "外部アプリ", url: "https://lens.google/" }
     };
 
-    // テーマごとの最上部ステータスバー色定義（PWA・モバイルブラウザ最上部の色連動用）
+    // テーマごとの最上部ステータスバー色定義
     const themeStatusBarColors = {
-      "theme-default": { meta: "#1d4ed8", htmlClass: "bg-blue-800" },
-      "theme-modern":  { meta: "#ffffff", htmlClass: "bg-white" },
-      "theme-paypay":  { meta: "#ff0033", htmlClass: "bg-[#ff0033]" },
-      "theme-smbc":    { meta: "#004831", htmlClass: "bg-[#004831]" },
-      "theme-gemini":  { meta: "#0f766e", htmlClass: "bg-[#0f766e]" }
+      "theme-default": "#1d4ed8",
+      "theme-modern":  "#f5f5f7",
+      "theme-paypay":  "#ff0033",
+      "theme-smbc":    "#004831",
+      "theme-gemini":  "#0f766e"
     };
 
     // --- 2. 状態管理（LocalStorage v7） ---
@@ -731,7 +737,6 @@
     let emergencyData = JSON.parse(localStorage.getItem("sgmy_emergency_v7")) || defaultEmergencyData;
     let userTiles = loadTilesSafely();
 
-    // 通貨レート＆割り勘人数設定
     let rateSGD = parseFloat(localStorage.getItem("sgmy_rate_sgd")) || 115;
     let rateMYR = parseFloat(localStorage.getItem("sgmy_rate_myr")) || 35;
     let splitGroupSize = parseInt(localStorage.getItem("sgmy_split_size"), 10) || 4;
@@ -739,7 +744,7 @@
 
     let currentDay = 1;
     let isDemoBarOpen = false;
-    let simMinutes = 750; // 12:30
+    let simMinutes = 750;
     let liveIntervalId = null;
     let activeToolKey = null;
 
@@ -768,7 +773,6 @@
       try {
         const saved = JSON.parse(localStorage.getItem("sgmy_schedules_v7"));
         if (saved && typeof saved === "object") {
-          // 1〜6日まで欠けている日があればデフォルトで補完
           for (let d = 1; d <= 6; d++) {
             if (!saved[d] || !Array.isArray(saved[d].items)) {
               saved[d] = JSON.parse(JSON.stringify(defaultScheduleData[d]));
@@ -784,7 +788,6 @@
       try {
         const saved = JSON.parse(localStorage.getItem("sgmy_user_tiles_v7"));
         if (Array.isArray(saved) && saved.length > 0) {
-          // 古いキー名 (tool:settings / tool:import) を正規化し、存在しないキーやgrabを除外
           return saved.map(t => {
             if (t.key === "tool:settings" || t.key === "tool:import") t.key = "tool:share";
             return t;
@@ -794,7 +797,7 @@
       return JSON.parse(JSON.stringify(defaultTiles));
     }
 
-    // --- 3. 初期化 ---
+    // --- 3. 初期化 ＆ Service Worker登録 ---
     window.addEventListener("DOMContentLoaded", () => {
       const savedTheme = localStorage.getItem("sgmy_design_theme") || "theme-default";
       changeDesignTheme(savedTheme, false);
@@ -806,9 +809,13 @@
       renderQuickTiles();
       renderToolsHub();
       initSortable();
+
+      // Service Worker 登録（PWA・オフライン対応）
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("./sw.js").catch(() => {});
+      }
     });
 
-    // 旅行開始日が設定されている場合、今日の日付からDay 1〜6を自動判定
     function autoDetectDayFromDate() {
       if (!tripStartDate) return;
       const start = new Date(tripStartDate + "T00:00:00");
@@ -820,24 +827,21 @@
       }
     }
 
-    // UIテーマ変更 ＋ アプリ版の一番上の色（meta theme-color & html背景色）の完全連動
+    // UIテーマ変更 ＋ アプリ版の最上部ステータスバー色連動
     function changeDesignTheme(themeClass, notify = true) {
       const validTheme = themeStatusBarColors[themeClass] ? themeClass : "theme-default";
       document.body.classList.remove("theme-default", "theme-modern", "theme-paypay", "theme-smbc", "theme-gemini");
       document.body.classList.add(validTheme);
 
-      // スマホ最上部（ステータスバー・ノッチ周辺）の色を即座に書き換え
-      const colorInfo = themeStatusBarColors[validTheme];
+      const hexColor = themeStatusBarColors[validTheme];
       const metaTag = document.getElementById("metaThemeColor");
-      if (metaTag) metaTag.setAttribute("content", colorInfo.meta);
+      if (metaTag) metaTag.setAttribute("content", hexColor);
 
-      const htmlRoot = document.getElementById("htmlRoot");
-      if (htmlRoot) {
-        htmlRoot.style.backgroundColor = colorInfo.meta;
-      }
+      document.documentElement.style.backgroundColor = hexColor;
+      document.body.style.backgroundColor = hexColor;
 
       localStorage.setItem("sgmy_design_theme", validTheme);
-      if (notify) showToast("UIデザインと最上部バーの色を変更しました");
+      if (notify) showToast("UIデザインを変更しました");
     }
 
     function showToast(msg) {
@@ -932,7 +936,6 @@
       } else {
         demoBadge.classList.add("hidden");
         updateFromRealClock();
-        // 集合タイマーのリアルタイム更新も兼ねて5秒ごとに更新
         liveIntervalId = setInterval(updateFromRealClock, 5000);
       }
     }
@@ -940,11 +943,10 @@
     function updateFromRealClock() {
       const now = new Date();
       const utcMs = now.getTime() + (now.getTimezoneOffset() * 60000);
-      const sgTime = new Date(utcMs + (8 * 3600000)); // UTC+8 (SG/MY)
+      const sgTime = new Date(utcMs + (8 * 3600000));
       simMinutes = sgTime.getHours() * 60 + sgTime.getMinutes();
       updateTimeAndScheduleUI();
 
-      // もし集合タイマーツールを開いている場合はカウントダウン表示もリアルタイム更新
       const timerEl = document.getElementById("timerRemainDisplay");
       if (timerEl) timerEl.textContent = getTimerRemainingText();
     }
@@ -1147,7 +1149,6 @@
           nextCardContainer.classList.add("hidden");
         }
       } else if (nextItem) {
-        // 予定がない空白時間はメインカードに次の予定を表示し、NEXTカードは隠す
         currentScheduleItemId = nextItem.id;
         nextScheduleItemId = nextItem.id;
         mainCardTargetScheduleId = nextItem.id;
@@ -1448,7 +1449,7 @@
       }, 80);
     }
 
-    // --- 8. クイックタイル描画 ＆ 誤爆ゼロのタッチ/長押し制御 ＆ 押しやすい大型バツボタン ---
+    // --- 8. クイックタイル描画 ＆ タッチ/長押し制御 ＆ 大型バツボタン ---
     let tileGesture = {
       timer: null,
       longPressFired: false,
@@ -1477,7 +1478,6 @@
                class="tile-card bg-white rounded-2xl p-3.5 shadow-sm border border-slate-200/80 flex flex-col justify-between relative cursor-pointer transition select-none text-left ${isEditingTiles ? 'edit-wiggle ring-2 ring-indigo-400' : ''}">
             
             ${isEditingTiles ? `
-              <!-- 押しやすく大型化したバツボタン（36x36px・ドラッグイベントへの伝播を完全ブロック） -->
               <button type="button"
                       onpointerdown="event.stopPropagation();"
                       ontouchstart="event.stopPropagation();"
@@ -1514,7 +1514,6 @@
 
     function handleTilePointerDown(e, tileId) {
       if (isEditingTiles) return;
-      // 右クリックは除外
       if (e.button && e.button !== 0) return;
 
       tileGesture.startX = e.clientX;
@@ -1554,7 +1553,6 @@
       if (tileGesture.longPressFired || tileGesture.moved || isEditingTiles) {
         return;
       }
-      // 短いタップと判定された場合、そのtileIdのツールを確実に開く
       activateTileById(tileId);
     }
 
@@ -1603,7 +1601,7 @@
       sortableInstance = new Sortable(grid, {
         animation: 200,
         disabled: true,
-        filter: "button", // バツボタン押下時はドラッグを開始しない
+        filter: "button",
         preventOnFilter: false,
         ghostClass: "sortable-ghost",
         dragClass: "sortable-drag",
@@ -1674,7 +1672,7 @@
       }
     }
 
-    // --- 10. ツール一覧（リストレイアウト）＆ 確実なツール起動ルーティング ---
+    // --- 10. ツール一覧（リストレイアウト）＆ ツール起動ルーティング ---
     function renderToolsHub() {
       const listContainer = document.getElementById("toolsHubList");
       listContainer.innerHTML = Object.keys(toolCatalog).map(key => {
@@ -1737,49 +1735,23 @@
       window.scrollTo({ top: 0, behavior: "smooth" });
 
       const container = document.getElementById("tool-detail-content");
-      container.innerHTML = ""; // 前回のツール残骸を確実にクリア
+      container.innerHTML = "";
 
       try {
         switch (toolKey) {
-          case "tool:myinfo":
-            renderMyInfoTool(container);
-            break;
-          case "tool:currency":
-            renderCurrencyTool(container);
-            break;
-          case "tool:links":
-            renderLinksTool(container);
-            break;
-          case "tool:emergency":
-            renderEmergencyTool(container);
-            break;
-          case "tool:hotel":
-            renderHotelTool(container);
-            break;
-          case "tool:phrases":
-            renderPhrasesTool(container);
-            break;
-          case "tool:split":
-            renderSplitTool(container);
-            break;
-          case "tool:border":
-            renderBorderChecklistTool(container);
-            break;
-          case "tool:timer":
-            renderTimerTool(container);
-            break;
-          case "tool:rules":
-            renderRulesTool(container);
-            break;
-          case "tool:share":
-            renderShareTool(container);
-            break;
-          case "tool:appsettings":
-            renderAppSettingsTool(container);
-            break;
-          default:
-            renderMyInfoTool(container);
-            break;
+          case "tool:myinfo":      renderMyInfoTool(container); break;
+          case "tool:currency":    renderCurrencyTool(container); break;
+          case "tool:links":       renderLinksTool(container); break;
+          case "tool:emergency":   renderEmergencyTool(container); break;
+          case "tool:hotel":       renderHotelTool(container); break;
+          case "tool:phrases":     renderPhrasesTool(container); break;
+          case "tool:split":       renderSplitTool(container); break;
+          case "tool:border":      renderBorderChecklistTool(container); break;
+          case "tool:timer":       renderTimerTool(container); break;
+          case "tool:rules":       renderRulesTool(container); break;
+          case "tool:share":       renderShareTool(container); break;
+          case "tool:appsettings": renderAppSettingsTool(container); break;
+          default:                 renderMyInfoTool(container); break;
         }
       } catch (err) {
         console.error(err);
@@ -1789,7 +1761,6 @@
 
     // --- 11. 各個別ツールのレンダリング実装 ---
 
-    // ① 双方向・レート変更可能な通貨換算電卓
     function renderCurrencyTool(container) {
       container.innerHTML = `
         <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-4 text-left">
@@ -1863,7 +1834,6 @@
       onBiCurrencyInput("SGD");
     }
 
-    // ② ホテル・集合場所提示カード
     function renderHotelTool(container) {
       container.innerHTML = `
         <div class="space-y-3 text-left">
@@ -1885,7 +1855,6 @@
       `;
     }
 
-    // ③ 指差し会話カード
     function renderPhrasesTool(container) {
       const phrases = [
         { badge: "🚻 トイレ", main: "Where is the restroom?", sub: "Di mana tandas? / 洗手间在哪里？", ja: "トイレはどこですか？" },
@@ -1914,7 +1883,6 @@
       if (p) openFullscreenCard(p.badge, p.main, p.sub, p.ja);
     }
 
-    // ④ 集合タイマー
     function renderTimerTool(container) {
       container.innerHTML = `
         <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-4 text-center">
@@ -1929,7 +1897,6 @@
       `;
     }
 
-    // ⑤ 現地ルール＆プラグ
     function renderRulesTool(container) {
       container.innerHTML = `
         <div class="space-y-4 text-left">
@@ -1949,7 +1916,6 @@
       `;
     }
 
-    // ⑥ 🎨 App設定（UIテーマ変更 ＋ 旅行開始日設定 ＋ デモ時間バー起動）
     function renderAppSettingsTool(container) {
       const currentTheme = localStorage.getItem("sgmy_design_theme") || "theme-default";
       const themes = [
@@ -1964,7 +1930,7 @@
         <div class="space-y-4 text-left">
           <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 space-y-3">
             <h3 class="text-lg font-extrabold text-slate-800"><i class="fa-solid fa-palette text-pink-600 mr-1.5"></i>UIデザインテーマ変更</h3>
-            <p class="text-xs text-slate-500">テーマを切り替えると、アプリ最上部のシステムバーの色も連動して変わります。</p>
+            <p class="text-xs text-slate-500">テーマを切り替えると、アプリ版の一番上（ステータスバー領域）の色も連動して変わります。</p>
 
             <div class="space-y-2.5">
               ${themes.map(t => {
@@ -2015,7 +1981,6 @@
       showToast("旅行開始日を保存しました");
     }
 
-    // ⑦ 🎫 「部屋・座席メモ」ツール
     function renderMyInfoTool(container) {
       container.innerHTML = `
         <div class="space-y-4 text-left">
@@ -2099,7 +2064,6 @@
       renderMyInfoTool(document.getElementById("tool-detail-content"));
     }
 
-    // ⑧ 📤 データ共有・インポート ＆ 🤖 AI作成プロンプト内蔵ツール
     const AI_PROMPT_TEMPLATE = `あなたは修学旅行の行程データ作成アシスタントです。
 以下の仕様に従い、シンガポール＆マレーシア修学旅行（6日間：Day 1〜Day 6）のインポート用JSONデータを作成してください。
 出力は余計な解説を省き、純粋なJSONテキストのみ（{"v":7, ...}）を出力してください。
@@ -2172,24 +2136,22 @@
     function renderShareTool(container) {
       container.innerHTML = `
         <div class="space-y-4 text-left">
-          <!-- 1. インポート（読み込み）セクション -->
           <div class="bg-white rounded-2xl p-4 shadow-sm border-2 border-emerald-500/40 space-y-3">
             <h3 class="text-base font-extrabold text-emerald-800"><i class="fa-solid fa-file-import mr-1.5"></i>データのインポート（読み込み）</h3>
-            <p class="text-xs text-slate-600">班員から共有されたJSONテキスト、またはAI（ChatGPT / Gemini等）が作成したJSONデータを下に貼り付けて「データを反映する」を押してください。</p>
-            <textarea id="importJsonTextarea" rows="5" placeholder='{"v": 7, "schedules": ...} をここに貼り付け（```json などの記号が含まれていても自動除去されます）' class="w-full border border-slate-300 rounded-xl p-2.5 text-xs font-mono bg-slate-50 selectable"></textarea>
+            <p class="text-xs text-slate-600">班員から共有されたJSONテキスト、またはAIが作成したJSONデータを下に貼り付けて「データを反映する」を押してください。</p>
+            <textarea id="importJsonTextarea" rows="5" placeholder='{"v": 7, "schedules": ...} をここに貼り付け' class="w-full border border-slate-300 rounded-xl p-2.5 text-xs font-mono bg-slate-50 selectable"></textarea>
             <button type="button" onclick="importDataFromText()" class="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white font-extrabold py-3 rounded-xl text-xs shadow-md transition">
               <i class="fa-solid fa-check mr-1"></i>貼り付けたデータをアプリに反映する
             </button>
           </div>
 
-          <!-- 2. 🤖 AIにインポート用データを作ってもらう説明文コピー -->
           <div class="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-2xl p-4 shadow-sm border border-indigo-200 space-y-2.5">
             <div class="flex items-center justify-between">
               <h4 class="text-sm font-extrabold text-indigo-900"><i class="fa-solid fa-robot text-indigo-600 mr-1.5"></i>AIでインポートデータを作成する</h4>
               <span class="text-[10px] font-bold bg-indigo-600 text-white px-2 py-0.5 rounded-full">6日間対応</span>
             </div>
             <p class="text-xs text-slate-600 leading-relaxed">
-              しおりの写真やテキストをAI（GeminiやChatGPT）に渡して、このアプリ用のデータを自動作成させるための<strong>「AI指示プロンプト（仕様書）」</strong>です。
+              しおりの写真やテキストをAIに渡して、このアプリ用のデータを自動作成させるための<strong>「AI指示プロンプト（仕様書）」</strong>です。
             </p>
             <button type="button" onclick="copyAiPrompt()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-3 rounded-xl text-xs shadow transition flex items-center justify-center gap-1.5">
               <i class="fa-regular fa-copy"></i> AI用プロンプト（仕様説明文）をコピー
@@ -2200,11 +2162,8 @@
             </details>
           </div>
 
-          <!-- 3. 班員へのエクスポート（書き出し） -->
           <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 space-y-3">
             <h4 class="text-sm font-extrabold text-slate-800"><i class="fa-solid fa-share-nodes text-blue-600 mr-1.5"></i>現在の設定データを班員に共有（書き出し）</h4>
-            <p class="text-xs text-slate-500">今このアプリに入っているスケジュール（Day1〜6）・リンク集・部屋メモをコピーしてLINE等で送れます。</p>
-
             <div class="grid grid-cols-2 gap-2">
               <button type="button" onclick="exportDataToClipboard()" class="bg-slate-800 hover:bg-slate-900 text-white font-bold py-2.5 px-3 rounded-xl text-xs shadow transition flex items-center justify-center gap-1.5">
                 <i class="fa-regular fa-copy"></i> 全データをコピー
@@ -2220,7 +2179,6 @@
             </div>
           </div>
 
-          <!-- 4. リセット -->
           <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 space-y-2">
             <h4 class="text-xs font-extrabold text-rose-600"><i class="fa-solid fa-rotate-left mr-1"></i>初期データへのリセット</h4>
             <button type="button" onclick="resetAllData()" class="w-full bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold py-2 rounded-xl text-xs transition">
@@ -2232,7 +2190,7 @@
     }
 
     function copyAiPrompt() {
-      copyText(AI_PROMPT_TEMPLATE, "AI用プロンプトをコピーしました！AIに貼り付けて予定を作ってもらえます");
+      copyText(AI_PROMPT_TEMPLATE, "AI用プロンプトをコピーしました！");
     }
 
     function createExportPayload() {
@@ -2267,7 +2225,7 @@
 
       try {
         new QRCode(canvas, { text: compactPayload, width: 180, height: 180, correctLevel: QRCode.CorrectLevel.L });
-        status.textContent = "部屋・座席メモの軽量QRコードです。6日分の全スケジュールを送る場合は「全データをコピー」からLINE等で送信してください。";
+        status.textContent = "部屋・座席メモの軽量QRコードです。全スケジュールを送る場合は「全データをコピー」からLINE等で送信してください。";
       } catch (e) {
         status.textContent = "文字数が多いため「全データをコピー」をご利用ください。";
       }
@@ -2277,7 +2235,6 @@
       let raw = document.getElementById("importJsonTextarea").value.trim();
       if (!raw) return showToast("JSONテキストを貼り付けてください");
 
-      // AIが出力しがちな ```json ... ``` のMarkdownコードブロック装飾を自動除去
       raw = raw.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "").trim();
 
       try {
@@ -2321,7 +2278,6 @@
       }
     }
 
-    // ⑨ リンク集 ＆ 緊急連絡先（prompt廃止・専用モーダル編集対応）
     function renderLinksTool(container) {
       const grouped = {};
       linksData.forEach(item => {
@@ -2528,7 +2484,6 @@
       renderEmergencyTool(document.getElementById("tool-detail-content"));
     }
 
-    // ⑩ 人数可変式の割り勘・立替メモ
     function renderSplitTool(container) {
       let totalJpy = 0;
       splitExpenses.forEach(e => { totalJpy += e.amount * (e.currency === "SGD" ? rateSGD : rateMYR); });
@@ -2605,7 +2560,6 @@
       renderSplitTool(document.getElementById("tool-detail-content"));
     }
 
-    // ⑪ 国境越えチェックリスト
     function renderBorderChecklistTool(container) {
       const items = [
         { key: "passport", label: "📕 パスポート原本（有効期限・顔写真ページ）" },
