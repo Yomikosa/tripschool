@@ -3,14 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <!-- Android PWA / ブラウザのアドレスバー・ステータスバー色 -->
   <meta name="theme-color" id="metaThemeColor" content="#1d4ed8">
-  <!-- iOS PWA（ホーム画面に追加時）に最上部ステータスバーまでヘッダー色を透過・連動させる設定 -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="修学旅行ナビ">
   <link rel="manifest" href="./manifest.json">
-  <title>SG & MY 修学旅行ナビ (6日間対応)</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Crect width='120' height='120' rx='28' fill='%230ea5e9'/%3E%3Cpath d='M52 20 L66 17 L60 24 L68 27 L64 29 L56 25 L50 28 Z' fill='%23fff'/%3E%3Cg fill='%230369a1'%3E%3Crect x='20' y='47' width='6' height='26'/%3E%3Crect x='30' y='47' width='6' height='26'/%3E%3Crect x='40' y='47' width='6' height='26'/%3E%3C/g%3E%3Cpath d='M15 44 Q33 43 51 47 L49 50 Q32 46 16 47 Z' fill='%23f8fafc'/%3E%3Cg fill='%230284c7'%3E%3Crect x='74' y='42' width='8' height='32'/%3E%3Cpolygon points='74,42 78,28 82,42'/%3E%3Crect x='90' y='42' width='8' height='32'/%3E%3Cpolygon points='90,42 94,28 98,42'/%3E%3C/g%3E%3Cpolygon points='26,108 42,82 78,82 94,108 60,115' fill='%23fff'/%3E%3Cpolygon points='30,106 44,85 76,85 90,106 60,112' fill='%230284c7'/%3E%3Ccircle cx='44' cy='94' r='6' fill='%23ef4444' stroke='%23fff' stroke-width='1.5'/%3E%3Ccircle cx='76' cy='94' r='6' fill='%23facc15' stroke='%23fff' stroke-width='1.5'/%3E%3C/svg%3E">
+  <title>SG & MY 修学旅行ナビ</title>
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -28,12 +27,10 @@
     html, body {
       font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
       -webkit-tap-highlight-color: transparent;
-      /* アプリ版で上部に引っ張った際（オーバースクロール時）や最上部ステータスバーの背景色をテーマと完全一致させる */
       background-color: var(--header-bg);
       margin: 0;
       padding: 0;
     }
-    /* iOS PWA（black-translucent）で最上部の時計・バッテリー裏までヘッダー背景色を広げる */
     .app-header {
       padding-top: max(0.65rem, env(safe-area-inset-top)) !important;
     }
@@ -156,12 +153,66 @@
     <div class="sticky top-0 z-40 shadow-md no-select">
       <!-- 🌐 メインステータスヘッダー -->
       <header id="appHeaderBar" class="app-header bg-gradient-to-r from-blue-700 to-indigo-800 text-white px-4 pb-2.5 flex justify-between items-center gap-2 transition-colors duration-300">
-        <!-- 左側：国旗＆Day表記 -->
+        <!-- 左側：アプリアイコン（添付画像＋SG/MY国旗モチーフ）＆ 現在のDay表記（滞在国表示は廃止） -->
         <div class="flex items-center gap-2.5 min-w-0 flex-1">
-          <span id="countryFlag" class="text-2xl shrink-0">🇸🇬</span>
+          <!-- 添付画像(MBS・マーライオン・ツインタワー・飛行機・マップピン)＋2カ国旗を組み込んだアプリアイコン -->
+          <div class="w-10 h-10 rounded-xl shadow-md overflow-hidden shrink-0 border border-white/25 bg-sky-500">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" class="w-full h-full">
+              <defs>
+                <linearGradient id="hdrSky" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#0ea5e9"/>
+                  <stop offset="100%" stop-color="#38bdf8"/>
+                </linearGradient>
+              </defs>
+              <rect width="120" height="120" rx="24" fill="url(#hdrSky)"/>
+              <!-- 飛行機と軌跡 -->
+              <path d="M22 36 Q42 20 62 24" stroke="#fff" stroke-width="2" stroke-dasharray="3 3" fill="none"/>
+              <path d="M52 20 L66 17 L60 24 L68 27 L64 29 L56 25 L50 28 Z" fill="#fff"/>
+              <!-- 左：マリーナベイ・サンズ＆マーライオン -->
+              <g fill="#0369a1">
+                <rect x="20" y="47" width="6" height="26"/>
+                <rect x="30" y="47" width="6" height="26"/>
+                <rect x="40" y="47" width="6" height="26"/>
+              </g>
+              <path d="M15 44 Q33 43 51 47 L49 50 Q32 46 16 47 Z" fill="#f8fafc"/>
+              <!-- 右：ペトロナスツインタワー＆KLタワー -->
+              <g fill="#0284c7">
+                <rect x="74" y="42" width="8" height="32"/>
+                <polygon points="74,42 78,28 82,42"/>
+                <rect x="90" y="42" width="8" height="32"/>
+                <polygon points="90,42 94,28 98,42"/>
+                <rect x="82" y="55" width="8" height="2.5" fill="#e0f2fe"/>
+              </g>
+              <!-- マーライオン＆噴水 -->
+              <path d="M16 74 C16 58 29 58 29 70 L29 82 L16 82 Z" fill="#fff"/>
+              <path d="M28 65 Q40 67 44 76" stroke="#bae6fd" stroke-width="2.5" fill="none"/>
+              <!-- グリーン＆下部ルートマップ -->
+              <path d="M8 76 Q60 66 112 78 L112 120 L8 120 Z" fill="#15803d"/>
+              <polygon points="24,110 40,82 80,82 96,110 60,117" fill="#fff"/>
+              <polygon points="28,108 42,85 78,85 92,108 60,114" fill="#0284c7"/>
+              <path d="M44 98 Q60 104 75 98" stroke="#fff" stroke-width="2" stroke-dasharray="3 3" fill="none"/>
+              <circle cx="44" cy="94" r="6" fill="#ef4444" stroke="#fff" stroke-width="1.5"/>
+              <circle cx="76" cy="94" r="6" fill="#facc15" stroke="#fff" stroke-width="1.5"/>
+              <!-- 左上：シンガポール国旗バッジ -->
+              <g transform="translate(8,10)">
+                <rect width="26" height="18" rx="3" fill="#fff" stroke="#e2e8f0" stroke-width="1"/>
+                <rect width="26" height="9" rx="2" fill="#ef4444"/>
+                <circle cx="7" cy="4.5" r="2.8" fill="#fff"/>
+                <circle cx="8.2" cy="4.5" r="2.3" fill="#ef4444"/>
+              </g>
+              <!-- 右上：マレーシア国旗バッジ -->
+              <g transform="translate(86,10)">
+                <rect width="26" height="18" rx="3" fill="#fff" stroke="#e2e8f0" stroke-width="1"/>
+                <rect y="0" width="26" height="3" fill="#dc2626"/>
+                <rect y="6" width="26" height="3" fill="#dc2626"/>
+                <rect y="12" width="26" height="3" fill="#dc2626"/>
+                <rect width="14" height="10" rx="1" fill="#1e3a8a"/>
+                <circle cx="6.5" cy="5" r="2.8" fill="#facc15"/>
+              </g>
+            </svg>
+          </div>
           <div class="min-w-0 leading-tight text-left">
-            <div id="countryName" class="header-sub text-[10px] font-semibold text-blue-200 truncate">シンガポール滞在</div>
-            <div id="dayTitle" class="text-base font-extrabold tracking-tight break-words">Day 1</div>
+            <div id="dayTitle" class="text-lg font-extrabold tracking-tight break-words">Day 1</div>
           </div>
         </div>
 
@@ -182,12 +233,12 @@
         </div>
       </header>
 
-      <!-- 🛠 デモ時間操作ドロワー（開いている間のみDEMO時間・下スクロールで薄くなりタップで復帰） -->
+      <!-- 🛠 デモ時間操作ドロワー（ここで変更したDayは activeTripDay として現在日程に反映） -->
       <div id="demoControlBar" onclick="restoreDemoBarOpacity()" class="bg-slate-800 text-white px-3.5 py-2.5 text-xs border-b border-slate-700 hidden cursor-pointer">
         <div class="flex items-center justify-between mb-2">
           <div class="flex items-center gap-2">
             <span class="font-bold text-amber-400"><i class="fa-solid fa-clock-rotate-left mr-1"></i>DEMO時間モード中</span>
-            <span class="text-[10px] text-slate-300">（閉じると現在時刻に戻ります）</span>
+            <span class="text-[10px] text-slate-300">（現在日程のシミュレート）</span>
           </div>
           <button type="button" onclick="event.stopPropagation(); closeDemoBar()" class="bg-slate-700 hover:bg-slate-600 text-white px-2.5 py-1 rounded-lg font-bold">
             <i class="fa-solid fa-xmark mr-0.5"></i>閉じる
@@ -196,16 +247,16 @@
 
         <div class="space-y-2">
           <div class="grid grid-cols-6 gap-1" onclick="event.stopPropagation()">
-            <button type="button" onclick="setDay(1)" id="dayBtn-1" class="py-1 rounded bg-blue-600 font-bold text-[11px] transition">Day1</button>
-            <button type="button" onclick="setDay(2)" id="dayBtn-2" class="py-1 rounded bg-slate-700 font-bold text-[11px] transition">Day2</button>
-            <button type="button" onclick="setDay(3)" id="dayBtn-3" class="py-1 rounded bg-slate-700 font-bold text-[11px] transition">Day3</button>
-            <button type="button" onclick="setDay(4)" id="dayBtn-4" class="py-1 rounded bg-slate-700 font-bold text-[11px] transition">Day4</button>
-            <button type="button" onclick="setDay(5)" id="dayBtn-5" class="py-1 rounded bg-slate-700 font-bold text-[11px] transition">Day5</button>
-            <button type="button" onclick="setDay(6)" id="dayBtn-6" class="py-1 rounded bg-slate-700 font-bold text-[11px] transition">Day6</button>
+            <button type="button" onclick="setActiveTripDay(1)" id="dayBtn-1" class="py-1 rounded bg-blue-600 font-bold text-[11px] transition">Day1</button>
+            <button type="button" onclick="setActiveTripDay(2)" id="dayBtn-2" class="py-1 rounded bg-slate-700 font-bold text-[11px] transition">Day2</button>
+            <button type="button" onclick="setActiveTripDay(3)" id="dayBtn-3" class="py-1 rounded bg-slate-700 font-bold text-[11px] transition">Day3</button>
+            <button type="button" onclick="setActiveTripDay(4)" id="dayBtn-4" class="py-1 rounded bg-slate-700 font-bold text-[11px] transition">Day4</button>
+            <button type="button" onclick="setActiveTripDay(5)" id="dayBtn-5" class="py-1 rounded bg-slate-700 font-bold text-[11px] transition">Day5</button>
+            <button type="button" onclick="setActiveTripDay(6)" id="dayBtn-6" class="py-1 rounded bg-slate-700 font-bold text-[11px] transition">Day6</button>
           </div>
           <div class="flex items-center gap-2" onclick="event.stopPropagation()">
             <span id="simTimeDisplay" class="font-mono text-sm font-bold text-emerald-400 w-12">12:30</span>
-            <input type="range" id="timeSlider" min="360" max="1380" step="5" value="750" 
+            <input type="range" id="timeSlider" min="0" max="1435" step="5" value="750" 
                    class="w-full accent-emerald-400 cursor-pointer" oninput="onTimeSliderChange(this.value)">
           </div>
         </div>
@@ -218,7 +269,7 @@
       <!-- ================= 🏠 1. ホームタブ ================= -->
       <section id="view-home" class="space-y-4">
 
-        <!-- メイン予定カード -->
+        <!-- メイン予定カード（常に activeTripDay の予定を表示） -->
         <div id="mainScheduleCard" onclick="onMainCardClick()" 
              class="now-card bg-white rounded-2xl p-4 shadow-md border-l-8 border-blue-600 cursor-pointer active:scale-[0.99] transition relative overflow-hidden">
           
@@ -296,7 +347,7 @@
         <div class="flex justify-between items-center no-select">
           <h2 class="text-lg font-extrabold text-slate-800"><i class="fa-regular fa-calendar-days text-blue-600 mr-1.5"></i>スケジュール</h2>
           <div class="flex gap-1.5">
-            <button type="button" onclick="scrollToActiveScheduleItem()" class="text-xs bg-blue-100 text-blue-700 font-bold px-2.5 py-1.5 rounded-lg hover:bg-blue-200 transition">
+            <button type="button" onclick="jumpToActiveDayCurrentPosition()" class="text-xs bg-blue-100 text-blue-700 font-bold px-2.5 py-1.5 rounded-lg hover:bg-blue-200 transition">
               <i class="fa-solid fa-location-crosshairs mr-1"></i>現在地
             </button>
             <button type="button" onclick="openScheduleEditModal(null, 'transit')" class="text-xs bg-emerald-600 text-white font-bold px-3 py-1.5 rounded-lg hover:bg-emerald-700 shadow-sm transition">
@@ -308,13 +359,14 @@
           </div>
         </div>
 
+        <!-- スケジュール閲覧日切り替えタブ（viewingScheduleDay のみを変更し、activeTripDay は変えない） -->
         <div class="grid grid-cols-6 gap-1 bg-slate-200 p-1 rounded-xl text-xs font-bold no-select">
-          <button type="button" onclick="setDay(1)" id="schedTab-1" class="py-2 rounded-lg bg-white text-blue-700 shadow-sm transition">Day 1</button>
-          <button type="button" onclick="setDay(2)" id="schedTab-2" class="py-2 rounded-lg text-slate-600 transition">Day 2</button>
-          <button type="button" onclick="setDay(3)" id="schedTab-3" class="py-2 rounded-lg text-slate-600 transition">Day 3</button>
-          <button type="button" onclick="setDay(4)" id="schedTab-4" class="py-2 rounded-lg text-slate-600 transition">Day 4</button>
-          <button type="button" onclick="setDay(5)" id="schedTab-5" class="py-2 rounded-lg text-slate-600 transition">Day 5</button>
-          <button type="button" onclick="setDay(6)" id="schedTab-6" class="py-2 rounded-lg text-slate-600 transition">Day 6</button>
+          <button type="button" onclick="setViewingScheduleDay(1)" id="schedTab-1" class="py-2 rounded-lg bg-white text-blue-700 shadow-sm transition">Day 1</button>
+          <button type="button" onclick="setViewingScheduleDay(2)" id="schedTab-2" class="py-2 rounded-lg text-slate-600 transition">Day 2</button>
+          <button type="button" onclick="setViewingScheduleDay(3)" id="schedTab-3" class="py-2 rounded-lg text-slate-600 transition">Day 3</button>
+          <button type="button" onclick="setViewingScheduleDay(4)" id="schedTab-4" class="py-2 rounded-lg text-slate-600 transition">Day 4</button>
+          <button type="button" onclick="setViewingScheduleDay(5)" id="schedTab-5" class="py-2 rounded-lg text-slate-600 transition">Day 5</button>
+          <button type="button" onclick="setViewingScheduleDay(6)" id="schedTab-6" class="py-2 rounded-lg text-slate-600 transition">Day 6</button>
         </div>
 
         <div id="scheduleTimeline" class="space-y-2.5 relative before:content-[''] before:absolute before:left-4 before:top-4 before:bottom-4 before:w-0.5 before:bg-slate-300"></div>
@@ -478,12 +530,11 @@
               <option value="tool:border">🛂 国境越え＆持ち物チェック</option>
               <option value="tool:split">💸 班別・割り勘＆立替メモ</option>
               <option value="tool:phrases">🗣️ 指差し会話＆ヘルプカード</option>
-              <option value="tool:hotel">🏨 ホテル・集合場所提示カード</option>
               <option value="tool:links">🔗 リンク集・ポータル</option>
               <option value="tool:timer">⏱️ 班別行動・集合タイマー</option>
               <option value="tool:rules">🚨 現地の厳罰ルール＆プラグ</option>
               <option value="tool:emergency">📋 緊急連絡先リスト</option>
-              <option value="tool:share">📤 データ共有・インポート</option>
+              <option value="tool:share">☁️ データ共有・クラウド同期</option>
               <option value="tool:appsettings">🎨 App設定（UI変更）</option>
             </select>
           </div>
@@ -505,7 +556,7 @@
       </div>
     </div>
 
-    <!-- 3. クイックタイル追加モーダル -->
+    <!-- 3. クイックタイル追加モーダル（ホテル提示カード削除済） -->
     <div id="addTileModal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
       <div class="bg-white w-full max-w-md rounded-t-2xl sm:rounded-2xl p-5 max-h-[85vh] overflow-y-auto space-y-4 text-left">
         <div class="flex justify-between items-center border-b pb-2">
@@ -520,14 +571,13 @@
               <option value="tool:myinfo">🎫 部屋・座席メモ</option>
               <option value="tool:currency">💱 通貨換算電卓 (SGD/MYR)</option>
               <option value="tool:links">🔗 リンク集・ポータル</option>
-              <option value="tool:hotel">🏨 ホテル・集合場所提示カード</option>
               <option value="tool:phrases">🗣️ 指差し会話＆ヘルプカード</option>
               <option value="tool:split">💸 班別・割り勘＆立替メモ</option>
               <option value="tool:border">🛂 国境越え＆持ち物チェック</option>
               <option value="tool:timer">⏱️ 班別行動・集合タイマー</option>
               <option value="tool:rules">🚨 現地の厳罰ルール＆プラグ</option>
               <option value="tool:emergency">📋 緊急連絡先リスト</option>
-              <option value="tool:share">📤 データ共有・インポート</option>
+              <option value="tool:share">☁️ データ共有・クラウド同期</option>
               <option value="tool:appsettings">🎨 App設定（UIテーマ変更）</option>
             </optgroup>
             <optgroup label="🚀 外部アプリの起動ショートカット">
@@ -575,17 +625,17 @@
       </div>
     </div>
 
-    <!-- 5. 全画面提示カードモーダル -->
+    <!-- 5. 全画面提示カードモーダル（指差し会話用） -->
     <div id="fullscreenCardModal" onclick="closeFullscreenCard()" class="fixed inset-0 bg-slate-900/95 z-50 hidden flex flex-col justify-between p-6 text-white cursor-pointer">
       <div class="flex justify-between items-center text-slate-400 text-xs no-select">
-        <span>現地スタッフ・運転手提示モード</span>
+        <span>指差し会話・提示モード</span>
         <span class="bg-slate-800 px-3 py-1 rounded-full text-white"><i class="fa-solid fa-xmark mr-1"></i>画面タップで閉じる</span>
       </div>
       <div class="my-auto space-y-4 text-center selectable">
-        <div id="fsCardBadge" class="inline-block bg-amber-500 text-slate-950 text-xs font-extrabold px-3 py-1 rounded-full">PLEASE TAKE ME TO:</div>
-        <h2 id="fsCardMainText" class="text-3xl font-black leading-tight tracking-wide text-amber-300">York Hotel Singapore</h2>
-        <p id="fsCardSubText" class="text-lg text-slate-200 font-medium">21 Mount Elizabeth, Singapore 228516</p>
-        <div id="fsCardJaText" class="text-sm text-slate-400 border-t border-slate-700 pt-4 mt-6">日本語訳：ヨーク・ホテルまでお願いします</div>
+        <div id="fsCardBadge" class="inline-block bg-amber-500 text-slate-950 text-xs font-extrabold px-3 py-1 rounded-full">会話</div>
+        <h2 id="fsCardMainText" class="text-3xl font-black leading-tight tracking-wide text-amber-300">Where is the restroom?</h2>
+        <p id="fsCardSubText" class="text-lg text-slate-200 font-medium">Di mana tandas?</p>
+        <div id="fsCardJaText" class="text-sm text-slate-400 border-t border-slate-700 pt-4 mt-6">トイレはどこですか？</div>
       </div>
       <div class="text-center text-xs text-slate-500 no-select">Thank you for your help! 🙏</div>
     </div>
@@ -594,7 +644,7 @@
 
   <!-- ================= JAVASCRIPT LOGIC ================= -->
   <script>
-    // --- 0. XSS対策サニタイズ関数 & URL検証関数 ---
+    // --- 0. XSS対策サニタイズ関数 & URL検証関数 & モーダル背面スクロールロック ---
     function escapeHTML(str) {
       if (str === null || str === undefined) return "";
       return String(str)
@@ -612,10 +662,29 @@
       return trimmed;
     }
 
+    // 【バグ⑥修正】モーダル開閉時に背面スクロールをロック・解除する
+    function updateBodyScrollLock() {
+      const modalIds = ["scheduleDetailModal", "scheduleEditModal", "addTileModal", "genericEditModal", "fullscreenCardModal"];
+      const anyOpen = modalIds.some(id => {
+        const el = document.getElementById(id);
+        return el && !el.classList.contains("hidden");
+      });
+      document.body.style.overflow = anyOpen ? "hidden" : "";
+    }
+
+    // パスワードのSHA-256ハッシュ生成（Web Crypto API）
+    async function sha256Hex(text) {
+      const encoder = new TextEncoder();
+      const data = encoder.encode("sgmy_salt_v8_" + text);
+      const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+    }
+
     // --- 1. 初期マスターデータ（6日間 Day 1 〜 Day 6 対応） ---
     const defaultScheduleData = {
       1: {
-        country: "SG", flag: "🇸🇬", countryName: "シンガポール滞在", dayTitle: "Day 1",
+        dayTitle: "Day 1",
         items: [
           { id: "d1-1", itemType: "event", start: "09:00", end: "11:00", title: "チャンギ国際空港 到着・入国審査", location: "Changi Airport Terminal 2", actionType: "tool", toolTarget: "tool:border", mapUrl: "", memo: "・パスポートとSG Arrival Card画面を準備\n・入国審査後、ターンテーブルでスーツケース受取" },
           { id: "d1-t1", itemType: "transit", transitIcon: "fa-bus", start: "11:00", end: "12:00", title: "貸切バスで市内レストランへ移動", location: "クラス別号車（空港 ➔ ワン・フラトン）", actionType: "tool", toolTarget: "tool:myinfo", mapUrl: "", memo: "自分のクラスのバス号車を「部屋・座席メモ」で確認して乗車してください。" },
@@ -627,7 +696,7 @@
         ]
       },
       2: {
-        country: "MY", flag: "🇲🇾", countryName: "マレーシア滞在", dayTitle: "Day 2",
+        dayTitle: "Day 2",
         items: [
           { id: "d2-1", itemType: "transit", transitIcon: "fa-passport", start: "08:00", end: "10:00", title: "国境越え（ウッドランズ検問所）", location: "SG出国 ➔ MY入国", actionType: "tool", toolTarget: "tool:border", mapUrl: "", memo: "【最重要】マレーシア入国審査ではバスから「全ての荷物」を持って降ります！忘れ物厳禁。" },
           { id: "d2-2", itemType: "event", start: "10:30", end: "12:30", title: "現地姉妹校との学校交流プログラム", location: "Johor Bahru", actionType: "tool", toolTarget: "tool:phrases", mapUrl: "", memo: "英語・マレー語で自己紹介＆文化紹介パフォーマンス。" },
@@ -636,7 +705,7 @@
         ]
       },
       3: {
-        country: "SG", flag: "🇸🇬", countryName: "シンガポール滞在", dayTitle: "Day 3",
+        dayTitle: "Day 3",
         items: [
           { id: "d3-1", itemType: "event", start: "09:00", end: "13:00", title: "B&Sプログラム（班別自主研修）", location: "チャイナタウン・アラブストリート等", actionType: "tool", toolTarget: "tool:split", mapUrl: "", memo: "現地の大学生と班別行動。昼食の割り勘は「割り勘・立替メモ」を使うと便利です。" },
           { id: "d3-t1", itemType: "transit", transitIcon: "fa-train-subway", start: "13:00", end: "13:30", title: "MRT＆セントーサエクスプレスで移動", location: "HarbourFront駅 ➔ VivoCity 3F ➔ Sentosa", actionType: "tool", toolTarget: "tool:links", mapUrl: "", memo: "MRT車内は飲食・水飲み厳禁（罰金対象）です！" },
@@ -644,7 +713,7 @@
         ]
       },
       4: {
-        country: "MY", flag: "🇲🇾", countryName: "マレーシア滞在", dayTitle: "Day 4",
+        dayTitle: "Day 4",
         items: [
           { id: "d4-t1", itemType: "transit", transitIcon: "fa-bus", start: "08:30", end: "12:30", title: "シンガポールから世界遺産マラッカへ移動", location: "国境検問所経由・高速バス移動", actionType: "tool", toolTarget: "tool:border", mapUrl: "", memo: "パスポート・MDAC登録画面を確認。途中サービスエリアでトイレ休憩あり。" },
           { id: "d4-1", itemType: "event", start: "12:30", end: "14:00", title: "昼食 @ ニョニャ料理（ババ・ニョニャ）", location: "マラッカ市内レストラン", actionType: "map", toolTarget: "", mapUrl: "Malacca Jonker Street", memo: "中国とマレーの融合文化「プラナカン（ニョニャ）料理」を体験。" },
@@ -652,14 +721,14 @@
         ]
       },
       5: {
-        country: "MY", flag: "🇲🇾", countryName: "マレーシア滞在", dayTitle: "Day 5",
+        dayTitle: "Day 5",
         items: [
           { id: "d5-1", itemType: "event", start: "09:30", end: "12:00", title: "クアラルンプール市内研修（ツインタワー等）", location: "Petronas Twin Towers / KLCC", actionType: "map", toolTarget: "", mapUrl: "Petronas Twin Towers", memo: "ペトロナスツインタワー前で記念撮影＆周辺見学。" },
           { id: "d5-2", itemType: "event", start: "12:30", end: "16:30", title: "KL班別ショッピング＆お土産購入", location: "セントラルマーケット / パビリオンKL", actionType: "tool", toolTarget: "tool:currency", mapUrl: "", memo: "なまこ石鹸やBeryl'sチョコレートなどのお土産購入。通貨換算電卓を活用しましょう。" }
         ]
       },
       6: {
-        country: "MY", flag: "🇲🇾", countryName: "マレーシア滞在", dayTitle: "Day 6",
+        dayTitle: "Day 6",
         items: [
           { id: "d6-t1", itemType: "transit", transitIcon: "fa-bus", start: "08:00", end: "09:30", title: "ホテル出発 ➔ クアラルンプール国際空港へ", location: "KL市内 ➔ KLIA", actionType: "tool", toolTarget: "tool:myinfo", mapUrl: "", memo: "部屋の忘れ物・パスポート・モバイルバッテリーの手荷物入れ替えを再確認！" },
           { id: "d6-1", itemType: "event", start: "09:30", end: "12:00", title: "出国審査・搭乗手続き", location: "Kuala Lumpur International Airport (KLIA)", actionType: "tool", toolTarget: "tool:links", mapUrl: "", memo: "帰国便の搭乗までに Visit Japan Web のQRコードを準備しておきましょう。" },
@@ -694,34 +763,34 @@
       { id: "emg-4", role: "🇸🇬 在シンガポール日本国大使館", name: "領事部（パスポート紛失等）", number: "+65-6235-8855", note: "16 Nassim Road, Singapore" }
     ];
 
+    // 【バグ⑤修正】ホテル提示カード(tool:hotel)を廃止し、初期タイルを整理
     const defaultTiles = [
       { id: "t1", key: "tool:myinfo" },
       { id: "t2", key: "tool:currency" },
       { id: "t3", key: "tool:links" },
-      { id: "t4", key: "tool:hotel" },
-      { id: "t5", key: "tool:phrases" },
+      { id: "t4", key: "tool:phrases" },
+      { id: "t5", key: "tool:split" },
       { id: "t6", key: "tool:share" }
     ];
 
+    // ツールカタログ（ホテル提示カード削除済）
     const toolCatalog = {
       "tool:myinfo":      { title: "部屋・座席メモ", sub: "部屋番号・バス・飛行機座席", icon: "fa-id-card-clip", color: "bg-cyan-600", badge: "自分用" },
       "tool:currency":    { title: "通貨換算電卓", sub: "SGD🇸🇬 ⇄ MYR🇲🇾 ⇄ 円 双方向換算", icon: "fa-coins", color: "bg-emerald-600", badge: "計算" },
       "tool:links":       { title: "リンク集・ポータル", sub: "入国カード・路線図・追加編集", icon: "fa-compass", color: "bg-blue-600", badge: "リンク" },
       "tool:emergency":   { title: "緊急連絡先リスト", sub: "番号コピー・連絡先の追加編集", icon: "fa-address-book", color: "bg-red-600", badge: "連絡先" },
-      "tool:hotel":       { title: "ホテル・集合場所提示", sub: "運転手やスタッフに見せる全画面カード", icon: "fa-hotel", color: "bg-indigo-600", badge: "提示用" },
       "tool:phrases":     { title: "指差し会話カード", sub: "英語・マレー語・トラブル時会話", icon: "fa-comments", color: "bg-amber-500", badge: "会話" },
       "tool:split":       { title: "割り勘・立替メモ", sub: "人数変更対応・班別行動の精算", icon: "fa-receipt", color: "bg-teal-600", badge: "精算" },
       "tool:border":      { title: "国境越え＆持ち物", sub: "SG⇔MY移動時の忘れ物チェック", icon: "fa-passport", color: "bg-rose-600", badge: "必須" },
       "tool:timer":       { title: "集合時間タイマー", sub: "自由行動の遅刻防止カウントダウン", icon: "fa-stopwatch", color: "bg-purple-600", badge: "時間" },
       "tool:rules":       { title: "現地ルール＆プラグ", sub: "罰金注意・コンセント形状解説", icon: "fa-triangle-exclamation", color: "bg-orange-600", badge: "知識" },
-      "tool:share":       { title: "データ共有・インポート", sub: "JSON読込・班員共有・AIプロンプト", icon: "fa-file-import", color: "bg-slate-700", badge: "共有/読込" },
+      "tool:share":       { title: "データ共有・クラウド同期", sub: "パスワード照合インポート・AI連携", icon: "fa-cloud-arrow-up", color: "bg-slate-700", badge: "同期/読込" },
       "tool:appsettings": { title: "App設定", sub: "UIテーマ変更・旅行開始日設定", icon: "fa-palette", color: "bg-pink-600", badge: "設定" },
       "app:gmaps":      { title: "Googleマップ", sub: "現在地＆ルート検索を開く", icon: "fa-map-location-dot", color: "bg-sky-600", badge: "外部アプリ", url: "https://maps.google.com/" },
       "app:gtranslate": { title: "Google翻訳", sub: "カメラ翻訳・音声翻訳を開く", icon: "fa-language", color: "bg-blue-500", badge: "外部アプリ", url: "https://translate.google.co.jp/" },
       "app:camera":     { title: "Googleレンズ", sub: "メニュー・看板をカメラ翻訳", icon: "fa-camera", color: "bg-violet-600", badge: "外部アプリ", url: "https://lens.google/" }
     };
 
-    // テーマごとの最上部ステータスバー色定義
     const themeStatusBarColors = {
       "theme-default": "#1d4ed8",
       "theme-modern":  "#f5f5f7",
@@ -730,11 +799,11 @@
       "theme-gemini":  "#0f766e"
     };
 
-    // --- 2. 状態管理（LocalStorage v7） ---
+    // --- 2. 状態管理（LocalStorage v8：現在日とスケジュール閲覧日の完全分離） ---
     let scheduleData = loadSchedulesSafely();
-    let myInfoList = JSON.parse(localStorage.getItem("sgmy_myinfo_v7")) || defaultMyInfoList;
-    let linksData = JSON.parse(localStorage.getItem("sgmy_links_v7")) || defaultLinksData;
-    let emergencyData = JSON.parse(localStorage.getItem("sgmy_emergency_v7")) || defaultEmergencyData;
+    let myInfoList = JSON.parse(localStorage.getItem("sgmy_myinfo_v8")) || defaultMyInfoList;
+    let linksData = JSON.parse(localStorage.getItem("sgmy_links_v8")) || defaultLinksData;
+    let emergencyData = JSON.parse(localStorage.getItem("sgmy_emergency_v8")) || defaultEmergencyData;
     let userTiles = loadTilesSafely();
 
     let rateSGD = parseFloat(localStorage.getItem("sgmy_rate_sgd")) || 115;
@@ -742,7 +811,10 @@
     let splitGroupSize = parseInt(localStorage.getItem("sgmy_split_size"), 10) || 4;
     let tripStartDate = localStorage.getItem("sgmy_trip_start_date") || "";
 
-    let currentDay = 1;
+    // ★重要修正：現在の旅行日(activeTripDay) と スケジュールタブで閲覧中の日(viewingScheduleDay) を完全分離
+    let activeTripDay = 1;
+    let viewingScheduleDay = 1;
+
     let isDemoBarOpen = false;
     let simMinutes = 750;
     let liveIntervalId = null;
@@ -771,7 +843,7 @@
 
     function loadSchedulesSafely() {
       try {
-        const saved = JSON.parse(localStorage.getItem("sgmy_schedules_v7"));
+        const saved = JSON.parse(localStorage.getItem("sgmy_schedules_v8")) || JSON.parse(localStorage.getItem("sgmy_schedules_v7"));
         if (saved && typeof saved === "object") {
           for (let d = 1; d <= 6; d++) {
             if (!saved[d] || !Array.isArray(saved[d].items)) {
@@ -786,18 +858,18 @@
 
     function loadTilesSafely() {
       try {
-        const saved = JSON.parse(localStorage.getItem("sgmy_user_tiles_v7"));
+        const saved = JSON.parse(localStorage.getItem("sgmy_user_tiles_v8")) || JSON.parse(localStorage.getItem("sgmy_user_tiles_v7"));
         if (Array.isArray(saved) && saved.length > 0) {
           return saved.map(t => {
             if (t.key === "tool:settings" || t.key === "tool:import") t.key = "tool:share";
             return t;
-          }).filter(t => t.key === "app:custom" || toolCatalog[t.key]);
+          }).filter(t => t.key !== "tool:hotel" && (t.key === "app:custom" || toolCatalog[t.key]));
         }
       } catch (e) {}
       return JSON.parse(JSON.stringify(defaultTiles));
     }
 
-    // --- 3. 初期化 ＆ Service Worker登録 ---
+    // --- 3. 初期化 ---
     window.addEventListener("DOMContentLoaded", () => {
       const savedTheme = localStorage.getItem("sgmy_design_theme") || "theme-default";
       changeDesignTheme(savedTheme, false);
@@ -810,7 +882,6 @@
       renderToolsHub();
       initSortable();
 
-      // Service Worker 登録（PWA・オフライン対応）
       if ("serviceWorker" in navigator) {
         navigator.serviceWorker.register("./sw.js").catch(() => {});
       }
@@ -822,12 +893,13 @@
       const now = new Date();
       const diffDays = Math.floor((now - start) / (1000 * 60 * 60 * 24)) + 1;
       if (diffDays >= 1 && diffDays <= 6) {
-        currentDay = diffDays;
-        setDay(currentDay);
+        activeTripDay = diffDays;
+        viewingScheduleDay = diffDays;
+        updateDayTabStyles();
+        updateTimeAndScheduleUI();
       }
     }
 
-    // UIテーマ変更 ＋ アプリ版の最上部ステータスバー色連動
     function changeDesignTheme(themeClass, notify = true) {
       const validTheme = themeStatusBarColors[themeClass] ? themeClass : "theme-default";
       document.body.classList.remove("theme-default", "theme-modern", "theme-paypay", "theme-smbc", "theme-gemini");
@@ -849,7 +921,7 @@
       t.textContent = msg;
       t.classList.remove("hidden");
       clearTimeout(window._toastTimer);
-      window._toastTimer = setTimeout(() => t.classList.add("hidden"), 2200);
+      window._toastTimer = setTimeout(() => t.classList.add("hidden"), 2400);
     }
 
     function copyText(text, label = "コピーしました") {
@@ -903,7 +975,7 @@
           primaryClockZone = (primaryClockZone === "local") ? "jst" : "local";
           localStorage.setItem("sgmy_primary_clock", primaryClockZone);
           updateTimeAndScheduleUI();
-          showToast(primaryClockZone === "local" ? "🇸🇬 現地時間を大きく表示" : "🇯🇵 日本時間を大きく表示");
+          showToast(primaryClockZone === "local" ? "現地時間を大きく表示" : "日本時間を大きく表示");
         }
       });
     }
@@ -921,6 +993,7 @@
       const bar = document.getElementById("demoControlBar");
       bar.classList.add("hidden");
       bar.classList.remove("demo-bar-dimmed");
+      autoDetectDayFromDate();
       syncTimeModeWithBar();
       showToast("現在時刻に戻りました");
     }
@@ -971,10 +1044,11 @@
       }
     }
 
-    // --- 5. 時間・スケジュール連動＆アクション実行 ---
+    // --- 5. 日付・時間・スケジュール連動（日またぎ計算対応・現在日と閲覧日の分離） ---
     function minsToTimeStr(mins) {
-      const h = Math.floor(mins / 60);
-      const m = mins % 60;
+      const normalized = ((mins % 1440) + 1440) % 1440;
+      const h = Math.floor(normalized / 60);
+      const m = normalized % 60;
       return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
     }
 
@@ -982,6 +1056,37 @@
       if (!str || !str.includes(":")) return 0;
       const [h, m] = str.split(":").map(Number);
       return (h || 0) * 60 + (m || 0);
+    }
+
+    // 【バグ③修正】深夜・日またぎの予定（例: 23:00 - 06:00）でも進行状況・残り時間を正確に判定
+    function evaluateItemTimeState(item, currentMins) {
+      const s = timeStrToMins(item.start);
+      let e = timeStrToMins(item.end);
+
+      if (e < s) {
+        // 日またぎ（終了が翌朝）の場合
+        const totalDuration = (e + 1440) - s;
+        if (currentMins >= s) {
+          const elapsed = currentMins - s;
+          return { isCurrent: true, isPast: false, remain: totalDuration - elapsed, pct: Math.round((elapsed / totalDuration) * 100) };
+        } else if (currentMins < e) {
+          const elapsed = (currentMins + 1440) - s;
+          return { isCurrent: true, isPast: false, remain: e - currentMins, pct: Math.round((elapsed / totalDuration) * 100) };
+        } else {
+          return { isCurrent: false, isPast: false, remain: s - currentMins, pct: 0 };
+        }
+      } else {
+        // 通常の同日内スケジュール
+        const totalDuration = Math.max(1, e - s);
+        if (currentMins >= s && currentMins < e) {
+          const elapsed = currentMins - s;
+          return { isCurrent: true, isPast: false, remain: e - currentMins, pct: Math.min(100, Math.max(0, Math.round((elapsed / totalDuration) * 100))) };
+        } else if (currentMins >= e) {
+          return { isCurrent: false, isPast: true, remain: 0, pct: 100 };
+        } else {
+          return { isCurrent: false, isPast: false, remain: s - currentMins, pct: 0 };
+        }
+      }
     }
 
     function getMapHref(item) {
@@ -995,12 +1100,12 @@
 
     function normalizeToolKey(key) {
       if (!key) return "tool:myinfo";
-      if (key === "tool:settings" || key === "tool:import") return "tool:share";
+      if (key === "tool:settings" || key === "tool:import" || key === "tool:hotel") return "tool:share";
       return toolCatalog[key] ? key : "tool:myinfo";
     }
 
-    function triggerScheduleItemAction(itemId, fromScheduleList = false) {
-      const item = scheduleData[currentDay].items.find(i => i.id === itemId);
+    function triggerScheduleItemAction(dayNum, itemId, fromScheduleList = false) {
+      const item = scheduleData[dayNum]?.items.find(i => i.id === itemId);
       if (!item) return;
 
       if (item.actionType === "map") {
@@ -1011,7 +1116,7 @@
       }
     }
 
-    function renderActionButtonHTML(item, isFullWidth = false, fromScheduleList = false) {
+    function renderActionButtonHTML(dayNum, item, isFullWidth = false, fromScheduleList = false) {
       const aType = item.actionType || "map";
       const widthCls = isFullWidth ? "w-full justify-center py-2.5 text-xs" : "px-2.5 py-1 text-xs";
 
@@ -1044,25 +1149,42 @@
       if (timerEl) timerEl.textContent = getTimerRemainingText();
     }
 
-    function setDay(day) {
-      currentDay = day;
-      [1, 2, 3, 4, 5, 6].forEach(d => {
-        const topBtn = document.getElementById(`dayBtn-${d}`);
-        const schedTab = document.getElementById(`schedTab-${d}`);
-        if (d === day) {
-          if (topBtn) topBtn.className = "py-1 rounded bg-blue-600 font-bold text-[11px] transition";
-          if (schedTab) schedTab.className = "py-2 rounded-lg bg-white text-blue-700 shadow-sm transition";
-        } else {
-          if (topBtn) topBtn.className = "py-1 rounded bg-slate-700 hover:bg-slate-600 font-bold text-[11px] transition";
-          if (schedTab) schedTab.className = "py-2 rounded-lg text-slate-600 transition";
-        }
-      });
+    // デモ操作バーでの現在日変更（activeTripDay と viewingScheduleDay の両方を更新）
+    function setActiveTripDay(day) {
+      activeTripDay = day;
+      viewingScheduleDay = day;
+      updateDayTabStyles();
       updateTimeAndScheduleUI();
     }
 
+    // スケジュールタブ内での閲覧日変更（viewingScheduleDay のみを更新し、現在日 activeTripDay は絶対に変えない！）
+    function setViewingScheduleDay(day) {
+      viewingScheduleDay = day;
+      updateDayTabStyles();
+      renderScheduleTimeline();
+    }
+
+    function updateDayTabStyles() {
+      [1, 2, 3, 4, 5, 6].forEach(d => {
+        const topBtn = document.getElementById(`dayBtn-${d}`);
+        const schedTab = document.getElementById(`schedTab-${d}`);
+        if (topBtn) {
+          topBtn.className = (d === activeTripDay)
+            ? "py-1 rounded bg-blue-600 font-bold text-[11px] transition"
+            : "py-1 rounded bg-slate-700 hover:bg-slate-600 font-bold text-[11px] transition";
+        }
+        if (schedTab) {
+          schedTab.className = (d === viewingScheduleDay)
+            ? "py-2 rounded-lg bg-white text-blue-700 shadow-sm transition"
+            : "py-2 rounded-lg text-slate-600 transition";
+        }
+      });
+    }
+
     function updateTimeAndScheduleUI() {
-      const dayInfo = scheduleData[currentDay] || scheduleData[1];
-      dayInfo.items.sort((a, b) => timeStrToMins(a.start) - timeStrToMins(b.start));
+      // ホーム画面＆ヘッダーは常に activeTripDay を参照する
+      const activeDayInfo = scheduleData[activeTripDay] || scheduleData[1];
+      activeDayInfo.items.sort((a, b) => timeStrToMins(a.start) - timeStrToMins(b.start));
 
       const localTimeStr = minsToTimeStr(simMinutes);
       const jstTimeStr = minsToTimeStr((simMinutes + 60) % 1440);
@@ -1081,23 +1203,23 @@
         document.getElementById("clockSecondaryTime").textContent = localTimeStr;
       }
 
-      document.getElementById("countryFlag").textContent = dayInfo.flag || "🇸🇬";
-      document.getElementById("countryName").textContent = dayInfo.countryName || "シンガポール滞在";
-      document.getElementById("dayTitle").textContent = `Day ${currentDay}`;
+      // ヘッダーのDay表示は常に activeTripDay
+      document.getElementById("dayTitle").textContent = `Day ${activeTripDay}`;
 
       let currentItem = null;
+      let currentState = null;
       let nextItem = null;
 
-      for (let i = 0; i < dayInfo.items.length; i++) {
-        const item = dayInfo.items[i];
-        const s = timeStrToMins(item.start);
-        const e = timeStrToMins(item.end);
+      for (let i = 0; i < activeDayInfo.items.length; i++) {
+        const item = activeDayInfo.items[i];
+        const st = evaluateItemTimeState(item, simMinutes);
 
-        if (simMinutes >= s && simMinutes < e) {
+        if (st.isCurrent) {
           currentItem = item;
-          nextItem = dayInfo.items[i + 1] || null;
+          currentState = st;
+          nextItem = activeDayInfo.items[i + 1] || null;
           break;
-        } else if (simMinutes < s) {
+        } else if (!st.isPast) {
           nextItem = item;
           break;
         }
@@ -1113,17 +1235,13 @@
       if (currentItem) {
         currentScheduleItemId = currentItem.id;
         mainCardTargetScheduleId = currentItem.id;
-        const s = timeStrToMins(currentItem.start);
-        const e = timeStrToMins(currentItem.end);
-        const remain = e - simMinutes;
-        const pct = Math.min(100, Math.max(0, Math.round(((simMinutes - s) / (e - s)) * 100)));
 
         nowPulseDot.classList.remove("hidden");
         nowNextBadge.classList.add("hidden");
         document.getElementById("nowTimeRange").textContent = `${currentItem.start} - ${currentItem.end}`;
         document.getElementById("nowTitle").textContent = currentItem.title;
         document.getElementById("nowLocation").innerHTML = `<i class="fa-solid ${currentItem.itemType === 'transit' ? escapeHTML(currentItem.transitIcon || 'fa-bus') : 'fa-location-dot'} text-rose-500"></i> ${escapeHTML(currentItem.location || "場所未設定")}`;
-        nowActionContainer.innerHTML = renderActionButtonHTML(currentItem, false, false);
+        nowActionContainer.innerHTML = renderActionButtonHTML(activeTripDay, currentItem, false, false);
 
         if (currentItem.memo && currentItem.memo.trim() !== "") {
           document.getElementById("nowMemo").textContent = currentItem.memo;
@@ -1132,17 +1250,17 @@
           nowMemoBox.classList.add("hidden");
         }
 
-        document.getElementById("nowRemaining").textContent = `あと ${remain}分`;
+        document.getElementById("nowRemaining").textContent = `あと ${currentState.remain}分`;
         nowProgressWrapper.classList.remove("hidden");
-        document.getElementById("nowProgressBar").style.width = `${pct}%`;
+        document.getElementById("nowProgressBar").style.width = `${currentState.pct}%`;
 
         if (nextItem) {
           nextScheduleItemId = nextItem.id;
-          const diff = timeStrToMins(nextItem.start) - simMinutes;
+          const nextSt = evaluateItemTimeState(nextItem, simMinutes);
           document.getElementById("nextStartTime").textContent = nextItem.start;
           document.getElementById("nextTitle").textContent = nextItem.title;
           document.getElementById("nextSub").textContent = `📍${nextItem.location || "移動・次の予定"}`;
-          document.getElementById("nextCountdown").textContent = `${diff}分後`;
+          document.getElementById("nextCountdown").textContent = `${nextSt.remain}分後`;
           nextCardContainer.classList.remove("hidden");
         } else {
           nextScheduleItemId = null;
@@ -1152,14 +1270,14 @@
         currentScheduleItemId = nextItem.id;
         nextScheduleItemId = nextItem.id;
         mainCardTargetScheduleId = nextItem.id;
-        const diff = timeStrToMins(nextItem.start) - simMinutes;
+        const nextSt = evaluateItemTimeState(nextItem, simMinutes);
 
         nowPulseDot.classList.add("hidden");
         nowNextBadge.classList.remove("hidden");
         document.getElementById("nowTimeRange").textContent = `${nextItem.start} - ${nextItem.end}`;
         document.getElementById("nowTitle").textContent = nextItem.title;
         document.getElementById("nowLocation").innerHTML = `<i class="fa-solid ${nextItem.itemType === 'transit' ? escapeHTML(nextItem.transitIcon || 'fa-bus') : 'fa-location-dot'} text-rose-500"></i> ${escapeHTML(nextItem.location || "場所未設定")}`;
-        nowActionContainer.innerHTML = renderActionButtonHTML(nextItem, false, false);
+        nowActionContainer.innerHTML = renderActionButtonHTML(activeTripDay, nextItem, false, false);
 
         if (nextItem.memo && nextItem.memo.trim() !== "") {
           document.getElementById("nowMemo").textContent = nextItem.memo;
@@ -1168,11 +1286,11 @@
           nowMemoBox.classList.add("hidden");
         }
 
-        document.getElementById("nowRemaining").textContent = `${diff}分後に開始`;
+        document.getElementById("nowRemaining").textContent = `${nextSt.remain}分後に開始`;
         nowProgressWrapper.classList.add("hidden");
         nextCardContainer.classList.add("hidden");
       } else {
-        currentScheduleItemId = dayInfo.items[dayInfo.items.length - 1]?.id || null;
+        currentScheduleItemId = activeDayInfo.items[activeDayInfo.items.length - 1]?.id || null;
         nextScheduleItemId = null;
         mainCardTargetScheduleId = currentScheduleItemId;
 
@@ -1193,32 +1311,39 @@
     }
 
     function onMainCardClick() {
+      viewingScheduleDay = activeTripDay;
+      updateDayTabStyles();
       switchTab("schedule", false);
       scrollToActiveScheduleItem(mainCardTargetScheduleId);
     }
 
-    // --- 6. スケジュールタイムライン描画 ---
+    // --- 6. スケジュールタイムライン描画（viewingScheduleDay の予定を描画） ---
     function renderScheduleTimeline() {
       const container = document.getElementById("scheduleTimeline");
-      const items = scheduleData[currentDay]?.items || [];
+      const dayObj = scheduleData[viewingScheduleDay];
+      if (dayObj && Array.isArray(dayObj.items)) {
+        dayObj.items.sort((a, b) => timeStrToMins(a.start) - timeStrToMins(b.start));
+      }
+      const items = dayObj?.items || [];
+      const isViewingActiveDay = (viewingScheduleDay === activeTripDay);
 
       if (items.length === 0) {
-        container.innerHTML = `<div class="pl-8 text-xs text-slate-400 py-6 text-left">予定がありません。「予定」または「移動」ボタンから登録してください。</div>`;
+        container.innerHTML = `<div class="pl-8 text-xs text-slate-400 py-6 text-left">Day ${viewingScheduleDay} の予定がありません。「予定」または「移動」ボタンから登録してください。</div>`;
         return;
       }
 
       container.innerHTML = items.map(item => {
-        const s = timeStrToMins(item.start);
-        const e = timeStrToMins(item.end);
-        const isCurrent = simMinutes >= s && simMinutes < e;
-        const isPast = simMinutes >= e;
+        const st = evaluateItemTimeState(item, simMinutes);
+        // 閲覧中の日が activeTripDay と一致している時のみ現在地ハイライト・過去透過を行う
+        const isCurrent = isViewingActiveDay && st.isCurrent;
+        const isPast = isViewingActiveDay && st.isPast;
         const isTransit = item.itemType === "transit";
         const safeId = escapeHTML(item.id);
 
         let actionBadge = "";
         if (item.actionType === "map") {
           actionBadge = `
-            <button type="button" onclick="event.stopPropagation(); triggerScheduleItemAction('${safeId}', true)" 
+            <button type="button" onclick="event.stopPropagation(); triggerScheduleItemAction(${viewingScheduleDay}, '${safeId}', true)" 
                     class="text-[11px] text-emerald-700 bg-emerald-50 hover:bg-emerald-100 active:scale-95 border border-emerald-300 px-2 py-0.5 rounded-md font-bold transition inline-flex items-center gap-1 shadow-sm">
               <i class="fa-solid fa-location-dot"></i>マップ
             </button>
@@ -1228,7 +1353,7 @@
           const tInfo = toolCatalog[tKey];
           if (tInfo) {
             actionBadge = `
-              <button type="button" onclick="event.stopPropagation(); triggerScheduleItemAction('${safeId}', true)" 
+              <button type="button" onclick="event.stopPropagation(); triggerScheduleItemAction(${viewingScheduleDay}, '${safeId}', true)" 
                       class="text-[11px] text-indigo-700 bg-indigo-50 hover:bg-indigo-100 active:scale-95 border border-indigo-300 px-2 py-0.5 rounded-md font-bold transition inline-flex items-center gap-1 shadow-sm">
                 <i class="fa-solid ${tInfo.icon}"></i>${escapeHTML(tInfo.title)}
               </button>
@@ -1293,19 +1418,19 @@
 
     // --- 7. 予定詳細モーダル ＆ 編集モーダル処理 ---
     function openScheduleDetailModal(itemId) {
-      const item = scheduleData[currentDay].items.find(i => i.id === itemId);
+      const item = scheduleData[viewingScheduleDay]?.items.find(i => i.id === itemId);
       if (!item) return;
 
       const isTransit = item.itemType === "transit";
       const badge = document.getElementById("detailBadge");
-      badge.textContent = isTransit ? "🚌 移動" : "📅 予定";
+      badge.textContent = isTransit ? `Day ${viewingScheduleDay} 🚌 移動` : `Day ${viewingScheduleDay} 📅 予定`;
       badge.className = `text-[10px] font-extrabold px-2.5 py-0.5 rounded-full ${isTransit ? 'bg-emerald-100 text-emerald-800' : 'bg-blue-100 text-blue-700'}`;
 
       document.getElementById("detailTime").textContent = `${item.start} - ${item.end}`;
       document.getElementById("detailTitle").textContent = item.title;
       document.getElementById("detailLocation").textContent = item.location || "場所・区間情報なし";
       document.getElementById("detailMemo").textContent = (item.memo && item.memo.trim() !== "") ? item.memo : "（メモは設定されていません）";
-      document.getElementById("detailActionArea").innerHTML = renderActionButtonHTML(item, true, true);
+      document.getElementById("detailActionArea").innerHTML = renderActionButtonHTML(viewingScheduleDay, item, true, true);
 
       document.getElementById("detailEditBtn").onclick = () => {
         closeScheduleDetailModal();
@@ -1313,10 +1438,12 @@
       };
 
       document.getElementById("scheduleDetailModal").classList.remove("hidden");
+      updateBodyScrollLock();
     }
 
     function closeScheduleDetailModal() {
       document.getElementById("scheduleDetailModal").classList.add("hidden");
+      updateBodyScrollLock();
     }
 
     function setSchedFormType(type) {
@@ -1349,11 +1476,12 @@
     function openScheduleEditModal(itemId = null, defaultType = "event") {
       const modal = document.getElementById("scheduleEditModal");
       const delBtn = document.getElementById("schedDeleteBtn");
+      const dayItems = scheduleData[viewingScheduleDay]?.items || [];
 
       if (itemId) {
-        const item = scheduleData[currentDay].items.find(i => i.id === itemId);
+        const item = dayItems.find(i => i.id === itemId);
         if (!item) return;
-        document.getElementById("scheduleEditModalTitle").textContent = `Day ${currentDay} の項目を編集`;
+        document.getElementById("scheduleEditModalTitle").textContent = `Day ${viewingScheduleDay} の項目を編集`;
         document.getElementById("schedEditId").value = item.id;
         setSchedFormType(item.itemType || "event");
         document.getElementById("schedTransitIcon").value = item.transitIcon || "fa-bus";
@@ -1367,12 +1495,24 @@
         document.getElementById("schedMemo").value = item.memo || "";
         delBtn.classList.remove("hidden");
       } else {
-        document.getElementById("scheduleEditModalTitle").textContent = `Day ${currentDay} に追加`;
+        // 【バグ②修正】新規追加時は、その日の最後の予定の終了時刻を自動取得して開始時刻にセット
+        let defaultStart = "09:00";
+        let defaultEnd = "10:00";
+        if (dayItems.length > 0) {
+          const lastItem = dayItems[dayItems.length - 1];
+          if (lastItem && lastItem.end) {
+            defaultStart = lastItem.end;
+            const endMins = (timeStrToMins(defaultStart) + (defaultType === "transit" ? 30 : 60)) % 1440;
+            defaultEnd = minsToTimeStr(endMins);
+          }
+        }
+
+        document.getElementById("scheduleEditModalTitle").textContent = `Day ${viewingScheduleDay} に追加`;
         document.getElementById("schedEditId").value = "";
         setSchedFormType(defaultType);
         document.getElementById("schedTransitIcon").value = "fa-bus";
-        document.getElementById("schedStart").value = "12:00";
-        document.getElementById("schedEnd").value = "13:00";
+        document.getElementById("schedStart").value = defaultStart;
+        document.getElementById("schedEnd").value = defaultEnd;
         document.getElementById("schedTitle").value = "";
         document.getElementById("schedLocation").value = "";
         document.getElementById("schedActionType").value = defaultType === "transit" ? "none" : "map";
@@ -1383,16 +1523,18 @@
       }
       onSchedActionTypeChange();
       modal.classList.remove("hidden");
+      updateBodyScrollLock();
     }
 
     function closeScheduleEditModal() {
       document.getElementById("scheduleEditModal").classList.add("hidden");
+      updateBodyScrollLock();
     }
 
     function saveScheduleItem() {
       const editId = document.getElementById("schedEditId").value;
-      const start = document.getElementById("schedStart").value || "12:00";
-      const end = document.getElementById("schedEnd").value || "13:00";
+      const start = document.getElementById("schedStart").value || "09:00";
+      const end = document.getElementById("schedEnd").value || "10:00";
       const title = document.getElementById("schedTitle").value.trim() || (currentSchedFormType === "transit" ? "移動" : "新規予定");
       const location = document.getElementById("schedLocation").value.trim();
       const transitIcon = document.getElementById("schedTransitIcon").value;
@@ -1408,7 +1550,7 @@
         start, end, title, location, actionType, mapUrl, toolTarget, memo
       };
 
-      const items = scheduleData[currentDay].items;
+      const items = scheduleData[viewingScheduleDay].items;
       if (editId) {
         const idx = items.findIndex(i => i.id === editId);
         if (idx !== -1) items[idx] = newObj;
@@ -1416,37 +1558,43 @@
         items.push(newObj);
       }
 
-      localStorage.setItem("sgmy_schedules_v7", JSON.stringify(scheduleData));
+      localStorage.setItem("sgmy_schedules_v8", JSON.stringify(scheduleData));
       closeScheduleEditModal();
       updateTimeAndScheduleUI();
-      showToast("スケジュールを保存しました");
+      showToast(`Day ${viewingScheduleDay} のスケジュールを保存しました`);
     }
 
     function deleteScheduleItem() {
       const editId = document.getElementById("schedEditId").value;
       if (!editId) return;
-      scheduleData[currentDay].items = scheduleData[currentDay].items.filter(i => i.id !== editId);
-      localStorage.setItem("sgmy_schedules_v7", JSON.stringify(scheduleData));
+      scheduleData[viewingScheduleDay].items = scheduleData[viewingScheduleDay].items.filter(i => i.id !== editId);
+      localStorage.setItem("sgmy_schedules_v8", JSON.stringify(scheduleData));
       closeScheduleEditModal();
       updateTimeAndScheduleUI();
       showToast("削除しました");
     }
 
+    // 【バグ④修正】「現在地」ボタンやNEXTカードタップ時は、閲覧日を activeTripDay に戻して進行中（または直後のNEXT）の予定へスクロール
+    function jumpToActiveDayCurrentPosition() {
+      viewingScheduleDay = activeTripDay;
+      updateDayTabStyles();
+      renderScheduleTimeline();
+      scrollToActiveScheduleItem(mainCardTargetScheduleId || nextScheduleItemId || currentScheduleItemId);
+    }
+
     function jumpToNextSchedule() {
+      viewingScheduleDay = activeTripDay;
+      updateDayTabStyles();
       switchTab("schedule", false);
-      setTimeout(() => {
-        const targetId = nextScheduleItemId || currentScheduleItemId;
-        const el = document.getElementById(`sched-card-${targetId}`);
-        if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
-      }, 100);
+      scrollToActiveScheduleItem(nextScheduleItemId || currentScheduleItemId);
     }
 
     function scrollToActiveScheduleItem(specificItemId = null) {
       setTimeout(() => {
-        const targetId = specificItemId || currentScheduleItemId;
+        const targetId = specificItemId || mainCardTargetScheduleId || currentScheduleItemId;
         const el = document.getElementById(`sched-card-${targetId}`);
         if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
-      }, 80);
+      }, 90);
     }
 
     // --- 8. クイックタイル描画 ＆ タッチ/長押し制御 ＆ 大型バツボタン ---
@@ -1608,14 +1756,14 @@
         onEnd: function () {
           const newOrderIds = Array.from(grid.children).map(el => el.getAttribute("data-id"));
           userTiles = newOrderIds.map(id => userTiles.find(t => t.id === id)).filter(Boolean);
-          localStorage.setItem("sgmy_user_tiles_v7", JSON.stringify(userTiles));
+          localStorage.setItem("sgmy_user_tiles_v8", JSON.stringify(userTiles));
         }
       });
     }
 
     function removeTile(id) {
       userTiles = userTiles.filter(t => t.id !== id);
-      localStorage.setItem("sgmy_user_tiles_v7", JSON.stringify(userTiles));
+      localStorage.setItem("sgmy_user_tiles_v8", JSON.stringify(userTiles));
       renderQuickTiles();
       showToast("タイルを削除しました");
     }
@@ -1623,9 +1771,11 @@
     function openAddTileModal() {
       document.getElementById("addTileModal").classList.remove("hidden");
       onNewTileTypeChange();
+      updateBodyScrollLock();
     }
     function closeAddTileModal() {
       document.getElementById("addTileModal").classList.add("hidden");
+      updateBodyScrollLock();
     }
     function onNewTileTypeChange() {
       const val = document.getElementById("newTileType").value;
@@ -1646,7 +1796,7 @@
       } else {
         userTiles.push({ id: newId, key: val });
       }
-      localStorage.setItem("sgmy_user_tiles_v7", JSON.stringify(userTiles));
+      localStorage.setItem("sgmy_user_tiles_v8", JSON.stringify(userTiles));
       renderQuickTiles();
       closeAddTileModal();
       showToast("ホームにタイルを追加しました");
@@ -1660,8 +1810,15 @@
       document.getElementById("nav-schedule").className = `flex flex-col items-center w-20 py-1 transition ${tabName === 'schedule' ? 'text-blue-600' : 'text-slate-400'}`;
       document.getElementById("nav-tools").className = `flex flex-col items-center w-20 py-1 transition ${tabName === 'tools' ? 'text-indigo-600' : 'text-slate-400'}`;
 
-      if (tabName === "schedule" && autoScrollSchedule) {
-        scrollToActiveScheduleItem();
+      if (tabName === "schedule") {
+        if (autoScrollSchedule) {
+          viewingScheduleDay = activeTripDay;
+          updateDayTabStyles();
+          renderScheduleTimeline();
+          scrollToActiveScheduleItem();
+        } else {
+          renderScheduleTimeline();
+        }
       } else if (tabName === "tools") {
         returnToScheduleItemId = null;
         showToolsHub();
@@ -1743,7 +1900,6 @@
           case "tool:currency":    renderCurrencyTool(container); break;
           case "tool:links":       renderLinksTool(container); break;
           case "tool:emergency":   renderEmergencyTool(container); break;
-          case "tool:hotel":       renderHotelTool(container); break;
           case "tool:phrases":     renderPhrasesTool(container); break;
           case "tool:split":       renderSplitTool(container); break;
           case "tool:border":      renderBorderChecklistTool(container); break;
@@ -1832,27 +1988,6 @@
       if (s > 0) { rateSGD = s; localStorage.setItem("sgmy_rate_sgd", rateSGD); }
       if (m > 0) { rateMYR = m; localStorage.setItem("sgmy_rate_myr", rateMYR); }
       onBiCurrencyInput("SGD");
-    }
-
-    function renderHotelTool(container) {
-      container.innerHTML = `
-        <div class="space-y-3 text-left">
-          <h3 class="text-lg font-extrabold text-slate-800"><i class="fa-solid fa-hotel text-indigo-600 mr-1.5"></i>ホテル・集合場所 提示カード</h3>
-          <p class="text-xs text-slate-500">カードをタップすると運転手や現地スタッフに見せやすい全画面表示になります。</p>
-          <div onclick="openFullscreenCard('PLEASE TAKE ME TO THIS HOTEL:', 'York Hotel Singapore', '21 Mount Elizabeth, Singapore 228516 (Near Orchard MRT)', '宿泊先：ヨーク・ホテル・シンガポールまでお願いします')" 
-               class="bg-gradient-to-br from-indigo-700 to-slate-900 text-white rounded-2xl p-4 shadow-md cursor-pointer active:scale-95 transition">
-            <span class="text-[10px] bg-amber-400 text-slate-900 font-extrabold px-2 py-0.5 rounded-full">🇸🇬 宿泊ホテル（タップで全画面）</span>
-            <h4 class="text-xl font-black text-amber-300 mt-2 selectable">York Hotel Singapore</h4>
-            <p class="text-xs text-slate-200 mt-1 selectable">21 Mount Elizabeth, Singapore 228516</p>
-          </div>
-          <div onclick="openFullscreenCard('MEETING POINT:', 'Universal Studios Singapore (Globe Monument)', '8 Sentosa Gateway, Sentosa Island, Singapore 098269', 'USS入口の地球儀モニュメント前（集合場所）へ行きたいです')" 
-               class="bg-white border-2 border-indigo-200 rounded-2xl p-4 shadow-sm cursor-pointer active:scale-95 transition">
-            <span class="text-[10px] bg-indigo-100 text-indigo-800 font-extrabold px-2 py-0.5 rounded-full">🎡 班別研修 集合場所</span>
-            <h4 class="text-base font-black text-slate-800 mt-1.5 selectable">USS 地球儀モニュメント前 (Globe)</h4>
-            <p class="text-xs text-slate-500 mt-0.5 selectable">8 Sentosa Gateway, Sentosa Island</p>
-          </div>
-        </div>
-      `;
     }
 
     function renderPhrasesTool(container) {
@@ -1954,7 +2089,7 @@
 
           <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 space-y-2.5">
             <h4 class="text-sm font-extrabold text-slate-800"><i class="fa-regular fa-calendar text-blue-600 mr-1.5"></i>旅行開始日（Day 1の日付）設定</h4>
-            <p class="text-[11px] text-slate-500">設定しておくと、旅行当日にアプリを開いた際、自動的に該当するDay（Day 1〜Day 6）が表示されます。</p>
+            <p class="text-[11px] text-slate-500">設定しておくと、旅行当日にアプリを開いた際、自動的に該当するDay（Day 1〜Day 6）が現在日として表示されます。</p>
             <input type="date" value="${escapeHTML(tripStartDate)}" onchange="saveTripStartDate(this.value)" class="w-full border border-slate-300 rounded-xl p-2.5 text-sm font-mono bg-slate-50">
           </div>
 
@@ -2045,7 +2180,7 @@
     function updateMyInfoItem(idx, field, val) {
       if (!myInfoList[idx]) return;
       myInfoList[idx][field] = val;
-      localStorage.setItem("sgmy_myinfo_v7", JSON.stringify(myInfoList));
+      localStorage.setItem("sgmy_myinfo_v8", JSON.stringify(myInfoList));
     }
 
     function addMyInfoItem() {
@@ -2053,29 +2188,27 @@
       const value = document.getElementById("newMyInfoValue").value.trim();
       if (!label) return showToast("項目名を入力してください");
       myInfoList.push({ id: "mi_" + Date.now(), icon: "fa-bookmark", label, value });
-      localStorage.setItem("sgmy_myinfo_v7", JSON.stringify(myInfoList));
+      localStorage.setItem("sgmy_myinfo_v8", JSON.stringify(myInfoList));
       renderMyInfoTool(document.getElementById("tool-detail-content"));
       showToast("メモ項目を追加しました");
     }
 
     function deleteMyInfoItem(idx) {
       myInfoList.splice(idx, 1);
-      localStorage.setItem("sgmy_myinfo_v7", JSON.stringify(myInfoList));
+      localStorage.setItem("sgmy_myinfo_v8", JSON.stringify(myInfoList));
       renderMyInfoTool(document.getElementById("tool-detail-content"));
     }
 
+    // --- 12. ☁️ クラウド同期（Cloudflare Pages Functions + KV パスワード照合）＆ JSONインポート ---
     const AI_PROMPT_TEMPLATE = `あなたは修学旅行の行程データ作成アシスタントです。
 以下の仕様に従い、シンガポール＆マレーシア修学旅行（6日間：Day 1〜Day 6）のインポート用JSONデータを作成してください。
-出力は余計な解説を省き、純粋なJSONテキストのみ（{"v":7, ...}）を出力してください。
+出力は余計な解説を省き、純粋なJSONテキストのみ（{"v":8, ...}）を出力してください。
 
 【JSONスキーマ構造】
 {
-  "v": 7,
+  "v": 8,
   "schedules": {
     "1": {
-      "country": "SG",
-      "flag": "🇸🇬",
-      "countryName": "シンガポール滞在",
       "dayTitle": "Day 1",
       "items": [
         {
@@ -2105,11 +2238,11 @@
         }
       ]
     },
-    "2": { "country": "MY", "flag": "🇲🇾", "countryName": "マレーシア滞在", "dayTitle": "Day 2", "items": [] },
-    "3": { "country": "SG", "flag": "🇸🇬", "countryName": "シンガポール滞在", "dayTitle": "Day 3", "items": [] },
-    "4": { "country": "MY", "flag": "🇲🇾", "countryName": "マレーシア滞在", "dayTitle": "Day 4", "items": [] },
-    "5": { "country": "MY", "flag": "🇲🇾", "countryName": "マレーシア滞在", "dayTitle": "Day 5", "items": [] },
-    "6": { "country": "MY", "flag": "🇲🇾", "countryName": "マレーシア滞在", "dayTitle": "Day 6", "items": [] }
+    "2": { "dayTitle": "Day 2", "items": [] },
+    "3": { "dayTitle": "Day 3", "items": [] },
+    "4": { "dayTitle": "Day 4", "items": [] },
+    "5": { "dayTitle": "Day 5", "items": [] },
+    "6": { "dayTitle": "Day 6", "items": [] }
   },
   "myinfo": [
     { "id": "mi-1", "icon": "fa-hotel", "label": "宿泊ホテル 部屋番号", "value": "1405号室" }
@@ -2127,27 +2260,72 @@
 - itemType は "event"（予定）または "transit"（移動）のどちらか。
 - transitIcon は "fa-bus", "fa-train-subway", "fa-person-walking", "fa-plane", "fa-taxi", "fa-passport" から選択。
 - actionType は "map"（地図を開く）, "tool"（ツールを開く）, "none"（ボタンなし）から選択。
-- toolTarget（actionTypeが"tool"の時のみ）は "tool:myinfo", "tool:currency", "tool:border", "tool:split", "tool:phrases", "tool:hotel", "tool:links", "tool:timer", "tool:rules", "tool:emergency" から選択。
+- toolTarget（actionTypeが"tool"の時のみ）は "tool:myinfo", "tool:currency", "tool:border", "tool:split", "tool:phrases", "tool:links", "tool:timer", "tool:rules", "tool:emergency" から選択。
 - 時刻は必ず "HH:MM"（24時間表記）とすること。
 
 【ここに私の修学旅行の予定メモを入力します】：
 `;
 
     function renderShareTool(container) {
+      const savedRoomId = localStorage.getItem("sgmy_cloud_room_id") || "";
+
       container.innerHTML = `
         <div class="space-y-4 text-left">
-          <div class="bg-white rounded-2xl p-4 shadow-sm border-2 border-emerald-500/40 space-y-3">
-            <h3 class="text-base font-extrabold text-emerald-800"><i class="fa-solid fa-file-import mr-1.5"></i>データのインポート（読み込み）</h3>
-            <p class="text-xs text-slate-600">班員から共有されたJSONテキスト、またはAIが作成したJSONデータを下に貼り付けて「データを反映する」を押してください。</p>
-            <textarea id="importJsonTextarea" rows="5" placeholder='{"v": 7, "schedules": ...} をここに貼り付け' class="w-full border border-slate-300 rounded-xl p-2.5 text-xs font-mono bg-slate-50 selectable"></textarea>
-            <button type="button" onclick="importDataFromText()" class="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white font-extrabold py-3 rounded-xl text-xs shadow-md transition">
-              <i class="fa-solid fa-check mr-1"></i>貼り付けたデータをアプリに反映する
-            </button>
+          <!-- 1. ☁️ クラウド同期（パスワード照合によるアップロード＆インポート） -->
+          <div class="bg-white rounded-2xl p-4 shadow-sm border-2 border-blue-500/40 space-y-3">
+            <div class="flex items-center justify-between">
+              <h3 class="text-base font-extrabold text-blue-900"><i class="fa-solid fa-cloud-arrow-up text-blue-600 mr-1.5"></i>クラウド同期（パスワード照合）</h3>
+              <span class="text-[10px] font-bold bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">Cloudflare KV</span>
+            </div>
+            <p class="text-xs text-slate-600 leading-relaxed">
+              「共有ID」と「パスワード」を設定して予定データをクラウドにアップロードしたり、パスワードと照合してクラウドから予定データをインポートできます。
+            </p>
+
+            <div class="space-y-2.5 bg-slate-50 p-3 rounded-xl border border-slate-200">
+              <div>
+                <label class="block text-[11px] font-bold text-slate-700">共有ID（半角英数字・3〜32文字）</label>
+                <input type="text" id="cloudRoomId" value="${escapeHTML(savedRoomId)}" placeholder="例: sgmy-3kumi-4han" 
+                       class="w-full border border-slate-300 rounded-lg p-2 text-xs font-mono bg-white mt-0.5">
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-slate-700">パスワード（合言葉）</label>
+                <input type="password" id="cloudPassword" placeholder="パスワードを入力" 
+                       class="w-full border border-slate-300 rounded-lg p-2 text-xs font-mono bg-white mt-0.5">
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 pt-1">
+              <button type="button" onclick="uploadToCloud()" id="btnCloudUpload"
+                      class="bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white font-extrabold py-3 px-2 rounded-xl text-xs shadow transition flex items-center justify-center gap-1.5">
+                <i class="fa-solid fa-cloud-arrow-up"></i> アップロード(保存)
+              </button>
+              <button type="button" onclick="downloadFromCloud()" id="btnCloudDownload"
+                      class="bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-extrabold py-3 px-2 rounded-xl text-xs shadow transition flex items-center justify-center gap-1.5">
+                <i class="fa-solid fa-cloud-arrow-down"></i> 照合してインポート
+              </button>
+            </div>
+            <div id="cloudStatusMsg" class="text-[11px] font-bold text-center hidden py-1 rounded-lg"></div>
           </div>
 
+          <!-- 2. テキストによる直接インポート（AI出力JSONの貼り付けにも対応） -->
+          <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 space-y-3">
+            <h4 class="text-sm font-extrabold text-slate-800"><i class="fa-solid fa-file-import text-emerald-600 mr-1.5"></i>JSONテキストから直接インポート</h4>
+            <p class="text-xs text-slate-500">AIが作成したJSONデータや、コピーしたJSONテキストを貼り付けて反映できます。</p>
+            <textarea id="importJsonTextarea" rows="4" placeholder='{"v": 8, "schedules": ...} をここに貼り付け' class="w-full border border-slate-300 rounded-xl p-2.5 text-xs font-mono bg-slate-50 selectable"></textarea>
+            <div class="grid grid-cols-2 gap-2">
+              <button type="button" onclick="exportDataToClipboard()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-2.5 rounded-xl text-xs transition">
+                <i class="fa-regular fa-copy mr-1"></i>現在データをコピー
+              </button>
+              <button type="button" onclick="importDataFromText()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-2.5 rounded-xl text-xs shadow transition">
+                <i class="fa-solid fa-check mr-1"></i>貼り付けデータを反映
+              </button>
+            </div>
+          </div>
+
+          <!-- 3. 🤖 AIでインポートデータを作成するプロンプト -->
           <div class="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-2xl p-4 shadow-sm border border-indigo-200 space-y-2.5">
             <div class="flex items-center justify-between">
-              <h4 class="text-sm font-extrabold text-indigo-900"><i class="fa-solid fa-robot text-indigo-600 mr-1.5"></i>AIでインポートデータを作成する</h4>
+              <h4 class="text-sm font-extrabold text-indigo-900"><i class="fa-solid fa-robot text-indigo-600 mr-1.5"></i>AIで予定データを作成する</h4>
               <span class="text-[10px] font-bold bg-indigo-600 text-white px-2 py-0.5 rounded-full">6日間対応</span>
             </div>
             <p class="text-xs text-slate-600 leading-relaxed">
@@ -2156,29 +2334,9 @@
             <button type="button" onclick="copyAiPrompt()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-3 rounded-xl text-xs shadow transition flex items-center justify-center gap-1.5">
               <i class="fa-regular fa-copy"></i> AI用プロンプト（仕様説明文）をコピー
             </button>
-            <details class="text-xs text-slate-600 pt-1">
-              <summary class="cursor-pointer font-bold text-indigo-700">AI用プロンプトの全文を確認する</summary>
-              <pre class="mt-2 p-2.5 bg-white border border-indigo-100 rounded-xl text-[10px] font-mono whitespace-pre-wrap selectable max-h-48 overflow-y-auto">${escapeHTML(AI_PROMPT_TEMPLATE)}</pre>
-            </details>
           </div>
 
-          <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 space-y-3">
-            <h4 class="text-sm font-extrabold text-slate-800"><i class="fa-solid fa-share-nodes text-blue-600 mr-1.5"></i>現在の設定データを班員に共有（書き出し）</h4>
-            <div class="grid grid-cols-2 gap-2">
-              <button type="button" onclick="exportDataToClipboard()" class="bg-slate-800 hover:bg-slate-900 text-white font-bold py-2.5 px-3 rounded-xl text-xs shadow transition flex items-center justify-center gap-1.5">
-                <i class="fa-regular fa-copy"></i> 全データをコピー
-              </button>
-              <button type="button" onclick="generateShareQRCode()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-2.5 px-3 rounded-xl text-xs transition flex items-center justify-center gap-1.5">
-                <i class="fa-solid fa-qrcode"></i> 軽量QRを表示
-              </button>
-            </div>
-
-            <div id="qrCodeWrapper" class="hidden bg-slate-50 p-4 rounded-xl border border-slate-200 text-center space-y-2">
-              <div id="qrcodeCanvas" class="flex justify-center"></div>
-              <p id="qrStatusText" class="text-[11px] text-slate-500"></p>
-            </div>
-          </div>
-
+          <!-- 4. リセット -->
           <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 space-y-2">
             <h4 class="text-xs font-extrabold text-rose-600"><i class="fa-solid fa-rotate-left mr-1"></i>初期データへのリセット</h4>
             <button type="button" onclick="resetAllData()" class="w-full bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold py-2 rounded-xl text-xs transition">
@@ -2189,46 +2347,156 @@
       `;
     }
 
-    function copyAiPrompt() {
-      copyText(AI_PROMPT_TEMPLATE, "AI用プロンプトをコピーしました！");
+    function setCloudStatus(msg, isError = false) {
+      const el = document.getElementById("cloudStatusMsg");
+      if (!el) return;
+      el.textContent = msg;
+      el.className = `text-xs font-bold text-center py-2 px-3 rounded-xl ${isError ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-emerald-50 text-emerald-800 border border-emerald-200'}`;
+      el.classList.remove("hidden");
     }
 
-    function createExportPayload() {
-      return JSON.stringify({
-        v: 7,
+    function createExportObject() {
+      return {
+        v: 8,
         schedules: scheduleData,
         myinfo: myInfoList,
         links: linksData,
         emergency: emergencyData,
         tiles: userTiles
-      }, null, 2);
+      };
+    }
+
+    function applyImportedPayload(parsed) {
+      if (!parsed || typeof parsed !== "object") throw new Error("Invalid payload");
+
+      if (parsed.schedules && typeof parsed.schedules === "object") {
+        for (let d = 1; d <= 6; d++) {
+          if (parsed.schedules[d] && Array.isArray(parsed.schedules[d].items)) {
+            scheduleData[d] = parsed.schedules[d];
+          }
+        }
+        localStorage.setItem("sgmy_schedules_v8", JSON.stringify(scheduleData));
+      } else if (parsed.day && parsed.dayData && Array.isArray(parsed.dayData.items)) {
+        scheduleData[parsed.day] = parsed.dayData;
+        localStorage.setItem("sgmy_schedules_v8", JSON.stringify(scheduleData));
+      }
+
+      if (Array.isArray(parsed.myinfo)) {
+        myInfoList = parsed.myinfo;
+        localStorage.setItem("sgmy_myinfo_v8", JSON.stringify(myInfoList));
+      }
+      if (Array.isArray(parsed.links)) {
+        linksData = parsed.links;
+        localStorage.setItem("sgmy_links_v8", JSON.stringify(linksData));
+      }
+      if (Array.isArray(parsed.emergency)) {
+        emergencyData = parsed.emergency;
+        localStorage.setItem("sgmy_emergency_v8", JSON.stringify(emergencyData));
+      }
+      if (Array.isArray(parsed.tiles)) {
+        userTiles = parsed.tiles.filter(t => t.key !== "tool:hotel" && (t.key === "app:custom" || toolCatalog[normalizeToolKey(t.key)]));
+        localStorage.setItem("sgmy_user_tiles_v8", JSON.stringify(userTiles));
+      }
+
+      updateTimeAndScheduleUI();
+      renderQuickTiles();
+    }
+
+    // ☁️ クラウドへエクスポート＆アップロード (POST /api/sync)
+    async function uploadToCloud() {
+      const roomId = document.getElementById("cloudRoomId").value.trim().toLowerCase();
+      const password = document.getElementById("cloudPassword").value;
+
+      if (!roomId || !/^[a-z0-9_-]{3,32}$/.test(roomId)) {
+        return setCloudStatus("共有IDは半角英数字・ハイフン（3〜32文字）で入力してください", true);
+      }
+      if (!password || password.length < 3) {
+        return setCloudStatus("パスワードを3文字以上で入力してください", true);
+      }
+
+      localStorage.setItem("sgmy_cloud_room_id", roomId);
+      setCloudStatus("☁️ クラウドへアップロード中...", false);
+
+      try {
+        const passHash = await sha256Hex(password);
+        const payload = createExportObject();
+
+        const res = await fetch("/api/sync", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ roomId, passHash, payload })
+        });
+
+        const data = await res.json();
+        if (!res.ok || data.error) {
+          return setCloudStatus(data.error || "アップロードに失敗しました", true);
+        }
+
+        setCloudStatus(`✅ 共有ID「${roomId}」でクラウドに保存しました！`, false);
+        showToast("クラウドへアップロードしました！");
+      } catch (err) {
+        // Cloudflareデプロイ前のローカルテスト環境用フォールバック
+        const passHash = await sha256Hex(password);
+        const localCloudKey = `sgmy_local_cloud_${roomId}`;
+        const existing = JSON.parse(localStorage.getItem(localCloudKey) || "null");
+        if (existing && existing.passHash !== passHash) {
+          return setCloudStatus("この共有IDは既に使用されており、パスワードが一致しません", true);
+        }
+        localStorage.setItem(localCloudKey, JSON.stringify({ roomId, passHash, payload: createExportObject() }));
+        setCloudStatus(`✅ 保存しました（※現在はローカルテスト環境のため端末内に擬似クラウド保存されました。Cloudflare公開後は本番KVに保存されます）`, false);
+      }
+    }
+
+    // ☁️ パスワードと照合してクラウドからインポート (GET /api/sync)
+    async function downloadFromCloud() {
+      const roomId = document.getElementById("cloudRoomId").value.trim().toLowerCase();
+      const password = document.getElementById("cloudPassword").value;
+
+      if (!roomId || !password) {
+        return setCloudStatus("共有IDとパスワードの両方を入力してください", true);
+      }
+
+      localStorage.setItem("sgmy_cloud_room_id", roomId);
+      setCloudStatus("🔍 パスワードを照合してデータを取得中...", false);
+
+      try {
+        const passHash = await sha256Hex(password);
+        const res = await fetch(`/api/sync?roomId=${encodeURIComponent(roomId)}&passHash=${encodeURIComponent(passHash)}`);
+        const data = await res.json();
+
+        if (!res.ok || data.error) {
+          return setCloudStatus(data.error || "パスワードが違うか、データが存在しません", true);
+        }
+
+        applyImportedPayload(data.payload);
+        setCloudStatus(`🎉 照合成功！「${roomId}」の予定データをインポートしました！`, false);
+        showToast("クラウドから予定を反映しました！");
+      } catch (err) {
+        // ローカルテスト環境用フォールバック照合
+        const passHash = await sha256Hex(password);
+        const localCloudKey = `sgmy_local_cloud_${roomId}`;
+        const record = JSON.parse(localStorage.getItem(localCloudKey) || "null");
+        if (!record) {
+          return setCloudStatus("指定された共有IDのデータが見つかりません", true);
+        }
+        if (record.passHash !== passHash) {
+          return setCloudStatus("❌ パスワードが一致しません", true);
+        }
+        applyImportedPayload(record.payload);
+        setCloudStatus(`🎉 照合成功！「${roomId}」の予定データをインポートしました！`, false);
+        showToast("予定データを反映しました！");
+      }
+    }
+
+    function copyAiPrompt() {
+      copyText(AI_PROMPT_TEMPLATE, "AI用プロンプトをコピーしました！");
     }
 
     function exportDataToClipboard() {
-      const jsonStr = createExportPayload();
+      const jsonStr = JSON.stringify(createExportObject(), null, 2);
       const inputEl = document.getElementById("importJsonTextarea");
       if (inputEl) inputEl.value = jsonStr;
       copyText(jsonStr, "現在の全設定JSONをコピーしました！");
-    }
-
-    function generateShareQRCode() {
-      const wrapper = document.getElementById("qrCodeWrapper");
-      const canvas = document.getElementById("qrcodeCanvas");
-      const status = document.getElementById("qrStatusText");
-      wrapper.classList.remove("hidden");
-      canvas.innerHTML = "";
-
-      const compactPayload = JSON.stringify({
-        v: 7,
-        myinfo: myInfoList.slice(0, 5)
-      });
-
-      try {
-        new QRCode(canvas, { text: compactPayload, width: 180, height: 180, correctLevel: QRCode.CorrectLevel.L });
-        status.textContent = "部屋・座席メモの軽量QRコードです。全スケジュールを送る場合は「全データをコピー」からLINE等で送信してください。";
-      } catch (e) {
-        status.textContent = "文字数が多いため「全データをコピー」をご利用ください。";
-      }
     }
 
     function importDataFromText() {
@@ -2239,45 +2507,14 @@
 
       try {
         const parsed = JSON.parse(raw);
-        if (!parsed || typeof parsed !== "object") throw new Error("Invalid root");
-
-        if (parsed.schedules && typeof parsed.schedules === "object") {
-          for (let d = 1; d <= 6; d++) {
-            if (parsed.schedules[d] && Array.isArray(parsed.schedules[d].items)) {
-              scheduleData[d] = parsed.schedules[d];
-            }
-          }
-          localStorage.setItem("sgmy_schedules_v7", JSON.stringify(scheduleData));
-        } else if (parsed.day && parsed.dayData && Array.isArray(parsed.dayData.items)) {
-          scheduleData[parsed.day] = parsed.dayData;
-          localStorage.setItem("sgmy_schedules_v7", JSON.stringify(scheduleData));
-        }
-
-        if (Array.isArray(parsed.myinfo)) {
-          myInfoList = parsed.myinfo;
-          localStorage.setItem("sgmy_myinfo_v7", JSON.stringify(myInfoList));
-        }
-        if (Array.isArray(parsed.links)) {
-          linksData = parsed.links;
-          localStorage.setItem("sgmy_links_v7", JSON.stringify(linksData));
-        }
-        if (Array.isArray(parsed.emergency)) {
-          emergencyData = parsed.emergency;
-          localStorage.setItem("sgmy_emergency_v7", JSON.stringify(emergencyData));
-        }
-        if (Array.isArray(parsed.tiles)) {
-          userTiles = parsed.tiles.filter(t => t.key === "app:custom" || toolCatalog[normalizeToolKey(t.key)]);
-          localStorage.setItem("sgmy_user_tiles_v7", JSON.stringify(userTiles));
-        }
-
-        updateTimeAndScheduleUI();
-        renderQuickTiles();
+        applyImportedPayload(parsed);
         showToast("🎉 インポートデータを正常に反映しました！");
       } catch (e) {
         alert("JSONデータの解析に失敗しました。カッコの閉じ忘れ等がないか確認してください。");
       }
     }
 
+    // --- 13. リンク集 ＆ 緊急連絡先 ---
     function renderLinksTool(container) {
       const grouped = {};
       linksData.forEach(item => {
@@ -2346,7 +2583,7 @@
       const url = sanitizeUrl(document.getElementById("newLinkUrl").value.trim());
       if (!title || url === "#") return showToast("タイトルと正しいURLを入力してください");
       linksData.push({ id: "lnk_" + Date.now(), category, title, sub, url });
-      localStorage.setItem("sgmy_links_v7", JSON.stringify(linksData));
+      localStorage.setItem("sgmy_links_v8", JSON.stringify(linksData));
       renderLinksTool(document.getElementById("tool-detail-content"));
       showToast("リンクを追加しました");
     }
@@ -2366,17 +2603,18 @@
         item.title = document.getElementById("geTitle").value.trim() || item.title;
         item.sub = document.getElementById("geSub").value.trim();
         item.url = sanitizeUrl(document.getElementById("geUrl").value.trim());
-        localStorage.setItem("sgmy_links_v7", JSON.stringify(linksData));
+        localStorage.setItem("sgmy_links_v8", JSON.stringify(linksData));
         closeGenericEditModal();
         renderLinksTool(document.getElementById("tool-detail-content"));
         showToast("リンクを更新しました");
       };
       document.getElementById("genericEditModal").classList.remove("hidden");
+      updateBodyScrollLock();
     }
 
     function deleteLinkItem(id) {
       linksData = linksData.filter(l => l.id !== id);
-      localStorage.setItem("sgmy_links_v7", JSON.stringify(linksData));
+      localStorage.setItem("sgmy_links_v8", JSON.stringify(linksData));
       renderLinksTool(document.getElementById("tool-detail-content"));
     }
 
@@ -2446,7 +2684,7 @@
       const note = document.getElementById("newEmgNote").value.trim();
       if (!name || !number) return showToast("名称と番号を入力してください");
       emergencyData.push({ id: "emg_" + Date.now(), role, name, number, note });
-      localStorage.setItem("sgmy_emergency_v7", JSON.stringify(emergencyData));
+      localStorage.setItem("sgmy_emergency_v8", JSON.stringify(emergencyData));
       renderEmergencyTool(document.getElementById("tool-detail-content"));
       showToast("連絡先を追加しました");
     }
@@ -2466,21 +2704,23 @@
         item.name = document.getElementById("geEmgName").value.trim() || item.name;
         item.number = document.getElementById("geEmgNum").value.trim() || item.number;
         item.note = document.getElementById("geEmgNote").value.trim();
-        localStorage.setItem("sgmy_emergency_v7", JSON.stringify(emergencyData));
+        localStorage.setItem("sgmy_emergency_v8", JSON.stringify(emergencyData));
         closeGenericEditModal();
         renderEmergencyTool(document.getElementById("tool-detail-content"));
         showToast("連絡先を更新しました");
       };
       document.getElementById("genericEditModal").classList.remove("hidden");
+      updateBodyScrollLock();
     }
 
     function closeGenericEditModal() {
       document.getElementById("genericEditModal").classList.add("hidden");
+      updateBodyScrollLock();
     }
 
     function deleteEmergencyItem(id) {
       emergencyData = emergencyData.filter(e => e.id !== id);
-      localStorage.setItem("sgmy_emergency_v7", JSON.stringify(emergencyData));
+      localStorage.setItem("sgmy_emergency_v8", JSON.stringify(emergencyData));
       renderEmergencyTool(document.getElementById("tool-detail-content"));
     }
 
@@ -2610,18 +2850,20 @@
       document.getElementById("fsCardSubText").textContent = sub;
       document.getElementById("fsCardJaText").textContent = ja;
       document.getElementById("fullscreenCardModal").classList.remove("hidden");
+      updateBodyScrollLock();
     }
     function closeFullscreenCard() {
       document.getElementById("fullscreenCardModal").classList.add("hidden");
+      updateBodyScrollLock();
     }
 
     function resetAllData() {
       if (!confirm("本当にすべての編集データを初期状態に戻しますか？")) return;
-      localStorage.removeItem("sgmy_schedules_v7");
-      localStorage.removeItem("sgmy_myinfo_v7");
-      localStorage.removeItem("sgmy_links_v7");
-      localStorage.removeItem("sgmy_emergency_v7");
-      localStorage.removeItem("sgmy_user_tiles_v7");
+      localStorage.removeItem("sgmy_schedules_v8");
+      localStorage.removeItem("sgmy_myinfo_v8");
+      localStorage.removeItem("sgmy_links_v8");
+      localStorage.removeItem("sgmy_emergency_v8");
+      localStorage.removeItem("sgmy_user_tiles_v8");
       location.reload();
     }
   </script>
