@@ -3,11 +3,8 @@ main = "worker.js"
 compatibility_date = "2025-01-01"
 
 [assets]
-directory = "./"            
-binding = "ASSETS"
-
-# ▼ ここをパスの配列から `true` に変更します
-run_worker_first = true
+directory = "public"
+# binding や run_worker_first は不要なので削除します
 
 [[kv_namespaces]]
 binding = "TRIP_KV"
