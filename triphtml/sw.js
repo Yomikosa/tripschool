@@ -1,59 +1,71 @@
 const CACHE_NAME = "sgmy-trip-nav-v8";
-const PRECACHE_ASSETS = [
+
+const PRECACHE_URLS = [
   "./",
   "./index.html",
   "./manifest.json",
   "https://cdn.tailwindcss.com",
   "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css",
-  "https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js",
-  "https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js",
-  "https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"
+  "https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js",
+  "https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"
 ];
 
+// インストール時に基本アセットをキャッシュ
 self.addEventListener("install", (event) => {
-  self.skipWaiting();
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_ASSETS))
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(PRECACHE_URLS);
+    }).then(() => self.skipWaiting())
   );
 });
 
+// 古いキャッシュの削除
 self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(keys.map((key) => (key !== CACHE_NAME ? caches.delete(key) : null)))
-    )
+    caches.keys().then((keys) => {
+      return Promise.all(
+        keys.map((key) => {
+          if (key !== CACHE_NAME) {
+            return caches.delete(key);
+          }
+        })
+      );
+    }).then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
+// オフラインファースト（キャッシュ優先＋動的キャッシュ保存）
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
-
-  // クラウド同期APIへのリクエストはキャッシュせず直接ネットワークへ通す
-  if (event.request.url.includes("/api/sync") || event.request.url.includes("script.google.com")) {
-    return;
-  }
 
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) {
-        fetch(event.request)
-          .then((netRes) => {
-            if (netRes && netRes.status === 200) {
-              caches.open(CACHE_NAME).then((cache) => cache.put(event.request, netRes));
-            }
-          })
-          .catch(() => {});
+        // バックグラウンドでキャッシュ更新を試みる（Stale-While-Revalidate）
+        fetch(event.request).then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, networkResponse));
+          }
+        }).catch(() => {});
         return cachedResponse;
       }
-      return fetch(event.request)
-        .then((netRes) => {
-          if (!netRes || netRes.status !== 200) return netRes;
-          const clone = netRes.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
-          return netRes;
-        })
-        .catch(() => caches.match("./index.html"));
+
+      // キャッシュになければネットワークから取得してキャッシュに保存（Webフォント等）
+      return fetch(event.request).then((networkResponse) => {
+        if (!networkResponse || networkResponse.status !== 200) {
+          return networkResponse;
+        }
+        const responseClone = networkResponse.clone();
+        caches.open(CACHE_NAME).then((cache) => {
+          cache.put(event.request, responseClone);
+        });
+        return networkResponse;
+      }).catch(() => {
+        // オフラインでページ遷移した場合はindex.htmlを返す
+        if (event.request.mode === "navigate") {
+          return caches.match("./index.html");
+        }
+      });
     })
   );
 });
