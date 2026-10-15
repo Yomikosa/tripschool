@@ -1,4 +1,4 @@
-name = "tripschool"
+name = "sgschool"
 main = "worker.js"
 compatibility_date = "2024-10-01"
 
@@ -8,4 +8,4 @@ binding = "ASSETS"
 
 [[kv_namespaces]]
 binding = "TRIP_KV"
-id = "281d13951bdc4631a14a6cbb67c7e1fc"
+id = "7ac3e81099734c96864ee315b0f1ec08"
